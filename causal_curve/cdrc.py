@@ -40,45 +40,68 @@ class CDRC(Core):
     Parameters
     ----------
 
-    gps_family: str, optional
+    gps_family: str, optional (default =  None)
         Accepts one of the following values: 'normal', 'lognormal', 'gamma', and None.
         Is used to determine the family of the glm used to model the GPS function.
         Look at the distribution of your treatment variable to determine which family
         is more appropriate. If no value is provided for this parameter, the algorithm
         will use the best-fitting family type.
 
-    treatment_grid_num: int, optional
+    treatment_grid_num: int, optional (default = 100)
         Takes the treatment, and creates an equally-spaced grid across its values. This is used
         to estimate the final causal dose-response curve. Higher value here means the
         final curve will be smoother, but also increases computation time. Default value is 100,
         and this is usually a reasonable number.
 
-    spline_order: int, optional
+    spline_order: int, optional (default = 3)
         Order of the splines to use fitting the final GAM. Must be integer >= 1. Default value
         is 3 for cubic splines.
 
-    n_splines: int, optional
+    n_splines: int, optional (default = 30)
         Number of splines to use for the treatment and GPS in the final GAM. Must be integer >= 2.
-        Must be non-negative. Default value is 20.
+        Must be non-negative. Default value is 30.
 
-    lambda_: float, optional
+    lambda_: float, optional (default = 0.5)
         Strength of smoothing penalty. Must be a positive float. Larger values enforce
         stronger smoothing. Default value is 0.5.
 
-    max_iter: int, optional
+    max_iter: int, optional (default = 100)
         Maximum number of iterations allowed for the maximum likelihood algo to converge.
         Default value is 100.
 
-    verbose: bool, optional
+    verbose: bool, optional (default = False)
         Determines whether the user will get. Default value is False.
 
     Attributes
     ----------
 
+    grid_values: array of shape (treatment_grid_num, )
+        The gridded values of the treatment variable. Equally spaced.
+
+    best_gps_family: str
+        If no gps_family is specified and the algorithm chooses the best glm family, this is
+        the name of the family that was chosen.
+
+    gps_deviance: float
+        The GPS model deviance
+
+    gps: array of shape (number of observations, )
+        The calculated GPS for each observation
+
+    gam_results: `pygam.LinearGAM` class
+        trained model of `LinearGAM` class, from pyGAM library
 
 
+    Methods
+    ----------
+    fit: (self, T, X, y)
+        Fits the causal dose-response model
 
+    calculate_CDRC: (self, ci)
+        Calculates the CDRC (and confidence interval) from trained model
 
+    print_gam_summary: (self)
+        Prints pyGAM text summary of GAM predicting outcome from the treatment and the GPS.
 
 
     References
@@ -97,7 +120,7 @@ class CDRC(Core):
 
     """
 
-    def __init__(self, gps_family = None, treatment_grid_num = 100, spline_order = 3, n_splines = 20, lambda_ = 0.5, max_iter = 100, verbose = False):
+    def __init__(self, gps_family = None, treatment_grid_num = 100, spline_order = 3, n_splines = 30, lambda_ = 0.5, max_iter = 100, verbose = False):
 
         self.gps_family = gps_family
         self.treatment_grid_num = treatment_grid_num
@@ -286,11 +309,8 @@ class CDRC(Core):
         # and give GPS loading for each observation in the dataset
         self.gps_at_grid = self._gps_values_at_grid()
 
-        # Create CDRC predictions from GAM
-        self._cdrc_preds = self._cdrc_predictions()
 
-
-    def calculate_CDRC(self, ci = 95):
+    def calculate_CDRC(self, ci = 0.95):
         """
         Using the results of the fitted model, this generates a point estimate for the CDRC
         at each of the values of the treatment grid. Connecting these estimates will produce
@@ -298,8 +318,8 @@ class CDRC(Core):
 
         Parameters
         ----------
-        ci: int or float, bounded (0, 100).
-            The desired confidence interval to produce. Default value is 95, corresponding
+        ci: float, bounded (0, 1.0).
+            The desired confidence interval to produce. Default value is 0.95, corresponding
             to 95% confidence intervals.
 
         Returns
@@ -310,40 +330,20 @@ class CDRC(Core):
         """
         self._validate_calculate_CDRC_params(ci)
 
-        lower_percentile = ((100 - ci) / 2)
-        upper_percentile = (100 - ((100 - ci) / 2))
+        # Create CDRC predictions from trained GAM
+        self._cdrc_preds = self._cdrc_predictions(ci)
 
         # For each column of _cdrc_preds, calculate the mean and confidence interval bounds
         results = []
 
         for i in range(0, self.treatment_grid_num):
             temp_grid_value = self.grid_values[i]
-            temp_point_estimate = self._cdrc_preds[:,i].mean()
-            temp_lower_bound = np.percentile(self._cdrc_preds[:,i], q = lower_percentile)
-            temp_upper_bound = np.percentile(self._cdrc_preds[:,i], q = upper_percentile)
+            temp_point_estimate = self._cdrc_preds[:,i,0].mean()
+            temp_lower_bound = self._cdrc_preds[:,i,1].mean()
+            temp_upper_bound = self._cdrc_preds[:,i,2].mean()
             results.append([temp_grid_value, temp_point_estimate, temp_lower_bound, temp_upper_bound])
 
         return pd.DataFrame(results, columns = ['Treatment', 'CDRC', 'Lower_CI', 'Upper_CI'])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     def _validate_calculate_CDRC_params(self, ci):
@@ -351,46 +351,38 @@ class CDRC(Core):
         Validates the parameters given to `calculate_CDRC`
         """
 
-        if not isinstance(ci, (float, int)):
+        if not isinstance(ci, float):
             raise TypeError(f"`ci` parameter must be an float, but found type {type(ci)}")
 
-        if (isinstance(ci, (float, int)) and ((ci <= 0) or (ci >= 100))):
-            raise ValueError("`ci` parameter should be between (0, 100)")
+        if (isinstance(ci, float) and ((ci <= 0) or (ci >= 1.0))):
+            raise ValueError("`ci` parameter should be between (0, 1)")
 
 
-    def _cdrc_predictions(self):
+    def _cdrc_predictions(self, ci):
         """
         Returns the predictions of CDRC for each value of the treatment grid.
         Essentially, we're making predictions using the original treatment and gps_at_grid
         """
 
-        # Creates an empty 2d array of shape (n_samples, treatment_grid_num)
-        # to hold cdrc predictions
-        cdrc_preds = np.zeros((len(self.T), self.treatment_grid_num), dtype=float)
+        # To keep track of cdrc predictions, we create an empty 3d array of shape
+        # (n_samples, treatment_grid_num, 3). The last dimension is of length 3 because
+        # we are going to keep track of the point estimate of the prediction, as well as
+        # the lower and upper bounds of the prediction interval
+        cdrc_preds = np.zeros((len(self.T), self.treatment_grid_num, 3), dtype=float)
 
-        # Loop through each of the grid values
+        # Loop through each of the grid values, predict point estimate and get prediction interval
         for i in range(0, self.treatment_grid_num):
             temp_T = np.repeat(self.grid_values[i], repeats = len(self.T))
             temp_gps = self.gps_at_grid[:,i]
             temp_cdrc_preds = self.gam_results.predict(np.column_stack((temp_T, temp_gps)))
-            cdrc_preds[:,i] = temp_cdrc_preds
+            temp_cdrc_interval = self.gam_results.prediction_intervals(np.column_stack((temp_T, temp_gps)), width=ci)
+            temp_cdrc_lower_bound = temp_cdrc_interval[:,0]
+            temp_cdrc_upper_bound = temp_cdrc_interval[:,1]
+            cdrc_preds[:,i,0] = temp_cdrc_preds
+            cdrc_preds[:,i,1] = temp_cdrc_lower_bound
+            cdrc_preds[:,i,2] = temp_cdrc_upper_bound
 
         return np.round(cdrc_preds, 3)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     def _gps_values_at_grid(self):
@@ -410,7 +402,7 @@ class CDRC(Core):
 
     def print_gam_summary(self):
         """
-        Very simple, just prints the GAM model summary (uses PyGAM's output)
+        Very simple, just prints the GAM model summary (uses pyGAM's output)
         """
         print(self._gam_summary_str)
 

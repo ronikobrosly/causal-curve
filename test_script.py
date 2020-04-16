@@ -21,12 +21,15 @@ y = data['Y']
 
 
 #test = CDRC(treatment_grid_num = 100, spline_order = 3, n_splines = 20, lambda_ = 0.5, max_iter = 100, verbose = False)
-test = CDRC(gps_family = 'normal', treatment_grid_num = 100, spline_order = 3, n_splines = 20, lambda_ = 0.5, max_iter = 100, verbose = False)
+test = CDRC(gps_family = 'lognormal', treatment_grid_num = 100, spline_order = 3, n_splines = 40, lambda_ = 0.5, max_iter = 100, verbose = False)
 
 
 test.fit(T = T, X = X, y = y)
 
-results = test.calculate_CDRC(95)
+results = test.calculate_CDRC(0.95)
+
+
+
 
 
 
