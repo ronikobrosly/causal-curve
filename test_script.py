@@ -16,3 +16,6 @@ test = CDRC(treatment_grid_num = 100, spline_order = 3, n_splines = 20, lambda_ 
 
 
 test.fit(T = T, X = X, y = y)
+
+
+test.calculate_CDRC(95)

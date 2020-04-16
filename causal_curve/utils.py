@@ -1,3 +1,3 @@
 """
-Misc. utility methods
+misc. utility methods
 """
