@@ -10,6 +10,7 @@ Python tools to perform causal inference using observational data when the treat
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contributing](#contributing)
+- [References](#references)
 
 ## Overview
 
@@ -49,3 +50,17 @@ TBC
 ## Contributing
 
 Your help is absolutely welcome! Please do reach out or create a feature branch!
+
+
+## References
+
+Galagate, D. Causal Inference with a Continuous Treatment and Outcome: Alternative
+Estimators for Parametric Dose-Response function with Applications. PhD thesis, 2016.
+
+Moodie E and Stephens DA. Estimation of dose–response functions for
+longitudinal data using the generalised propensity score. In: Statistical Methods in
+Medical Research 21(2), 2010, pp.149–166.
+
+Hirano K and Imbens GW. The propensity score with continuous treatments.
+In: Gelman A and Meng XL (eds) Applied bayesian modeling and causal inference
+from incomplete-data perspectives. Oxford, UK: Wiley, 2004, pp.73–84.

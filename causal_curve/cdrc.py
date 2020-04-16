@@ -2,19 +2,25 @@
 Defines the causal dose-response curve class (CDRC)
 """
 
+import contextlib
+import io
 import pdb
 
 import numpy as np
 from pandas.api.types import is_float_dtype, is_numeric_dtype
-from scipy.stats import norm
+from pygam import LinearGAM, s
+from scipy.stats import gamma, norm
 import statsmodels.api as sm
 from statsmodels.genmod.families.links import inverse_power as Inverse_Power
 
 from causal_curve.core import Core
 
 
+
+
 class CDRC(Core):
-    """Causal Dose-Response Curve model
+    """
+    Causal Dose-Response Curve model
 
     Computes the generalized propensity score (GPS) function, and uses this in a generalized
     additive model (GAM) to correct treatment prediction of the outcome variable. Assumes
@@ -23,8 +29,8 @@ class CDRC(Core):
     WARNINGS:
 
         * This algorithm assumes you've already performed the necessary transformations to
-        any input variables (e.g. categorical variables are already one-hot encoded and in such
-        a case, one of the categories is excluded).
+        categorical covariates (i.e. these variables are already one-hot encoded and
+        one of the categories is excluded for each set of dummy variables).
 
         * Please take care to ensure that the "ignorability" assumption is met (i.e.
         all strong confounders are captured in your covariates and there is no
@@ -34,11 +40,11 @@ class CDRC(Core):
     ----------
 
     gps_family: str, optional
-        Accepts one of the following values: 'normal', 'lognormal', 'gamma' (this is experimental),
-        or None. Is used to determine the family of the glm used to model the GPS function.
+        Accepts one of the following values: 'normal', 'lognormal', 'gamma', and None.
+        Is used to determine the family of the glm used to model the GPS function.
         Look at the distribution of your treatment variable to determine which family
-        is more appropriate. If user doesn't provide a value here, each of these families
-        is tried and the best fitting family is used.
+        is more appropriate. If no value is provided for this parameter, the algorithm
+        will use the best-fitting family type.
 
     treatment_grid_num: int, optional
         Takes the treatment, and creates an equally-spaced grid across its values. This is used
@@ -101,7 +107,7 @@ class CDRC(Core):
         self._validate_init_params()
 
         if self.verbose:
-            print(f"Using the following params for CDRC: \n\n {self.get_params()} ")
+            print(f"Using the following params for CDRC: {self.get_params()} ")
 
 
     def _validate_init_params(self):
@@ -222,38 +228,75 @@ class CDRC(Core):
         # Estimating the GPS
         self.best_gps_family = self.gps_family
 
+        # If no family specified, pick the best family
         if self.gps_family == None:
             if self.verbose:
                 print(f"Fitting several GPS models and picking the best fitting one...")
 
-            self.best_gps_family = self.find_best_gps_model()
+            self.best_gps_family, self.gps_function, self.gps_deviance = self._find_best_gps_model()
 
+            if self.verbose:
+                print(f"Best fitting model was {self.best_gps_family}, which produced a deviance of {self.gps_deviance}")
 
+        # Otherwise, go with the what the user provided...
+        else:
+            if self.verbose:
+                print(f"Fitting GPS model of family '{self.best_gps_family}'...")
+
+            if self.best_gps_family == 'normal':
+                self.gps_function, self.gps_deviance = self._create_normal_gps_function()
+            elif self.best_gps_family == 'lognormal':
+                self.gps_function, self.gps_deviance = self._create_lognormal_gps_function()
+            elif self.best_gps_family == 'gamma':
+                self.gps_function, self.gps_deviance = self._create_gamma_gps_function()
+
+        # Estimate the GPS
         if self.verbose:
-            print(f"Fitting GPS model of family '{self.best_gps_family}''")
+            print(f"Saving GPS values...")
 
-        if self.best_gps_family == 'normal':
-            self.gps_function, self_gps_deviance = self.create_normal_gps_function()
-        elif self.best_gps_family == 'lognormal':
-            self.gps_function, self_gps_deviance = self.create_lognormal_gps_function()
-        elif self.best_gps_family == 'gamma':
-            self.gps_function, self_gps_deviance = self.create_gamma_gps_function()
+        self.gps = self.gps_function(self.T)
 
+        # Create GAM that predicts outcome from the treatment and GPS
+        if self.verbose:
+            print(f"Fitting GAM using treatment and GPS...")
 
+        # Save model results
+        self.gam_results = self._fit_gam()
 
+        f = io.StringIO()
+        with contextlib.redirect_stdout(f):
+            self.gam_results.summary()
 
-
-
-
-
-
-
+        self._gam_summary_str = f.getvalue()
 
 
 
 
 
-    def create_normal_gps_function(self):
+
+
+
+
+
+    def print_gam_summary(self):
+        """
+        Very simple, just prints the GAM model summary (uses PyGAM's output)
+        """
+        print(self._gam_summary_str)
+
+
+    def _fit_gam(self):
+        """
+        Fits a GAM that predicts the outcome from the treatment and GPS
+        """
+
+        X = np.column_stack((self.T.values, self.gps))
+        y = np.asarray(self.y)
+
+        return LinearGAM(s(0, n_splines=self.n_splines, spline_order=self.spline_order) + s(1, n_splines=self.n_splines, spline_order=self.spline_order), max_iter=500).fit(X, y)
+
+
+    def _create_normal_gps_function(self):
         """
         Models the GPS using a GLM of the Gaussian family
         """
@@ -269,11 +312,11 @@ class CDRC(Core):
         return gps_function, normal_gps_model.deviance
 
 
-    def create_lognormal_gps_function(self):
+    def _create_lognormal_gps_function(self):
         """
         Models the GPS using a GLM of the Gaussian family (assumes treatment is lognormal)
         """
-        lognormal_gps_model = sm.GLM(self.T, self.X, family=sm.families.Gaussian()).fit()
+        lognormal_gps_model = sm.GLM(np.log(self.T), self.X, family=sm.families.Gaussian()).fit()
 
         pred_log_treat = lognormal_gps_model.fittedvalues
         sigma = np.std(lognormal_gps_model.resid_response)
@@ -284,28 +327,40 @@ class CDRC(Core):
         return gps_function, lognormal_gps_model.deviance
 
 
-    def create_gamma_gps_function(self):
+    def _create_gamma_gps_function(self):
         """
         Models the GPS using a GLM of the Gamma family
         """
         gamma_gps_model = sm.GLM(self.T, self.X, family=sm.families.Gamma(Inverse_Power())).fit()
 
-        pred_gamma_treat = gamma_gps_model.fittedvalues
-        shape = (self.T.mean() / gamma_gps_model.scale)
-        final_scale = (pred_gamma_treat / gamma_gps_model.scale)
+        mu = gamma_gps_model.mu
+        scale = gamma_gps_model.scale
+        shape = (mu / gamma_gps_model.scale)
 
         def gps_function(treatment_val):
-            return gamma.pdf(5, a = shape, loc = 0, scale = final_scale)
+            return gamma.pdf(treatment_val, a = shape, loc = 0, scale = scale)
 
-        return gps_function
-
-
+        return gps_function, gamma_gps_model.deviance
 
 
-
-    def find_best_gps_model(self):
+    def _find_best_gps_model(self):
         """
         If user doesn't provide a GLM family for modeling the GPS, this function compares
         a few different gps models and picks the one with the lowest deviance
         """
-        pass
+        models_to_try_dict = {
+            'normal_gps_model': self._create_normal_gps_function(),
+            'lognormal_gps_model': self._create_lognormal_gps_function(),
+            'gamma_gps_model': self._create_gamma_gps_function(),
+
+        }
+
+        model_comparison_dict = {}
+
+        for key, value in models_to_try_dict.items():
+            model_comparison_dict[key] = value[1]
+
+        # Return model with lowest deviance
+        best_model = min(model_comparison_dict, key=model_comparison_dict.get)
+
+        return best_model, models_to_try_dict[best_model][0], models_to_try_dict[best_model][1]
