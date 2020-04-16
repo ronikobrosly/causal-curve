@@ -290,16 +290,12 @@ class CDRC(Core):
         """
         gamma_gps_model = sm.GLM(self.T, self.X, family=sm.families.Gamma(Inverse_Power())).fit()
 
-        pdb.set_trace()
-
         pred_gamma_treat = gamma_gps_model.fittedvalues
         shape = (self.T.mean() / gamma_gps_model.scale)
-        final_scale = (pred_gamma_treat / shape)
-
-        rv = gamma(shape, 0, final_scale)
+        final_scale = (pred_gamma_treat / gamma_gps_model.scale)
 
         def gps_function(treatment_val):
-            return rv.pdf(treatment_val)
+            return gamma.pdf(5, a = shape, loc = 0, scale = final_scale)
 
         return gps_function
 
