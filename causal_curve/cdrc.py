@@ -326,6 +326,26 @@ class CDRC(Core):
         return pd.DataFrame(results, columns = ['Treatment', 'CDRC', 'Lower_CI', 'Upper_CI'])
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     def _validate_calculate_CDRC_params(self, ci):
         """
         Validates the parameters given to `calculate_CDRC`
@@ -355,7 +375,22 @@ class CDRC(Core):
             temp_cdrc_preds = self.gam_results.predict(np.column_stack((temp_T, temp_gps)))
             cdrc_preds[:,i] = temp_cdrc_preds
 
-        return cdrc_preds
+        return np.round(cdrc_preds, 3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     def _gps_values_at_grid(self):

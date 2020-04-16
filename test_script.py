@@ -19,7 +19,10 @@ T = data['T']
 X = data[['X1', 'X2']]
 y = data['Y']
 
-test = CDRC(treatment_grid_num = 100, spline_order = 3, n_splines = 20, lambda_ = 0.5, max_iter = 100, verbose = True)
+
+#test = CDRC(treatment_grid_num = 100, spline_order = 3, n_splines = 20, lambda_ = 0.5, max_iter = 100, verbose = False)
+test = CDRC(gps_family = 'normal', treatment_grid_num = 100, spline_order = 3, n_splines = 20, lambda_ = 0.5, max_iter = 100, verbose = False)
+
 
 test.fit(T = T, X = X, y = y)
 
@@ -52,7 +55,7 @@ ax.spines["right"].set_visible(False)
 # Ensure that the axis ticks only show up on the bottom and left of the plot.
 # Ticks on the right and top of the plot are generally unnecessary chartjunk.
 ax.get_xaxis().tick_bottom()
-ax.get_yaxis().tick_left()  
+ax.get_yaxis().tick_left()
 
 
 
