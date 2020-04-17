@@ -4,10 +4,12 @@ Python tools to perform causal inference using observational data when the treat
 
 <p align="center">
 <img src="https://upload.wikimedia.org/wikipedia/commons/e/e8/Antikythera_mechanism.svg" data-canonical-src="https://en.wikipedia.org/wiki/Antikythera_mechanism" align="middle" width="350" height="477" />
+
+The Antikythera mechanism, an ancient analog computer, with lots of beautiful curves.
 </p>
 
 
-The Antikythera mechanism, an ancient analog computer, with lots of beautiful curves.
+
 
 
 ## Table of Contents
