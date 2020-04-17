@@ -1,7 +1,10 @@
 # causal-curve
 Python tools to perform causal inference using observational data when the treatment of interest is continuous.
 
-<img src=imgs/curves.png>
+[![Antikythera mechanism](https://upload.wikimedia.org/wikipedia/commons/e/e8/Antikythera_mechanism.svg)](https://en.wikipedia.org/wiki/Antikythera_mechanism)
+
+The Antikythera mechanism, an ancient analog computer, with lots of beautiful curves. 
+
 
 ## Table of Contents
 
