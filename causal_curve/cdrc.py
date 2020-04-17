@@ -226,7 +226,7 @@ class CDRC(Core):
         """
         Produces initial grid values for the treatment variable
         """
-        return np.quantile(self.T, q = np.linspace(start = 0, stop = 1, num = self.treatment_grid_num))
+        return np.quantile(self.T, q = np.linspace(start = 0.01, stop = 0.99, num = self.treatment_grid_num))
 
 
     def fit(self, T, X, y):
@@ -415,7 +415,7 @@ class CDRC(Core):
         X = np.column_stack((self.T.values, self.gps))
         y = np.asarray(self.y)
 
-        return LinearGAM(s(0, n_splines=self.n_splines, spline_order=self.spline_order) + s(1, n_splines=self.n_splines, spline_order=self.spline_order), max_iter=500).fit(X, y)
+        return LinearGAM(s(0, n_splines=self.n_splines, spline_order=self.spline_order) + s(1, n_splines=self.n_splines, spline_order=self.spline_order), max_iter=self.max_iter, lam=self.lambda_).fit(X, y)
 
 
     def _create_normal_gps_function(self):
