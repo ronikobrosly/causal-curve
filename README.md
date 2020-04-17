@@ -31,15 +31,13 @@ For example, when you would like to:
 * Estimate how decreasing order wait time will impact customer satisfaction, after controlling for confounding effects.
 * Estimate how changing neighborhood income inequality (e.g. the Gini index) could be causally related to neighborhood crime rate.
 
-This library attempts to address this gap, providing tools to estimate `causal curves`.
+This library attempts to address this gap, providing tools to estimate causal curves.
 
 ## Documentation
 
 TBC
 
 ## Installation
-
-causal-curves
 
 TBC
 
@@ -50,7 +48,6 @@ TBC
 ## Contributing
 
 Your help is absolutely welcome! Please do reach out or create a feature branch!
-
 
 ## References
 

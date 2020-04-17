@@ -37,6 +37,7 @@ class CDRC(Core):
         all strong confounders are captured in your covariates and there is no
         informative censoring), otherwise your results will be biased, sometimes strongly so.
 
+
     Parameters
     ----------
 
@@ -48,10 +49,23 @@ class CDRC(Core):
         will use the best-fitting family type.
 
     treatment_grid_num: int, optional (default = 100)
-        Takes the treatment, and creates an equally-spaced grid across its values. This is used
-        to estimate the final causal dose-response curve. Higher value here means the
-        final curve will be smoother, but also increases computation time. Default value is 100,
-        and this is usually a reasonable number.
+        Takes the treatment, and creates a quantile-based grid across its values. For instance, if
+        the number 6 is selected, this means the algorithm will only take the 6 treatment variable
+        values at approximately the 0, 20, 40, 60, 80, and 100th percentiles to estimate the CDRC.
+        Higher value here means the final curve will be more finely estimated, but also
+        increases computation time. Default value is 100, and this is usually a reasonable number.
+
+    lower_grid_constraint: float, optional (default = 0.01)
+        This adds an optional constraint of the lower side of the treatment grid. Sometimes
+        data near the minimum values of the treatment are few in number and thus generate unstable
+        estimates. By default, this clips the bottom 1 percentile or lower of treatment values.
+        This can be as low as 0, indicating there is no lower limit to how much treatment data
+        is considered.
+
+    upper_grid_constraint: float, optional (default = 0.99)
+        See above parameter. Just like above, but this is an upper constraint. By default,
+        this clips the top 99th percentile or higher of treatment values. This can be as high
+        as 1.0, indicating there is no upper limit to how much treatment data is considered.
 
     spline_order: int, optional (default = 3)
         Order of the splines to use fitting the final GAM. Must be integer >= 1. Default value
@@ -61,7 +75,7 @@ class CDRC(Core):
         Number of splines to use for the treatment and GPS in the final GAM. Must be integer >= 2.
         Must be non-negative. Default value is 30.
 
-    lambda_: float, optional (default = 0.5)
+    lambda_: int or float, optional (default = 0.5)
         Strength of smoothing penalty. Must be a positive float. Larger values enforce
         stronger smoothing. Default value is 0.5.
 
@@ -70,7 +84,8 @@ class CDRC(Core):
         Default value is 100.
 
     verbose: bool, optional (default = False)
-        Determines whether the user will get. Default value is False.
+        Determines whether the user will get verbose status updates. Default value is False.
+
 
     Attributes
     ----------
@@ -120,10 +135,16 @@ class CDRC(Core):
 
     """
 
-    def __init__(self, gps_family = None, treatment_grid_num = 100, spline_order = 3, n_splines = 30, lambda_ = 0.5, max_iter = 100, verbose = False):
+    def __init__(
+        self, gps_family = None, treatment_grid_num = 100, lower_grid_constraint = 0.01,
+        upper_grid_constraint = 0.99, spline_order = 3, n_splines = 30,
+        lambda_ = 0.5, max_iter = 100, verbose = False
+    ):
 
         self.gps_family = gps_family
         self.treatment_grid_num = treatment_grid_num
+        self.lower_grid_constraint = lower_grid_constraint
+        self.upper_grid_constraint = upper_grid_constraint
         self.spline_order = spline_order
         self.n_splines = n_splines
         self.lambda_ = lambda_
@@ -159,6 +180,30 @@ class CDRC(Core):
         if (isinstance(self.treatment_grid_num, int)) and self.treatment_grid_num >= 1000:
             raise ValueError(f"treatment_grid_num parameter is too high!")
 
+        # Checks for lower_grid_constraint
+        if not isinstance(self.lower_grid_constraint, float):
+            raise TypeError(f"lower_grid_constraint parameter must be a float, but found type {type(self.lower_grid_constraint)}")
+
+        if (isinstance(self.lower_grid_constraint, float)) and self.lower_grid_constraint < 0:
+            raise ValueError(f"lower_grid_constraint parameter cannot be < 0, but found value {self.lower_grid_constraint}")
+
+        if (isinstance(self.lower_grid_constraint, float)) and self.lower_grid_constraint >= 1.0:
+            raise ValueError(f"lower_grid_constraint parameter cannot >= 1.0, but found value {self.lower_grid_constraint}")
+
+        # Checks for upper_grid_constraint
+        if not isinstance(self.upper_grid_constraint, float):
+            raise TypeError(f"upper_grid_constraint parameter must be a float, but found type {type(self.upper_grid_constraint)}")
+
+        if (isinstance(self.upper_grid_constraint, float)) and self.upper_grid_constraint <= 0:
+            raise ValueError(f"upper_grid_constraint parameter cannot be <= 0, but found value {self.upper_grid_constraint}")
+
+        if (isinstance(self.upper_grid_constraint, float)) and self.upper_grid_constraint > 1.0:
+            raise ValueError(f"upper_grid_constraint parameter cannot > 1.0, but found value {self.upper_grid_constraint}")
+
+        # Checks for lower_grid_constraint isn't higher than upper_grid_constraint
+        if self.lower_grid_constraint >= self.upper_grid_constraint:
+            raise ValueError("lower_grid_constraint should be lower than upper_grid_constraint!")
+
         # Checks for spline_order
         if not isinstance(self.spline_order, int):
             raise TypeError(f"spline_order parameter must be an integer, but found type {type(self.spline_order)}")
@@ -180,13 +225,13 @@ class CDRC(Core):
             raise ValueError(f"n_splines parameter is too high!")
 
         # Checks for lambda_
-        if not isinstance(self.lambda_, float):
-            raise TypeError(f"lambda_ parameter must be an float, but found type {type(self.lambda_)}")
+        if not isinstance(self.lambda_, (int, float)):
+            raise TypeError(f"lambda_ parameter must be an int or float, but found type {type(self.lambda_)}")
 
-        if (isinstance(self.lambda_, float)) and self.lambda_ <= 0:
+        if (isinstance(self.lambda_, (int, float))) and self.lambda_ <= 0:
             raise ValueError(f"lambda_ parameter should be >= 2, but found {self.lambda_}")
 
-        if (isinstance(self.lambda_, float)) and self.lambda_ >= 1000:
+        if (isinstance(self.lambda_, (int, float))) and self.lambda_ >= 1000:
             raise ValueError(f"lambda_ parameter is too high!")
 
         # Checks for max_iter
@@ -226,7 +271,7 @@ class CDRC(Core):
         """
         Produces initial grid values for the treatment variable
         """
-        return np.quantile(self.T, q = np.linspace(start = 0.01, stop = 0.99, num = self.treatment_grid_num))
+        return np.quantile(self.T, q = np.linspace(start = self.lower_grid_constraint, stop = self.upper_grid_constraint, num = self.treatment_grid_num))
 
 
     def fit(self, T, X, y):
@@ -339,8 +384,9 @@ class CDRC(Core):
         for i in range(0, self.treatment_grid_num):
             temp_grid_value = self.grid_values[i]
             temp_point_estimate = self._cdrc_preds[:,i,0].mean()
-            temp_lower_bound = self._cdrc_preds[:,i,1].mean()
-            temp_upper_bound = self._cdrc_preds[:,i,2].mean()
+            mean_ci_width = ((self._cdrc_preds[:,i,2].mean() - self._cdrc_preds[:,i,1].mean()) / 2)
+            temp_lower_bound = temp_point_estimate - mean_ci_width
+            temp_upper_bound = temp_point_estimate + mean_ci_width
             results.append([temp_grid_value, temp_point_estimate, temp_lower_bound, temp_upper_bound])
 
         return pd.DataFrame(results, columns = ['Treatment', 'CDRC', 'Lower_CI', 'Upper_CI'])
@@ -375,7 +421,7 @@ class CDRC(Core):
             temp_T = np.repeat(self.grid_values[i], repeats = len(self.T))
             temp_gps = self.gps_at_grid[:,i]
             temp_cdrc_preds = self.gam_results.predict(np.column_stack((temp_T, temp_gps)))
-            temp_cdrc_interval = self.gam_results.prediction_intervals(np.column_stack((temp_T, temp_gps)), width=ci)
+            temp_cdrc_interval = self.gam_results.confidence_intervals(np.column_stack((temp_T, temp_gps)), width=ci)
             temp_cdrc_lower_bound = temp_cdrc_interval[:,0]
             temp_cdrc_upper_bound = temp_cdrc_interval[:,1]
             cdrc_preds[:,i,0] = temp_cdrc_preds

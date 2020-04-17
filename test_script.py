@@ -21,7 +21,7 @@ y = data['Y']
 
 
 #test = CDRC(treatment_grid_num = 100, spline_order = 3, n_splines = 20, lambda_ = 0.5, max_iter = 100, verbose = False)
-test = CDRC(gps_family = 'lognormal', treatment_grid_num = 100, spline_order = 3, n_splines = 40, lambda_ = 0.5, max_iter = 100, verbose = False)
+test = CDRC(gps_family = 'gamma', treatment_grid_num = 100, spline_order = 3, n_splines = 40, lambda_ = 0.5, max_iter = 100, verbose = False)
 
 
 test.fit(T = T, X = X, y = y)
@@ -67,8 +67,8 @@ fig = plt.figure(1, figsize=(7, 2.5))
 plot_mean_and_CI(treat0, mean0, lb0, ub0, color_mean='b', color_shading='b')
 
 
-plt.xlim(0, 20)
-plt.ylim(0, 20)
+plt.xlim(0, 12)
+plt.ylim(0, 12)
 plt.xlabel('Treatment')
 plt.ylabel('Outcome')
 plt.xticks(fontsize=12)
