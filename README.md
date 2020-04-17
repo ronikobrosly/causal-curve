@@ -2,9 +2,9 @@
 Python tools to perform causal inference using observational data when the treatment of interest is continuous.
 
 
-
+<p align="center">
 <img src="https://upload.wikimedia.org/wikipedia/commons/e/e8/Antikythera_mechanism.svg" data-canonical-src="https://en.wikipedia.org/wiki/Antikythera_mechanism" align="middle" width="350" height="477" />
-
+</p>
 
 
 The Antikythera mechanism, an ancient analog computer, with lots of beautiful curves.
