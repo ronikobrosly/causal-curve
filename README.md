@@ -38,7 +38,7 @@ For example, when you would like to:
 * Estimate the causal response to increasing or decreasing the price of a product across a wide range.
 * Understand how the number of hours per week of aerobic exercise causes positive health outcomes.
 * Estimate how decreasing order wait time will impact customer satisfaction, after controlling for confounding effects.
-* Estimate how changing neighborhood income inequality (e.g. the Gini index) could be causally related to neighborhood crime rate.
+* Estimate how changing neighborhood income inequality (Gini index) could be causally related to neighborhood crime rate.
 
 This library attempts to address this gap, providing tools to estimate causal curves.
 
