@@ -16,75 +16,79 @@ import statsmodels.api as sm
 from statsmodels.genmod.families.links import inverse_power as Inverse_Power
 
 from causal_curve.core import Core
-
+from causal_curve.utils import rand_seed_wrapper
 
 
 class CDRC(Core):
     """
-    Causal Dose-Response Curve model
-
     In a multi-stage approach, this computes the generalized propensity score (GPS) function,
     and uses this in a generalized additive model (GAM) to correct treatment prediction of
     the outcome variable. Assumes continuous treatment and outcome variable.
 
-    WARNINGS:
+    WARNING:
 
-        * This algorithm assumes you've already performed the necessary transformations to
-        categorical covariates (i.e. these variables are already one-hot encoded and
-        one of the categories is excluded for each set of dummy variables).
+    -This algorithm assumes you've already performed the necessary transformations to
+    categorical covariates (i.e. these variables are already one-hot encoded and
+    one of the categories is excluded for each set of dummy variables).
 
-        * Please take care to ensure that the "ignorability" assumption is met (i.e.
-        all strong confounders are captured in your covariates and there is no
-        informative censoring), otherwise your results will be biased, sometimes strongly so.
-
+    -Please take care to ensure that the "ignorability" assumption is met (i.e.
+    all strong confounders are captured in your covariates and there is no
+    informative censoring), otherwise your results will be biased, sometimes strongly so.
 
     Parameters
     ----------
 
-    gps_family: str, optional (default =  None)
-        Accepts one of the following values: 'normal', 'lognormal', 'gamma', and None.
+    gps_family: str, optional (default = None)
         Is used to determine the family of the glm used to model the GPS function.
-        Look at the distribution of your treatment variable to determine which family
-        is more appropriate. If no value is provided for this parameter, the algorithm
-        will use the best-fitting family type.
+        Look at the distribution of your treatment variable to determine which family is more appropriate.
+        Possible values:
+
+        - 'normal'
+        - 'lognormal'
+        - 'gamma'
+        - None : (best-fitting family automatically chosen)
 
     treatment_grid_num: int, optional (default = 100)
-        Takes the treatment, and creates a quantile-based grid across its values. For instance, if
-        the number 6 is selected, this means the algorithm will only take the 6 treatment variable
-        values at approximately the 0, 20, 40, 60, 80, and 100th percentiles to estimate the CDRC.
-        Higher value here means the final curve will be more finely estimated, but also
-        increases computation time. Default value is 100, and this is usually a reasonable number.
+        Takes the treatment, and creates a quantile-based grid across its values.
+        For instance, if the number 6 is selected, this means the algorithm will only take
+        the 6 treatment variable values at approximately the 0, 20, 40, 60, 80, and 100th
+        percentiles to estimate the CDRC. Higher value here means the final curve
+        will be more finely estimated, but also increases computation time.
+        Default is usually a reasonable number.
 
-    lower_grid_constraint: float, optional (default = 0.01)
-        This adds an optional constraint of the lower side of the treatment grid. Sometimes
-        data near the minimum values of the treatment are few in number and thus generate unstable
-        estimates. By default, this clips the bottom 1 percentile or lower of treatment values.
-        This can be as low as 0, indicating there is no lower limit to how much treatment data
-        is considered.
+    lower_grid_constraint:  float,optional(default = 0.01)
+        This adds an optional constraint of the lower side of the treatment grid.
+        Sometimes data near the minimum values of the treatment are few in number
+        and thus generate unstable estimates. By default, this clips the bottom 1 percentile
+        or lower of treatment values. This can be as low as 0, indicating there is no
+        lower limit to how much treatment data is considered.
 
     upper_grid_constraint: float, optional (default = 0.99)
-        See above parameter. Just like above, but this is an upper constraint. By default,
-        this clips the top 99th percentile or higher of treatment values. This can be as high
-        as 1.0, indicating there is no upper limit to how much treatment data is considered.
+        See above parameter. Just like above, but this is an upper constraint.
+        By default, this clips the top 99th percentile or higher of treatment values.
+        This can be as high as 1.0, indicating there is no upper limit to how much
+        treatment data is considered.
 
     spline_order: int, optional (default = 3)
-        Order of the splines to use fitting the final GAM. Must be integer >= 1. Default value
-        is 3 for cubic splines.
+        Order of the splines to use fitting the final GAM.
+        Must be integer >= 1. Default value creates cubic splines.
 
     n_splines: int, optional (default = 30)
-        Number of splines to use for the treatment and GPS in the final GAM. Must be integer >= 2.
-        Must be non-negative. Default value is 30.
+        Number of splines to use for the treatment and GPS in the final GAM.
+        Must be integer >= 2. Must be non-negative.
 
     lambda_: int or float, optional (default = 0.5)
-        Strength of smoothing penalty. Must be a positive float. Larger values enforce
-        stronger smoothing. Default value is 0.5.
+        Strength of smoothing penalty. Must be a positive float.
+        Larger values enforce stronger smoothing.
 
     max_iter: int, optional (default = 100)
         Maximum number of iterations allowed for the maximum likelihood algo to converge.
-        Default value is 100.
+
+    random_seed: int, optional (default = None)
+        Sets the random seed.
 
     verbose: bool, optional (default = False)
-        Determines whether the user will get verbose status updates. Default value is False.
+        Determines whether the user will get verbose status updates.
 
 
     Attributes
@@ -119,6 +123,14 @@ class CDRC(Core):
         Prints pyGAM text summary of GAM predicting outcome from the treatment and the GPS.
 
 
+    Examples
+    --------
+    >>> from causal_curve.cdrc import CDRC
+    >>> cdrc = CDRC(treatment_grid_num = 200, random_seed = 512)
+    >>> cdrc.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
+    >>> cdrc_results = cdrc.calculate_CDRC(0.95)
+
+
     References
     ----------
 
@@ -138,7 +150,7 @@ class CDRC(Core):
     def __init__(
         self, gps_family = None, treatment_grid_num = 100, lower_grid_constraint = 0.01,
         upper_grid_constraint = 0.99, spline_order = 3, n_splines = 30,
-        lambda_ = 0.5, max_iter = 100, verbose = False
+        lambda_ = 0.5, max_iter = 100, random_seed = None, verbose = False
     ):
 
         self.gps_family = gps_family
@@ -149,10 +161,12 @@ class CDRC(Core):
         self.n_splines = n_splines
         self.lambda_ = lambda_
         self.max_iter = max_iter
+        self.random_seed = random_seed
         self.verbose = verbose
 
         # Validate the params
         self._validate_init_params()
+        rand_seed_wrapper()
 
         if self.verbose:
             print("Using the following params for CDRC:")
@@ -244,14 +258,20 @@ class CDRC(Core):
         if (isinstance(self.max_iter, int)) and self.max_iter >= 1e6:
             raise ValueError(f"max_iter parameter is unnecessarily high!")
 
+        # Checks for random_seed
+        if not isinstance(self.random_seed, int):
+            raise TypeError(f"random_seed parameter must be an int, but found type {type(self.random_seed)}")
+
+        if (isinstance(self.random_seed, int)) and self.random_seed < 0:
+            raise ValueError(f"random_seed parameter must be > 0")
+
         # Checks for verbose
         if not isinstance(self.verbose, bool):
             raise TypeError(f"verbose parameter must be a boolean type, but found type {type(self.verbose)}")
 
 
     def _validate_fit_data(self):
-        """
-        Verifies that T, X, and y are formatted the right way
+        """Verifies that T, X, and y are formatted the right way
         """
         # Checks for T column
         if not is_float_dtype(self.T):
@@ -268,15 +288,13 @@ class CDRC(Core):
 
 
     def _grid_values(self):
-        """
-        Produces initial grid values for the treatment variable
+        """Produces initial grid values for the treatment variable
         """
         return np.quantile(self.T, q = np.linspace(start = self.lower_grid_constraint, stop = self.upper_grid_constraint, num = self.treatment_grid_num))
 
 
     def fit(self, T, X, y):
-        """
-        Fits the causal dose-response model. For now, this only accepts pandas format.
+        """Fits the causal dose-response model. For now, this only accepts pandas format.
 
         Parameters
         ----------
@@ -290,7 +308,7 @@ class CDRC(Core):
 
         Returns
         ----------
-        None
+        self : object
 
         """
         self.T = T
@@ -348,7 +366,7 @@ class CDRC(Core):
         self._gam_summary_str = f.getvalue()
 
         if self.verbose:
-            print(f"Calculating CDRC estimates for each treatment grid value...")
+            print(f"Calculating many CDRC estimates for each treatment grid value...")
 
         # Loop over all grid values (`treatment_grid_num` in total)
         # and give GPS loading for each observation in the dataset
@@ -356,27 +374,32 @@ class CDRC(Core):
 
 
     def calculate_CDRC(self, ci = 0.95):
-        """
-        Using the results of the fitted model, this generates a point estimate for the CDRC
+        """Using the results of the fitted model, this generates a point estimate for the CDRC
         at each of the values of the treatment grid. Connecting these estimates will produce
         the overall estimated CDRC. Percentile bootstrap confidence intervals are produced as well.
 
         Parameters
         ----------
-        ci: float, bounded (0, 1.0).
+        ci: float (default = 0.95)
             The desired confidence interval to produce. Default value is 0.95, corresponding
-            to 95% confidence intervals.
+            to 95% confidence intervals. bounded (0, 1.0).
 
         Returns
         ----------
-        Pandas dataframe of treatment grid values, the CDRC point estimate at that value,
-        and the associated lower and upper confidence interval bounds at that point.
+        dataframe : Pandas dataframe
+            Contains treatment grid values, the CDRC point estimate at that value,
+            and the associated lower and upper confidence interval bounds at that point.
+
+        self : object
 
         """
         self._validate_calculate_CDRC_params(ci)
 
         # Create CDRC predictions from trained GAM
         self._cdrc_preds = self._cdrc_predictions(ci)
+
+        if self.verbose:
+            print(f"Generating predictions for each value of treatment grid, and averaging to get CDRC...")
 
         # For each column of _cdrc_preds, calculate the mean and confidence interval bounds
         results = []
@@ -393,8 +416,7 @@ class CDRC(Core):
 
 
     def _validate_calculate_CDRC_params(self, ci):
-        """
-        Validates the parameters given to `calculate_CDRC`
+        """Validates the parameters given to `calculate_CDRC`
         """
 
         if not isinstance(ci, float):
@@ -405,9 +427,8 @@ class CDRC(Core):
 
 
     def _cdrc_predictions(self, ci):
-        """
-        Returns the predictions of CDRC for each value of the treatment grid.
-        Essentially, we're making predictions using the original treatment and gps_at_grid
+        """Returns the predictions of CDRC for each value of the treatment grid. Essentially,
+        we're making predictions using the original treatment and gps_at_grid
         """
 
         # To keep track of cdrc predictions, we create an empty 3d array of shape
@@ -432,9 +453,8 @@ class CDRC(Core):
 
 
     def _gps_values_at_grid(self):
-        """
-        Returns an array where we get the GPS-derived values for each element of the treatment grid.
-        Resulting array will be of shape (n_samples, treatment_grid_num)
+        """Returns an array where we get the GPS-derived values for each element
+        of the treatment grid. Resulting array will be of shape (n_samples, treatment_grid_num)
         """
         # Creates an empty 2d array of shape (n_samples, treatment_grid_num)
         gps_at_grid = np.zeros((len(self.T), self.treatment_grid_num), dtype=float)
@@ -447,15 +467,23 @@ class CDRC(Core):
 
 
     def print_gam_summary(self):
-        """
-        Very simple, just prints the GAM model summary (uses pyGAM's output)
+        """Prints the GAM model summary (uses pyGAM's output)
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        ----------
+        self : object
+
+
         """
         print(self._gam_summary_str)
 
 
     def _fit_gam(self):
-        """
-        Fits a GAM that predicts the outcome from the treatment and GPS
+        """Fits a GAM that predicts the outcome from the treatment and GPS
         """
 
         X = np.column_stack((self.T.values, self.gps))
@@ -465,8 +493,7 @@ class CDRC(Core):
 
 
     def _create_normal_gps_function(self):
-        """
-        Models the GPS using a GLM of the Gaussian family
+        """Models the GPS using a GLM of the Gaussian family
         """
         normal_gps_model = sm.GLM(self.T, self.X, family=sm.families.Gaussian()).fit()
 
@@ -481,8 +508,7 @@ class CDRC(Core):
 
 
     def _create_lognormal_gps_function(self):
-        """
-        Models the GPS using a GLM of the Gaussian family (assumes treatment is lognormal)
+        """Models the GPS using a GLM of the Gaussian family (assumes treatment is lognormal)
         """
         lognormal_gps_model = sm.GLM(np.log(self.T), self.X, family=sm.families.Gaussian()).fit()
 
@@ -496,8 +522,7 @@ class CDRC(Core):
 
 
     def _create_gamma_gps_function(self):
-        """
-        Models the GPS using a GLM of the Gamma family
+        """Models the GPS using a GLM of the Gamma family
         """
         gamma_gps_model = sm.GLM(self.T, self.X, family=sm.families.Gamma(Inverse_Power())).fit()
 
@@ -512,8 +537,7 @@ class CDRC(Core):
 
 
     def _find_best_gps_model(self):
-        """
-        If user doesn't provide a GLM family for modeling the GPS, this function compares
+        """If user doesn't provide a GLM family for modeling the GPS, this function compares
         a few different gps models and picks the one with the lowest deviance
         """
         models_to_try_dict = {
