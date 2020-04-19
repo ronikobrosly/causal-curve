@@ -5,12 +5,11 @@ Misc. utility functions
 """
 
 def rand_seed_wrapper(random_seed = None):
-    """
-    Sets the random seed using numpy
+    """Sets the random seed using numpy
 
     Parameters
     ----------
-    random_seed : int
+    random_seed: int
 
     Returns
     ----------

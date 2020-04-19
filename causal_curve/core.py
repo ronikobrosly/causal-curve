@@ -10,8 +10,7 @@ class Core():
 
 
     def get_params(self):
-        """
-        returns a dict of all of the object's user-facing parameters
+        """Returns a dict of all of the object's user-facing parameters
 
         Parameters
         ----------
@@ -19,7 +18,7 @@ class Core():
 
         Returns
         -------
-        Dict of these parameters
+        self: object
         """
         attrs = self.__dict__
         return dict([(k,v) for k,v in list(attrs.items()) if (k[0] != '_') and (k[-1] != '_')])
