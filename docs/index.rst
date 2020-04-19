@@ -1,9 +1,9 @@
-.. causal-curve documentation master file, created by
-   sphinx-quickstart on Fri Apr 17 19:05:35 2020.
+.. causal_curve documentation master file, created by
+   sphinx-quickstart on Sun Apr 19 11:08:21 2020.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to causal-curve's documentation!
+Welcome to causal_curve's documentation!
 ========================================
 
 .. toctree::
