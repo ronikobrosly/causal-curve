@@ -74,7 +74,7 @@ treatment and outcome. Let's use the default settings of the CDRC tool:
 >>> cdrc.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
 >>> cdrc_results = cdrc.calculate_CDRC(0.95)
 
-You now have everything to produce the following plot with matplotlib. In this example with mild confounding,
+You now have everything to produce the following plot with matplotlib. In this example with only mild confounding,
 the GPS-calculated estimate of the true causal curve produces has approximately
 half the error of a simple LOESS estimate using only the treatment and the outcome.
 

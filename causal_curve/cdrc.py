@@ -5,7 +5,6 @@ Defines the causal dose-response curve class (CDRC)
 import contextlib
 import io
 from pprint import pprint
-import pdb
 
 import numpy as np
 import pandas as pd
@@ -40,7 +39,8 @@ class CDRC(Core):
 
     gps_family: str, optional (default = None)
         Is used to determine the family of the glm used to model the GPS function.
-        Look at the distribution of your treatment variable to determine which family is more appropriate.
+        Look at the distribution of your treatment variable to determine which
+        family is more appropriate.
         Possible values:
 
         - 'normal'
@@ -148,9 +148,17 @@ class CDRC(Core):
     """
 
     def __init__(
-        self, gps_family = None, treatment_grid_num = 100, lower_grid_constraint = 0.01,
-        upper_grid_constraint = 0.99, spline_order = 3, n_splines = 30,
-        lambda_ = 0.5, max_iter = 100, random_seed = None, verbose = False
+        self,
+        gps_family=None,
+        treatment_grid_num=100,
+        lower_grid_constraint=0.01,
+        upper_grid_constraint=0.99,
+        spline_order=3,
+        n_splines=30,
+        lambda_=0.5,
+        max_iter=100,
+        random_seed=None,
+        verbose=False,
     ):
 
         self.gps_family = gps_family
@@ -172,103 +180,166 @@ class CDRC(Core):
             print("Using the following params for CDRC:")
             pprint(self.get_params(), indent=4)
 
-
     def _validate_init_params(self):
         """
         Checks that the params used when instantiating CDRC are formatted correctly
         """
         # Checks for gps_family param
         if not isinstance(self.gps_family, (str, type(None))):
-            raise TypeError(f"gps_family parameter must be a string or None, but found type {type(self.gps_family)}")
+            raise TypeError(
+                f"gps_family parameter must be a string or None, \
+                 but found type {type(self.gps_family)}"
+            )
 
-        if ((isinstance(self.gps_family, str)) and (self.gps_family not in ['normal', 'lognormal', 'gamma'])):
-            raise ValueError(f"gps_family parameter must take on values of 'normal', 'lognormal', or 'gamma', but found {self.gps_family}")
+        if (isinstance(self.gps_family, str)) and (
+            self.gps_family not in ["normal", "lognormal", "gamma"]
+        ):
+            raise ValueError(
+                f"gps_family parameter must take on values of \
+                'normal', 'lognormal', or 'gamma', but found {self.gps_family}"
+            )
 
         # Checks for treatment_grid_num
         if not isinstance(self.treatment_grid_num, int):
-            raise TypeError(f"treatment_grid_num parameter must be an integer, but found type {type(self.treatment_grid_num)}")
+            raise TypeError(
+                f"treatment_grid_num parameter must be an integer, \
+                but found type {type(self.treatment_grid_num)}"
+            )
 
         if (isinstance(self.treatment_grid_num, int)) and self.treatment_grid_num < 10:
-            raise ValueError(f"treatment_grid_num parameter should be >= 10 so your final curve has enough resolution, but found value {self.treatment_grid_num}")
+            raise ValueError(
+                f"treatment_grid_num parameter should be >= 10 so your final curve \
+                has enough resolution, but found value {self.treatment_grid_num}"
+            )
 
-        if (isinstance(self.treatment_grid_num, int)) and self.treatment_grid_num >= 1000:
+        if (
+            isinstance(self.treatment_grid_num, int)
+        ) and self.treatment_grid_num >= 1000:
             raise ValueError(f"treatment_grid_num parameter is too high!")
 
         # Checks for lower_grid_constraint
         if not isinstance(self.lower_grid_constraint, float):
-            raise TypeError(f"lower_grid_constraint parameter must be a float, but found type {type(self.lower_grid_constraint)}")
+            raise TypeError(
+                f"lower_grid_constraint parameter must be a float, \
+                but found type {type(self.lower_grid_constraint)}"
+            )
 
-        if (isinstance(self.lower_grid_constraint, float)) and self.lower_grid_constraint < 0:
-            raise ValueError(f"lower_grid_constraint parameter cannot be < 0, but found value {self.lower_grid_constraint}")
+        if (
+            isinstance(self.lower_grid_constraint, float)
+        ) and self.lower_grid_constraint < 0:
+            raise ValueError(
+                f"lower_grid_constraint parameter cannot be < 0, \
+                but found value {self.lower_grid_constraint}"
+            )
 
-        if (isinstance(self.lower_grid_constraint, float)) and self.lower_grid_constraint >= 1.0:
-            raise ValueError(f"lower_grid_constraint parameter cannot >= 1.0, but found value {self.lower_grid_constraint}")
+        if (
+            isinstance(self.lower_grid_constraint, float)
+        ) and self.lower_grid_constraint >= 1.0:
+            raise ValueError(
+                f"lower_grid_constraint parameter cannot >= 1.0, \
+                but found value {self.lower_grid_constraint}"
+            )
 
         # Checks for upper_grid_constraint
         if not isinstance(self.upper_grid_constraint, float):
-            raise TypeError(f"upper_grid_constraint parameter must be a float, but found type {type(self.upper_grid_constraint)}")
+            raise TypeError(
+                f"upper_grid_constraint parameter must be a float, \
+                but found type {type(self.upper_grid_constraint)}"
+            )
 
-        if (isinstance(self.upper_grid_constraint, float)) and self.upper_grid_constraint <= 0:
-            raise ValueError(f"upper_grid_constraint parameter cannot be <= 0, but found value {self.upper_grid_constraint}")
+        if (
+            isinstance(self.upper_grid_constraint, float)
+        ) and self.upper_grid_constraint <= 0:
+            raise ValueError(
+                f"upper_grid_constraint parameter cannot be <= 0, \
+                but found value {self.upper_grid_constraint}"
+            )
 
-        if (isinstance(self.upper_grid_constraint, float)) and self.upper_grid_constraint > 1.0:
-            raise ValueError(f"upper_grid_constraint parameter cannot > 1.0, but found value {self.upper_grid_constraint}")
+        if (
+            isinstance(self.upper_grid_constraint, float)
+        ) and self.upper_grid_constraint > 1.0:
+            raise ValueError(
+                f"upper_grid_constraint parameter cannot > 1.0, \
+                but found value {self.upper_grid_constraint}"
+            )
 
         # Checks for lower_grid_constraint isn't higher than upper_grid_constraint
         if self.lower_grid_constraint >= self.upper_grid_constraint:
-            raise ValueError("lower_grid_constraint should be lower than upper_grid_constraint!")
+            raise ValueError(
+                "lower_grid_constraint should be lower than upper_grid_constraint!"
+            )
 
         # Checks for spline_order
         if not isinstance(self.spline_order, int):
-            raise TypeError(f"spline_order parameter must be an integer, but found type {type(self.spline_order)}")
+            raise TypeError(
+                f"spline_order parameter must be an integer, \
+                but found type {type(self.spline_order)}"
+            )
 
         if (isinstance(self.spline_order, int)) and self.spline_order < 1:
-            raise ValueError(f"spline_order parameter should be >= 1, but found {self.spline_order}")
+            raise ValueError(
+                f"spline_order parameter should be >= 1, but found {self.spline_order}"
+            )
 
         if (isinstance(self.spline_order, int)) and self.spline_order >= 30:
             raise ValueError(f"spline_order parameter is too high!")
 
         # Checks for n_splines
         if not isinstance(self.n_splines, int):
-            raise TypeError(f"n_splines parameter must be an integer, but found type {type(self.n_splines)}")
+            raise TypeError(
+                f"n_splines parameter must be an integer, but found type {type(self.n_splines)}"
+            )
 
         if (isinstance(self.n_splines, int)) and self.n_splines < 2:
-            raise ValueError(f"n_splines parameter should be >= 2, but found {self.n_splines}")
+            raise ValueError(
+                f"n_splines parameter should be >= 2, but found {self.n_splines}"
+            )
 
         if (isinstance(self.n_splines, int)) and self.n_splines >= 100:
             raise ValueError(f"n_splines parameter is too high!")
 
         # Checks for lambda_
         if not isinstance(self.lambda_, (int, float)):
-            raise TypeError(f"lambda_ parameter must be an int or float, but found type {type(self.lambda_)}")
+            raise TypeError(
+                f"lambda_ parameter must be an int or float, but found type {type(self.lambda_)}"
+            )
 
         if (isinstance(self.lambda_, (int, float))) and self.lambda_ <= 0:
-            raise ValueError(f"lambda_ parameter should be >= 2, but found {self.lambda_}")
+            raise ValueError(
+                f"lambda_ parameter should be >= 2, but found {self.lambda_}"
+            )
 
         if (isinstance(self.lambda_, (int, float))) and self.lambda_ >= 1000:
             raise ValueError(f"lambda_ parameter is too high!")
 
         # Checks for max_iter
         if not isinstance(self.max_iter, int):
-            raise TypeError(f"max_iter parameter must be an int, but found type {type(self.max_iter)}")
+            raise TypeError(
+                f"max_iter parameter must be an int, but found type {type(self.max_iter)}"
+            )
 
         if (isinstance(self.max_iter, int)) and self.max_iter <= 10:
-            raise ValueError(f"max_iter parameter is too low! Results won't be reliable!")
+            raise ValueError(
+                f"max_iter parameter is too low! Results won't be reliable!"
+            )
 
         if (isinstance(self.max_iter, int)) and self.max_iter >= 1e6:
             raise ValueError(f"max_iter parameter is unnecessarily high!")
 
         # Checks for random_seed
         if not isinstance(self.random_seed, (int, type(None))):
-            raise TypeError(f"random_seed parameter must be an int, but found type {type(self.random_seed)}")
+            raise TypeError(
+                f"random_seed parameter must be an int, but found type {type(self.random_seed)}"
+            )
 
         if (isinstance(self.random_seed, int)) and self.random_seed < 0:
             raise ValueError(f"random_seed parameter must be > 0")
 
         # Checks for verbose
         if not isinstance(self.verbose, bool):
-            raise TypeError(f"verbose parameter must be a boolean type, but found type {type(self.verbose)}")
-
+            raise TypeError(
+                f"verbose parameter must be a boolean type, but found type {type(self.verbose)}"
+            )
 
     def _validate_fit_data(self):
         """Verifies that T, X, and y are formatted the right way
@@ -280,18 +351,25 @@ class CDRC(Core):
         # Make sure all X columns are float or int
         for column in self.X:
             if not is_numeric_dtype(self.X[column]):
-                raise TypeError(f"All covariate (X) columns must be int or float type (i.e. must be numeric)")
+                raise TypeError(
+                    f"All covariate (X) columns must be int or float type (i.e. must be numeric)"
+                )
 
         # Checks for Y column
         if not is_float_dtype(self.y):
             raise TypeError(f"Outcome data must be of type float")
 
-
     def _grid_values(self):
         """Produces initial grid values for the treatment variable
         """
-        return np.quantile(self.T, q = np.linspace(start = self.lower_grid_constraint, stop = self.upper_grid_constraint, num = self.treatment_grid_num))
-
+        return np.quantile(
+            self.T,
+            q=np.linspace(
+                start=self.lower_grid_constraint,
+                stop=self.upper_grid_constraint,
+                num=self.treatment_grid_num,
+            ),
+        )
 
     def fit(self, T, X, y):
         """Fits the causal dose-response model. For now, this only accepts pandas format.
@@ -329,21 +407,34 @@ class CDRC(Core):
             if self.verbose:
                 print(f"Fitting several GPS models and picking the best fitting one...")
 
-            self.best_gps_family, self.gps_function, self.gps_deviance = self._find_best_gps_model()
+            (
+                self.best_gps_family,
+                self.gps_function,
+                self.gps_deviance,
+            ) = self._find_best_gps_model()
 
             if self.verbose:
-                print(f"Best fitting model was {self.best_gps_family}, which produced a deviance of {self.gps_deviance}")
+                print(
+                    f"Best fitting model was {self.best_gps_family}, which \
+                    produced a deviance of {self.gps_deviance}"
+                )
 
         # Otherwise, go with the what the user provided...
         else:
             if self.verbose:
                 print(f"Fitting GPS model of family '{self.best_gps_family}'...")
 
-            if self.best_gps_family == 'normal':
-                self.gps_function, self.gps_deviance = self._create_normal_gps_function()
-            elif self.best_gps_family == 'lognormal':
-                self.gps_function, self.gps_deviance = self._create_lognormal_gps_function()
-            elif self.best_gps_family == 'gamma':
+            if self.best_gps_family == "normal":
+                (
+                    self.gps_function,
+                    self.gps_deviance,
+                ) = self._create_normal_gps_function()
+            elif self.best_gps_family == "lognormal":
+                (
+                    self.gps_function,
+                    self.gps_deviance,
+                ) = self._create_lognormal_gps_function()
+            elif self.best_gps_family == "gamma":
                 self.gps_function, self.gps_deviance = self._create_gamma_gps_function()
 
         # Estimate the GPS
@@ -372,8 +463,7 @@ class CDRC(Core):
         # and give GPS loading for each observation in the dataset
         self.gps_at_grid = self._gps_values_at_grid()
 
-
-    def calculate_CDRC(self, ci = 0.95):
+    def calculate_CDRC(self, ci=0.95):
         """Using the results of the fitted model, this generates a point estimate for the CDRC
         at each of the values of the treatment grid. Connecting these estimates will produce
         the overall estimated CDRC. Percentile bootstrap confidence intervals are produced as well.
@@ -399,32 +489,46 @@ class CDRC(Core):
         self._cdrc_preds = self._cdrc_predictions(ci)
 
         if self.verbose:
-            print(f"Generating predictions for each value of treatment grid, and averaging to get CDRC...")
+            print(
+                f"Generating predictions for each value of treatment grid, \
+                and averaging to get CDRC..."
+            )
 
         # For each column of _cdrc_preds, calculate the mean and confidence interval bounds
         results = []
 
         for i in range(0, self.treatment_grid_num):
             temp_grid_value = self.grid_values[i]
-            temp_point_estimate = self._cdrc_preds[:,i,0].mean()
-            mean_ci_width = ((self._cdrc_preds[:,i,2].mean() - self._cdrc_preds[:,i,1].mean()) / 2)
+            temp_point_estimate = self._cdrc_preds[:, i, 0].mean()
+            mean_ci_width = (
+                self._cdrc_preds[:, i, 2].mean() - self._cdrc_preds[:, i, 1].mean()
+            ) / 2
             temp_lower_bound = temp_point_estimate - mean_ci_width
             temp_upper_bound = temp_point_estimate + mean_ci_width
-            results.append([temp_grid_value, temp_point_estimate, temp_lower_bound, temp_upper_bound])
+            results.append(
+                [
+                    temp_grid_value,
+                    temp_point_estimate,
+                    temp_lower_bound,
+                    temp_upper_bound,
+                ]
+            )
 
-        return pd.DataFrame(results, columns = ['Treatment', 'CDRC', 'Lower_CI', 'Upper_CI'])
-
+        return pd.DataFrame(
+            results, columns=["Treatment", "CDRC", "Lower_CI", "Upper_CI"]
+        )
 
     def _validate_calculate_CDRC_params(self, ci):
         """Validates the parameters given to `calculate_CDRC`
         """
 
         if not isinstance(ci, float):
-            raise TypeError(f"`ci` parameter must be an float, but found type {type(ci)}")
+            raise TypeError(
+                f"`ci` parameter must be an float, but found type {type(ci)}"
+            )
 
-        if (isinstance(ci, float) and ((ci <= 0) or (ci >= 1.0))):
+        if isinstance(ci, float) and ((ci <= 0) or (ci >= 1.0)):
             raise ValueError("`ci` parameter should be between (0, 1)")
-
 
     def _cdrc_predictions(self, ci):
         """Returns the predictions of CDRC for each value of the treatment grid. Essentially,
@@ -439,18 +543,21 @@ class CDRC(Core):
 
         # Loop through each of the grid values, predict point estimate and get prediction interval
         for i in range(0, self.treatment_grid_num):
-            temp_T = np.repeat(self.grid_values[i], repeats = len(self.T))
-            temp_gps = self.gps_at_grid[:,i]
-            temp_cdrc_preds = self.gam_results.predict(np.column_stack((temp_T, temp_gps)))
-            temp_cdrc_interval = self.gam_results.confidence_intervals(np.column_stack((temp_T, temp_gps)), width=ci)
-            temp_cdrc_lower_bound = temp_cdrc_interval[:,0]
-            temp_cdrc_upper_bound = temp_cdrc_interval[:,1]
-            cdrc_preds[:,i,0] = temp_cdrc_preds
-            cdrc_preds[:,i,1] = temp_cdrc_lower_bound
-            cdrc_preds[:,i,2] = temp_cdrc_upper_bound
+            temp_T = np.repeat(self.grid_values[i], repeats=len(self.T))
+            temp_gps = self.gps_at_grid[:, i]
+            temp_cdrc_preds = self.gam_results.predict(
+                np.column_stack((temp_T, temp_gps))
+            )
+            temp_cdrc_interval = self.gam_results.confidence_intervals(
+                np.column_stack((temp_T, temp_gps)), width=ci
+            )
+            temp_cdrc_lower_bound = temp_cdrc_interval[:, 0]
+            temp_cdrc_upper_bound = temp_cdrc_interval[:, 1]
+            cdrc_preds[:, i, 0] = temp_cdrc_preds
+            cdrc_preds[:, i, 1] = temp_cdrc_lower_bound
+            cdrc_preds[:, i, 2] = temp_cdrc_upper_bound
 
         return np.round(cdrc_preds, 3)
-
 
     def _gps_values_at_grid(self):
         """Returns an array where we get the GPS-derived values for each element
@@ -461,10 +568,9 @@ class CDRC(Core):
 
         # Loop over all grid values
         for i in range(0, self.treatment_grid_num):
-        	gps_at_grid[:,i] = self.gps_function(self.grid_values[i])
+            gps_at_grid[:, i] = self.gps_function(self.grid_values[i])
 
         return gps_at_grid
-
 
     def print_gam_summary(self):
         """Prints the GAM model summary (uses pyGAM's output)
@@ -481,7 +587,6 @@ class CDRC(Core):
         """
         print(self._gam_summary_str)
 
-
     def _fit_gam(self):
         """Fits a GAM that predicts the outcome from the treatment and GPS
         """
@@ -489,62 +594,65 @@ class CDRC(Core):
         X = np.column_stack((self.T.values, self.gps))
         y = np.asarray(self.y)
 
-        return LinearGAM(s(0, n_splines=self.n_splines, spline_order=self.spline_order) + s(1, n_splines=self.n_splines, spline_order=self.spline_order), max_iter=self.max_iter, lam=self.lambda_).fit(X, y)
-
+        return LinearGAM(
+            s(0, n_splines=self.n_splines, spline_order=self.spline_order)
+            + s(1, n_splines=self.n_splines, spline_order=self.spline_order),
+            max_iter=self.max_iter,
+            lam=self.lambda_,
+        ).fit(X, y)
 
     def _create_normal_gps_function(self):
         """Models the GPS using a GLM of the Gaussian family
         """
         normal_gps_model = sm.GLM(self.T, self.X, family=sm.families.Gaussian()).fit()
 
-
         pred_treat = normal_gps_model.fittedvalues
         sigma = np.std(normal_gps_model.resid_response)
 
-        def gps_function(treatment_val, pred_treat = pred_treat, sigma = sigma):
+        def gps_function(treatment_val, pred_treat=pred_treat, sigma=sigma):
             return norm.pdf(treatment_val, pred_treat, sigma)
 
         return gps_function, normal_gps_model.deviance
 
-
     def _create_lognormal_gps_function(self):
         """Models the GPS using a GLM of the Gaussian family (assumes treatment is lognormal)
         """
-        lognormal_gps_model = sm.GLM(np.log(self.T), self.X, family=sm.families.Gaussian()).fit()
+        lognormal_gps_model = sm.GLM(
+            np.log(self.T), self.X, family=sm.families.Gaussian()
+        ).fit()
 
         pred_log_treat = lognormal_gps_model.fittedvalues
         sigma = np.std(lognormal_gps_model.resid_response)
 
-        def gps_function(treatment_val, pred_log_treat = pred_log_treat, sigma = sigma):
+        def gps_function(treatment_val, pred_log_treat=pred_log_treat, sigma=sigma):
             return norm.pdf(np.log(treatment_val), pred_log_treat, sigma)
 
         return gps_function, lognormal_gps_model.deviance
 
-
     def _create_gamma_gps_function(self):
         """Models the GPS using a GLM of the Gamma family
         """
-        gamma_gps_model = sm.GLM(self.T, self.X, family=sm.families.Gamma(Inverse_Power())).fit()
+        gamma_gps_model = sm.GLM(
+            self.T, self.X, family=sm.families.Gamma(Inverse_Power())
+        ).fit()
 
         mu = gamma_gps_model.mu
         scale = gamma_gps_model.scale
-        shape = (mu / gamma_gps_model.scale)
+        shape = mu / gamma_gps_model.scale
 
         def gps_function(treatment_val):
-            return gamma.pdf(treatment_val, a = shape, loc = 0, scale = scale)
+            return gamma.pdf(treatment_val, a=shape, loc=0, scale=scale)
 
         return gps_function, gamma_gps_model.deviance
-
 
     def _find_best_gps_model(self):
         """If user doesn't provide a GLM family for modeling the GPS, this function compares
         a few different gps models and picks the one with the lowest deviance
         """
         models_to_try_dict = {
-            'normal_gps_model': self._create_normal_gps_function(),
-            'lognormal_gps_model': self._create_lognormal_gps_function(),
-            'gamma_gps_model': self._create_gamma_gps_function(),
-
+            "normal_gps_model": self._create_normal_gps_function(),
+            "lognormal_gps_model": self._create_lognormal_gps_function(),
+            "gamma_gps_model": self._create_gamma_gps_function(),
         }
 
         model_comparison_dict = {}
@@ -555,4 +663,8 @@ class CDRC(Core):
         # Return model with lowest deviance
         best_model = min(model_comparison_dict, key=model_comparison_dict.get)
 
-        return best_model, models_to_try_dict[best_model][0], models_to_try_dict[best_model][1]
+        return (
+            best_model,
+            models_to_try_dict[best_model][0],
+            models_to_try_dict[best_model][1],
+        )

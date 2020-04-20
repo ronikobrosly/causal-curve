@@ -74,7 +74,7 @@ pull request:
 
 3. Install the development dependencies::
 
-      pip install pytest flake8 pylint
+      pip install pytest pylint black
 
 4. Install causal-curve in editable mode::
 
@@ -141,10 +141,8 @@ usually worth complying with.
 - **Make sure that the documentation renders properly**. To build the
   documentation, please refer to the :ref:`contribute_documentation` guidelines.
 
-- **Make sure that your PR does not add PEP8 violations**. On a Unix-like
-  system, you can run ``make flake8-diff`` to only test the modified code.
-  On any platform, you can run ``flake8`` to test the whole package, but it
-  is better to only fix PEP8 violations that are related to your changes.
+- **Make sure that your PR does not add PEP8 violations**. You can run `black`
+  and `pylint` to only test the modified code.
   Feel free to submit another pull request if you find other PEP8 violations.
 
 .. _contribute_documentation:
