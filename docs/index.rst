@@ -41,6 +41,11 @@ Welcome to causal-curve's documentation!
 **causal-curve** is a Python package dedicated with tools to perform causal inference
 using observational data when the treatment of interest is continuous.
 
+
+.. image:: ../imgs/welcome_plot.png
+
+
+
 Summary
 -------
 
