@@ -3,9 +3,12 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
+
 setuptools.setup(
-    name="causal-curve", # Replace with your own username
-    version="0.0.1",
+    name="causal-curve",
+    version="0.0.2",
     author="Roni Kobrosly",
     author_email="roni.kobrosly@gmail.com",
     description="A python library with tools to perform causal inference using \
@@ -20,4 +23,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6.7',
+    install_requires=required
 )
