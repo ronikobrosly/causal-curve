@@ -259,7 +259,7 @@ class CDRC(Core):
             raise ValueError(f"max_iter parameter is unnecessarily high!")
 
         # Checks for random_seed
-        if not isinstance(self.random_seed, int):
+        if not isinstance(self.random_seed, (int, type(None))):
             raise TypeError(f"random_seed parameter must be an int, but found type {type(self.random_seed)}")
 
         if (isinstance(self.random_seed, int)) and self.random_seed < 0:
@@ -298,12 +298,12 @@ class CDRC(Core):
 
         Parameters
         ----------
-        T : array-like, shape (n_samples,)
+        T: array-like, shape (n_samples,)
             A continuous treatment variable
-        X : array-like, shape (n_samples, m_features)
+        X: array-like, shape (n_samples, m_features)
             Covariates, where n_samples is the number of samples
             and m_features is the number of features
-        y : array-like, shape (n_samples,)
+        y: array-like, shape (n_samples,)
             Outcome variable
 
         Returns
@@ -386,11 +386,11 @@ class CDRC(Core):
 
         Returns
         ----------
-        dataframe : Pandas dataframe
+        dataframe: Pandas dataframe
             Contains treatment grid values, the CDRC point estimate at that value,
             and the associated lower and upper confidence interval bounds at that point.
 
-        self : object
+        self: object
 
         """
         self._validate_calculate_CDRC_params(ci)
@@ -475,7 +475,7 @@ class CDRC(Core):
 
         Returns
         ----------
-        self : object
+        self: object
 
 
         """

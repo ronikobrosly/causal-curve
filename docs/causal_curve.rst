@@ -1,8 +1,6 @@
 causal\_curve package
 =====================
 
-Submodules
-----------
 
 causal\_curve.cdrc module
 -------------------------
