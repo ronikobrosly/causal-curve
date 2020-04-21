@@ -54,6 +54,7 @@ numpydoc_show_class_members = False
 # generate autosummary even if no references
 autosummary_generate = True
 
+master_doc = 'index'
 
 # -- Options for HTML output -------------------------------------------------
 
