@@ -40,7 +40,7 @@ This library attempts to address this gap, providing tools to estimate causal cu
 
 ## Documentation
 
-[Documentation is available at readthedocs.org](causal-curve.readthedocs.io)
+[Documentation is available at readthedocs.org](https://causal-curve.readthedocs.io/en/latest/)
 
 ## Contributing
 
