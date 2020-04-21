@@ -11,13 +11,11 @@ Python tools to perform causal inference using observational data when the treat
 
 
 
-
 ## Table of Contents
 
 - [Overview](#overview)
-- [Documentation](#documentation)
 - [Installation](#installation)
-- [Usage](#usage)
+- [Documentation](#documentation)
 - [Contributing](#contributing)
 - [References](#references)
 
@@ -36,17 +34,13 @@ For example, when you would like to:
 
 This library attempts to address this gap, providing tools to estimate causal curves (AKA causal dose-response curves).
 
-## Documentation
-
-TBC
-
 ## Installation
 
-TBC
+`pip install causal-curve`
 
-## Usage
+## Documentation
 
-TBC
+[Documentation is available at readthedocs.org](causal-curve.readthedocs.io)
 
 ## Contributing
 

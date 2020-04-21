@@ -70,6 +70,7 @@ The following code completes the data generation:
 With this dataframe, we can now calculate the GPS to estimate the causal relationship between
 treatment and outcome. Let's use the default settings of the CDRC tool:
 
+>>> from causal_curve import CDRC
 >>> cdrc = CDRC()
 >>> cdrc.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
 >>> cdrc_results = cdrc.calculate_CDRC(0.95)

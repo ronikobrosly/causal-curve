@@ -74,7 +74,7 @@ Quick example (of the ``CDRC`` tool)
 
 **causal-curve** uses a sklearn-like API that should feel familiar to python machine learning users.
 
->>> from causal_curve.cdrc import CDRC
+>>> from causal_curve import CDRC
 
 >>> cdrc = CDRC(treatment_grid_num = 200, random_seed = 512)
 

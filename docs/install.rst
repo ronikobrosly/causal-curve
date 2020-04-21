@@ -9,12 +9,21 @@ Dependencies
 
 causal-curve requires:
 
-- Python (>= 3.7.6)
-- NumPy (>= 1.18.2)
-- Pandas (>= 1.0.3)
-- pyGAM (>= 0.8.0)
-- SciPy (>= 1.4.1)
-- Statsmodels (>= 0.11.1)
+- future
+- joblib
+- numpy
+- pandas
+- patsy
+- progressbar2
+- pygam
+- python-dateutil
+- python-utils
+- pytz
+- scikit-learn
+- scipy
+- six
+- statsmodels
+
 
 
 User installation
