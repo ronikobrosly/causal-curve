@@ -8,7 +8,7 @@ with open('requirements.txt') as f:
 
 setuptools.setup(
     name="causal-curve",
-    version="0.0.2",
+    version="0.0.3",
     author="Roni Kobrosly",
     author_email="roni.kobrosly@gmail.com",
     description="A python library with tools to perform causal inference using \
