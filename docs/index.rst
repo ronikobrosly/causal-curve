@@ -73,6 +73,8 @@ Quick example (of the ``CDRC`` tool)
 --------------------------------------
 
 **causal-curve** uses a sklearn-like API that should feel familiar to python machine learning users.
+The following example estimates the causal dose-response curve (CDRC) by calculating
+generalized propensity scores. 
 
 >>> from causal_curve import CDRC
 

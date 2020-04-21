@@ -349,11 +349,18 @@ class CDRC(Core):
             raise TypeError(f"Treatment data must be of type float")
 
         # Make sure all X columns are float or int
-        for column in self.X:
-            if not is_numeric_dtype(self.X[column]):
+        if isinstance(self.X, pd.Series):
+            if not is_numeric_dtype(self.X):
                 raise TypeError(
                     f"All covariate (X) columns must be int or float type (i.e. must be numeric)"
                 )
+
+        elif isinstance(self.X, pd.DataFrame):
+            for column in self.X:
+                if not is_numeric_dtype(self.X[column]):
+                    raise TypeError(
+                        f"All covariate (X) columns must be int or float type (i.e. must be numeric)"
+                    )
 
         # Checks for Y column
         if not is_float_dtype(self.y):
@@ -516,7 +523,7 @@ class CDRC(Core):
 
         return pd.DataFrame(
             results, columns=["Treatment", "CDRC", "Lower_CI", "Upper_CI"]
-        )
+        ).round(3)
 
     def _validate_calculate_CDRC_params(self, ci):
         """Validates the parameters given to `calculate_CDRC`

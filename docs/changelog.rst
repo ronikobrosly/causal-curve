@@ -4,7 +4,7 @@
 Change Log
 ==========
 
-Version 0.0.8
+Version 0.0.9
 -------------
 
 - Project created

@@ -1,3 +1,4 @@
+black
 future
 joblib
 numpy
@@ -6,6 +7,7 @@ pandas
 patsy
 progressbar2
 pygam
+pytest
 python-dateutil
 python-utils
 pytz
