@@ -22,7 +22,7 @@ copyright = '2020, Roni Kobrosly'
 author = 'Roni Kobrosly'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.9'
+release = '0.0.10'
 
 
 # -- General configuration ---------------------------------------------------

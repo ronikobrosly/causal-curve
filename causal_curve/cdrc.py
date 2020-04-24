@@ -13,6 +13,7 @@ from pygam import LinearGAM, s
 from scipy.stats import gamma, norm
 import statsmodels.api as sm
 from statsmodels.genmod.families.links import inverse_power as Inverse_Power
+from statsmodels.tools.tools import add_constant
 
 from causal_curve.core import Core
 from causal_curve.utils import rand_seed_wrapper
@@ -611,7 +612,7 @@ class CDRC(Core):
     def _create_normal_gps_function(self):
         """Models the GPS using a GLM of the Gaussian family
         """
-        normal_gps_model = sm.GLM(self.T, self.X, family=sm.families.Gaussian()).fit()
+        normal_gps_model = sm.GLM(self.T, add_constant(self.X), family=sm.families.Gaussian()).fit()
 
         pred_treat = normal_gps_model.fittedvalues
         sigma = np.std(normal_gps_model.resid_response)
@@ -625,7 +626,7 @@ class CDRC(Core):
         """Models the GPS using a GLM of the Gaussian family (assumes treatment is lognormal)
         """
         lognormal_gps_model = sm.GLM(
-            np.log(self.T), self.X, family=sm.families.Gaussian()
+            np.log(self.T), add_constant(self.X), family=sm.families.Gaussian()
         ).fit()
 
         pred_log_treat = lognormal_gps_model.fittedvalues
@@ -640,7 +641,7 @@ class CDRC(Core):
         """Models the GPS using a GLM of the Gamma family
         """
         gamma_gps_model = sm.GLM(
-            self.T, self.X, family=sm.families.Gamma(Inverse_Power())
+            self.T, add_constant(self.X), family=sm.families.Gamma(Inverse_Power())
         ).fit()
 
         mu = gamma_gps_model.mu
