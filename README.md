@@ -28,7 +28,7 @@ This is unfortunate because there are many scenarios (in industry and research) 
 For example, when you would like to:
 
 * Estimate the causal response to increasing or decreasing the price of a product across a wide range.
-* Understand how the number of hours per week of aerobic exercise causes positive health outcomes.
+* Understand how the number of minutes per week of aerobic exercise causes positive health outcomes.
 * Estimate how decreasing order wait time will impact customer satisfaction, after controlling for confounding effects.
 * Estimate how changing neighborhood income inequality (Gini index) could be causally related to neighborhood crime rate.
 
