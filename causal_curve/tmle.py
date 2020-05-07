@@ -2,6 +2,8 @@
 Defines the Targetted Maximum likelihood Estimation (TMLE) model class
 """
 
+from pprint import pprint
+
 
 class TMLE(Core):
     """
@@ -51,6 +53,18 @@ class TMLE(Core):
         Determines whether the user will get verbose status updates.
 
 
+    Attributes
+    ----------
+
+
+    Methods
+    ----------
+
+
+    Examples
+    --------
+
+
     References
     ----------
 
@@ -73,7 +87,6 @@ class TMLE(Core):
         verbose=False,
     ):
 
-        self.gps_family = gps_family
         self.treatment_grid_bins = treatment_grid_bins
         self.n_estimators = n_estimators
         self.learning_rate = learning_rate
@@ -94,4 +107,34 @@ class TMLE(Core):
         """
         Checks that the params used when instantiating TMLE model are formatted correctly
         """
-        pass
+
+        # Checks for treatment_grid_bins
+        if not isinstance(self.treatment_grid_bins, type(list)):
+            raise TypeError(
+                f"treatment_grid_bins parameter must be a list, \
+                 but found type {type(self.treatment_grid_bins)}"
+            )
+
+        for element in self.treatment_grid_bins:
+            if not isinstance(element, float):
+                raise TypeError(
+                    f"'{element}' in `treatment_grid_bins` list is not of type float, \
+                     it is {type(element)}"
+                )
+
+        if len(self.treatment_grid_bins) < 2:
+            raise TypeError(
+                "treatment_grid_bins list must, at minimum, of length >= 2"
+            )
+
+        # Checks for n_estimators
+        if not isinstance(self.n_estimators, int):
+            raise TypeError(
+                f"n_estimators parameter must be an integer, \
+                but found type {type(self.n_estimators)}"
+            )
+
+        if (self.n_estimators < 10) or (self.n_estimators > 100000) :
+            raise TypeError(
+                "n_estimators parameter must be between 10 and 100000}"
+            )
