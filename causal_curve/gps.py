@@ -380,7 +380,7 @@ class GPS(Core):
         )
 
     def fit(self, T, X, y):
-        """Fits the causal dose-response model. For now, this only accepts pandas format.
+        """Fits the GPS causal dose-response model. For now, this only accepts pandas columns.
 
         Parameters
         ----------
