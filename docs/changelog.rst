@@ -4,6 +4,12 @@
 Change Log
 ==========
 
+Version 0.1.1
+-------------
+
+- setup.py fix
+
+
 Version 0.1.0
 -------------
 
