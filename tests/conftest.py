@@ -18,9 +18,12 @@ def full_example_dataset():
 
     treatment = np.random.normal(loc=50.0, scale=10.0, size=n)
     x1 = np.random.normal(loc=50.0, scale=10.0, size=n)
-    outcome = treatment + x1 + np.random.normal(loc=50.0, scale=3.0, size=n)
+    x2 = np.random.normal(loc=0, scale=10.0, size=n)
+    outcome = treatment + x1 + x2 + np.random.normal(loc=50.0, scale=3.0, size=n)
 
-    fixture = pd.DataFrame({"treatment": treatment, "x1": x1, "outcome": outcome})
+    fixture = pd.DataFrame(
+        {"treatment": treatment, "x1": x1, "x2": x2, "outcome": outcome}
+    )
 
     fixture.reset_index(drop=True, inplace=True)
 
