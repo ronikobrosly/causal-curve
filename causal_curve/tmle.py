@@ -1,7 +1,6 @@
 """
 Defines the Targetted Maximum likelihood Estimation (TMLE) model class
 """
-import pdb
 from pprint import pprint
 
 import numpy as np
