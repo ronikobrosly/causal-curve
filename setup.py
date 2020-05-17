@@ -34,7 +34,7 @@ setuptools.setup(
         'scikit-learn',
         'scipy',
         'six',
-        'statsmodels'
+        'statsmodels',
         'xgboost'
     ]
 )
