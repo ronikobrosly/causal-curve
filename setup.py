@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="causal-curve",
-    version="0.0.10",
+    version="0.1.0",
     author="Roni Kobrosly",
     author_email="roni.kobrosly@gmail.com",
     description="A python library with tools to perform causal inference using \
@@ -35,5 +35,6 @@ setuptools.setup(
         'scipy',
         'six',
         'statsmodels'
+        'xgboost'
     ]
 )

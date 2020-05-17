@@ -1,5 +1,5 @@
 """
-Defines the causal dose-response curve class (CDRC)
+Defines the Generalized Prospensity Score (GPS) model class
 """
 
 import contextlib
@@ -19,7 +19,7 @@ from causal_curve.core import Core
 from causal_curve.utils import rand_seed_wrapper
 
 
-class CDRC(Core):
+class GPS(Core):
     """
     In a multi-stage approach, this computes the generalized propensity score (GPS) function,
     and uses this in a generalized additive model (GAM) to correct treatment prediction of
@@ -53,11 +53,11 @@ class CDRC(Core):
         Takes the treatment, and creates a quantile-based grid across its values.
         For instance, if the number 6 is selected, this means the algorithm will only take
         the 6 treatment variable values at approximately the 0, 20, 40, 60, 80, and 100th
-        percentiles to estimate the CDRC. Higher value here means the final curve
+        percentiles to estimate the causal dose response curve. Higher value here means the final curve
         will be more finely estimated, but also increases computation time.
         Default is usually a reasonable number.
 
-    lower_grid_constraint:  float,optional(default = 0.01)
+    lower_grid_constraint:  float, optional(default = 0.01)
         This adds an optional constraint of the lower side of the treatment grid.
         Sometimes data near the minimum values of the treatment are few in number
         and thus generate unstable estimates. By default, this clips the bottom 1 percentile
@@ -126,10 +126,10 @@ class CDRC(Core):
 
     Examples
     --------
-    >>> from causal_curve.cdrc import CDRC
-    >>> cdrc = CDRC(treatment_grid_num = 200, random_seed = 512)
-    >>> cdrc.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
-    >>> cdrc_results = cdrc.calculate_CDRC(0.95)
+    >>> from causal_curve import GPS
+    >>> gps = GPS(treatment_grid_num = 200, random_seed = 512)
+    >>> gps.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
+    >>> gps_results = gps.calculate_CDRC(0.95)
 
 
     References
@@ -178,12 +178,12 @@ class CDRC(Core):
         rand_seed_wrapper()
 
         if self.verbose:
-            print("Using the following params for CDRC:")
+            print("Using the following params for GPS model:")
             pprint(self.get_params(), indent=4)
 
     def _validate_init_params(self):
         """
-        Checks that the params used when instantiating CDRC are formatted correctly
+        Checks that the params used when instantiating GPS model are formatted correctly
         """
         # Checks for gps_family param
         if not isinstance(self.gps_family, (str, type(None))):
@@ -380,7 +380,7 @@ class CDRC(Core):
         )
 
     def fit(self, T, X, y):
-        """Fits the causal dose-response model. For now, this only accepts pandas format.
+        """Fits the GPS causal dose-response model. For now, this only accepts pandas columns.
 
         Parameters
         ----------
@@ -472,9 +472,9 @@ class CDRC(Core):
         self.gps_at_grid = self._gps_values_at_grid()
 
     def calculate_CDRC(self, ci=0.95):
-        """Using the results of the fitted model, this generates a point estimate for the CDRC
+        """Using the results of the fitted model, this generates point estimates for the CDRC
         at each of the values of the treatment grid. Connecting these estimates will produce
-        the overall estimated CDRC. Percentile bootstrap confidence intervals are produced as well.
+        the overall estimated CDRC. Confidence interval is returned as well.
 
         Parameters
         ----------
@@ -499,7 +499,7 @@ class CDRC(Core):
         if self.verbose:
             print(
                 f"Generating predictions for each value of treatment grid, \
-                and averaging to get CDRC..."
+                and averaging to get the CDRC..."
             )
 
         # For each column of _cdrc_preds, calculate the mean and confidence interval bounds
@@ -612,7 +612,9 @@ class CDRC(Core):
     def _create_normal_gps_function(self):
         """Models the GPS using a GLM of the Gaussian family
         """
-        normal_gps_model = sm.GLM(self.T, add_constant(self.X), family=sm.families.Gaussian()).fit()
+        normal_gps_model = sm.GLM(
+            self.T, add_constant(self.X), family=sm.families.Gaussian()
+        ).fit()
 
         pred_treat = normal_gps_model.fittedvalues
         sigma = np.std(normal_gps_model.resid_response)

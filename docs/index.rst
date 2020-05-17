@@ -22,7 +22,8 @@ Welcome to causal-curve's documentation!
   :hidden:
   :caption: Tutorial - Examples
 
-  CDRC_example
+  GPS_example
+  TMLE_example
 
 .. toctree::
    :maxdepth: 1
@@ -69,16 +70,16 @@ For example, when you would like to:
 This library attempts to address this gap, providing tools to estimate causal curves (AKA causal dose-response curves).
 
 
-Quick example (of the ``CDRC`` tool)
+Quick example (of the ``GPS`` tool)
 --------------------------------------
 
 **causal-curve** uses a sklearn-like API that should feel familiar to python machine learning users.
 The following example estimates the causal dose-response curve (CDRC) by calculating
-generalized propensity scores. 
+generalized propensity scores.
 
->>> from causal_curve import CDRC
+>>> from causal_curve import GPS
 
->>> cdrc = CDRC(treatment_grid_num = 200, random_seed = 512)
+>>> gps = GPS(treatment_grid_num = 200, random_seed = 512)
 
 >>> df # a pandas dataframe with your data
            X_1       X_2  Treatment    Outcome
@@ -88,10 +89,10 @@ generalized propensity scores.
 3     1.140052  0.555203   0.000339   1.461526
 4     1.613471  0.340886   0.000438   2.064511
 
->>> cdrc.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
->>> cdrc_results = cdrc.calculate_CDRC(ci = 0.95)
+>>> gps.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
+>>> gps_results = gps.calculate_CDRC(ci = 0.95)
 
-1. First we import our CDRC (causal dose-response curve) class.
+1. First we import our GPS class.
 
 2. Then we instantiate the class, providing any of the optional parameters.
 

@@ -4,7 +4,8 @@ import warnings
 
 from statsmodels.genmod.generalized_linear_model import DomainWarning
 
-from causal_curve.cdrc import CDRC as CDRC
+from causal_curve.gps import GPS as GPS
+from causal_curve.tmle import TMLE as TMLE
 
 
 # Suppress statsmodel warning for gamma family GLM
