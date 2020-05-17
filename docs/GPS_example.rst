@@ -1,20 +1,23 @@
-.. _CDRC_example:
+.. _GPS_example:
 
-=====================================
-Causal Dose Response Curve Estimation
-=====================================
+====================================================
+GPS Method for Causal Dose Response Curve Estimation
+====================================================
 
 Generalized propensity score method
 -----------------------------------
 
 
-In this example, we use this package's CDRC tool to estimate the marginal causal curve of some
+In this example, we use this package's GPS tool to estimate the marginal causal curve of some
 continuous treatment on a continuous outcome, accounting for some mild confounding effects.
 To put this differently, the result of this will be an estimate of the average
 of each individual's dose-response to the treatment. To do this we employ the
 generalized propensity score (GPS) to correct the treatment prediction of the outcome.
 
-We use simulated data originally developed by Hirano and Imbens but adapted by others
+Compared with the package's TMLE method, this GPS method is more computationally efficient,
+better suited for large datasets, but produces significantly wider confidence intervals.
+
+In this example we use simulated data originally developed by Hirano and Imbens but adapted by others
 (see references). The advantage of this simulated data is it allows us
 to compare the estimate we produce against the true, analytically-derived causal curve.
 
@@ -68,12 +71,12 @@ The following code completes the data generation:
 >>> ).sort_values('Treatment', ascending = True)
 
 With this dataframe, we can now calculate the GPS to estimate the causal relationship between
-treatment and outcome. Let's use the default settings of the CDRC tool:
+treatment and outcome. Let's use the default settings of the GPS tool:
 
->>> from causal_curve import CDRC
->>> cdrc = CDRC()
->>> cdrc.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
->>> cdrc_results = cdrc.calculate_CDRC(0.95)
+>>> from causal_curve import GPS
+>>> gps = GPS()
+>>> gps.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
+>>> gps_results = gps.calculate_CDRC(0.95)
 
 You now have everything to produce the following plot with matplotlib. In this example with only mild confounding,
 the GPS-calculated estimate of the true causal curve produces has approximately

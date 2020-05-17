@@ -126,7 +126,7 @@ class GPS(Core):
 
     Examples
     --------
-    >>> from causal_curve.gps import GPS
+    >>> from causal_curve import GPS
     >>> gps = GPS(treatment_grid_num = 200, random_seed = 512)
     >>> gps.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
     >>> gps_results = gps.calculate_CDRC(0.95)
@@ -472,9 +472,9 @@ class GPS(Core):
         self.gps_at_grid = self._gps_values_at_grid()
 
     def calculate_CDRC(self, ci=0.95):
-        """Using the results of the fitted model, this generates a point estimate for the CDRC
+        """Using the results of the fitted model, this generates point estimates for the CDRC
         at each of the values of the treatment grid. Connecting these estimates will produce
-        the overall estimated CDRC. Percentile bootstrap confidence intervals are produced as well.
+        the overall estimated CDRC. Confidence interval is returned as well.
 
         Parameters
         ----------
@@ -612,7 +612,9 @@ class GPS(Core):
     def _create_normal_gps_function(self):
         """Models the GPS using a GLM of the Gaussian family
         """
-        normal_gps_model = sm.GLM(self.T, add_constant(self.X), family=sm.families.Gaussian()).fit()
+        normal_gps_model = sm.GLM(
+            self.T, add_constant(self.X), family=sm.families.Gaussian()
+        ).fit()
 
         pred_treat = normal_gps_model.fittedvalues
         sigma = np.std(normal_gps_model.resid_response)

@@ -7,6 +7,8 @@ from pprint import pprint
 import numpy as np
 import pandas as pd
 from pandas.api.types import is_float_dtype, is_numeric_dtype
+from scipy.interpolate import interp1d
+from scipy.stats import norm
 from statsmodels.genmod.generalized_linear_model import GLM
 from xgboost import XGBClassifier, XGBRegressor
 
@@ -41,12 +43,12 @@ class TMLE(Core):
         Represents the edges of bins of treatment values that are used to construct a smooth curve
         Look at the distribution of your treatment variable to determine which
         family is more appropriate. Be mindful of the "positivity" assumption when determining
-        bins. In other words, make sure there aren't too few data points in each bin. The lowest
-        element in the list should be minimum treatment value, the highest element should be the
-        maximum treatment value.
+        bins. In other words, make sure there aren't too few data points in each bin. Mean
+        treatment values between the bin edges will be used to generate the CDRC.
 
     n_estimators: int, optional (default = 100)
-        Optional argument to set the number of learners to use when XGBoost creates TMLE's Q and G models.
+        Optional argument to set the number of learners to use when XGBoost
+        creates TMLE's Q and G models.
 
     learning_rate: float, optional (default = 0.1)
         Optional argument to set the XGBoost's learning rate for TMLE's Q and G models.
@@ -55,7 +57,8 @@ class TMLE(Core):
         Optional argument to set XGBoost's maximum depth when creating TMLE's Q and G models.
 
     gamma: float, optional (default = 1.0)
-        Optional argument to set XGBoost's gamma parameter (regularization) when creating TMLE's Q and G models.
+        Optional argument to set XGBoost's gamma parameter (regularization) when
+        creating TMLE's Q and G models.
 
     random_seed: int, optional (default = None)
         Sets the random seed.
@@ -66,6 +69,11 @@ class TMLE(Core):
 
     Attributes
     ----------
+    psi_list: array of shape (len(treatment_grid_bins) - 2, )
+        The estimated causal difference between treatment bins
+
+    std_error_ic_list: array of shape (len(treatment_grid_bins) - 2, )
+        The standard errors for the psi estimates found in `psi_list`
 
 
     Methods
@@ -73,8 +81,21 @@ class TMLE(Core):
     fit: (self, T, X, y)
         Fits the causal dose-response model
 
+    calculate_CDRC: (self, ci, CDRC_grid_num)
+        Calculates the CDRC (and confidence interval) from TMLE estimation
+
+
     Examples
     --------
+    >>> from causal_curve import TMLE
+    >>> tmle = TMLE(treatment_grid_bins = [0, 0.03, 0.05, 0.25, 0.5, 1.0, 2.0],
+        n_estimators=500,
+        learning_rate = 0.1,
+        max_depth = 5,
+        random_seed=111
+    )
+    >>> tmle.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
+    >>> tmle_results = tmle.calculate_CDRC(0.95)
 
 
     References
@@ -92,9 +113,9 @@ class TMLE(Core):
         self,
         treatment_grid_bins,
         n_estimators=100,
-        learning_rate = 0.1,
-        max_depth = 5,
-        gamma = 1.0,
+        learning_rate=0.1,
+        max_depth=5,
+        gamma=1.0,
         random_seed=None,
         verbose=False,
     ):
@@ -135,9 +156,7 @@ class TMLE(Core):
                 )
 
         if len(self.treatment_grid_bins) < 2:
-            raise TypeError(
-                "treatment_grid_bins list must, at minimum, of length >= 2"
-            )
+            raise TypeError("treatment_grid_bins list must, at minimum, of length >= 2")
 
         # Checks for n_estimators
         if not isinstance(self.n_estimators, int):
@@ -146,10 +165,8 @@ class TMLE(Core):
                 but found type {type(self.n_estimators)}"
             )
 
-        if (self.n_estimators < 10) or (self.n_estimators > 100000) :
-            raise TypeError(
-                "n_estimators parameter must be between 10 and 100000"
-            )
+        if (self.n_estimators < 10) or (self.n_estimators > 100000):
+            raise TypeError("n_estimators parameter must be between 10 and 100000")
 
         # Checks for learning_rate
         if not isinstance(self.learning_rate, (int, float)):
@@ -158,7 +175,7 @@ class TMLE(Core):
                 but found type {type(self.learning_rate)}"
             )
 
-        if (self.learning_rate <= 0 ) or (self.learning_rate >= 1000) :
+        if (self.learning_rate <= 0) or (self.learning_rate >= 1000):
             raise TypeError(
                 "learning_rate parameter must be greater than 0 and less than 1000"
             )
@@ -171,9 +188,7 @@ class TMLE(Core):
             )
 
         if self.max_depth <= 0:
-            raise TypeError(
-                "max_depth parameter must be greater than 0"
-            )
+            raise TypeError("max_depth parameter must be greater than 0")
 
         # Checks for gamma
         if not isinstance(self.gamma, float):
@@ -183,9 +198,7 @@ class TMLE(Core):
             )
 
         if self.gamma <= 0:
-            raise TypeError(
-                "gamma parameter must be greater than 0"
-            )
+            raise TypeError("gamma parameter must be greater than 0")
 
         # Checks for random_seed
         if not isinstance(self.random_seed, (int, type(None))):
@@ -206,62 +219,99 @@ class TMLE(Core):
         """Verifies that T, X, and y are formatted the right way
         """
         # Checks for T column
-        if not is_float_dtype(self.T):
+        if not is_float_dtype(self.t_data):
             raise TypeError(f"Treatment data must be of type float")
 
         # Make sure all X columns are float or int
-        if isinstance(self.X, pd.Series):
-            if not is_numeric_dtype(self.X):
+        if isinstance(self.x_data, pd.Series):
+            if not is_numeric_dtype(self.x_data):
                 raise TypeError(
                     f"All covariate (X) columns must be int or float type (i.e. must be numeric)"
                 )
 
-        elif isinstance(self.X, pd.DataFrame):
-            for column in self.X:
-                if not is_numeric_dtype(self.X[column]):
+        elif isinstance(self.x_data, pd.DataFrame):
+            for column in self.x_data:
+                if not is_numeric_dtype(self.x_data[column]):
                     raise TypeError(
-                        f"All covariate (X) columns must be int or float type (i.e. must be numeric)"
+                        f"All covariate (X) columns must be int or float type \
+                        (i.e. must be numeric)"
                     )
 
         # Checks for Y column
-        if not is_float_dtype(self.y):
+        if not is_float_dtype(self.y_data):
             raise TypeError(f"Outcome data must be of type float")
 
+    def _validate_calculate_CDRC_params(self, ci):
+        """Validates the parameters given to `calculate_CDRC`
+        """
 
+        if not isinstance(ci, float):
+            raise TypeError(
+                f"`ci` parameter must be an float, but found type {type(ci)}"
+            )
 
+        if isinstance(ci, float) and ((ci <= 0) or (ci >= 1.0)):
+            raise ValueError("`ci` parameter should be between (0, 1)")
 
     def _initial_bucket_mean_prediction(self):
         """Creates a model to predict the outcome variable given the provided inputs within
         the first bucket of treatment_grid_bins. This returns the mean predicted outcome.
         """
 
-        y = self.y[self.T < self.treatment_grid_bins[1]]
-        X = pd.concat([self.T, self.X], axis = 1)[self.T < self.treatment_grid_bins[1]]
+        y = self.y_data[self.t_data < self.treatment_grid_bins[1]]
+        X = pd.concat([self.t_data, self.x_data], axis=1)[
+            self.t_data < self.treatment_grid_bins[1]
+        ]
 
         init_model = XGBRegressor(
-            n_estimators = self.n_estimators,
-            max_depth = self.max_depth,
-            learning_rate = self.learning_rate,
-            gamma = self.gamma,
-            random_state = self.random_seed
+            n_estimators=self.n_estimators,
+            max_depth=self.max_depth,
+            learning_rate=self.learning_rate,
+            gamma=self.gamma,
+            random_state=self.random_seed,
         ).fit(X, y)
 
         return init_model.predict(X).mean()
 
-
-    def _create_treatment_comparison_df(self, low_boundary, med_boundary, high_boundary):
+    def _create_treatment_comparison_df(
+        self, low_boundary, med_boundary, high_boundary
+    ):
         """Given the current boundaries chosen from treatment_grid_bins, this filters
         the input data appropriately.
         """
-        temp_y = self.y[((self.T >= low_boundary) & (self.T <= high_boundary))]
-        temp_x = self.X[((self.T >= low_boundary) & (self.T <= high_boundary))]
-        temp_t = self.T.copy()
+        temp_y = self.y_data[
+            ((self.t_data >= low_boundary) & (self.t_data <= high_boundary))
+        ]
+        temp_x = self.x_data[
+            ((self.t_data >= low_boundary) & (self.t_data <= high_boundary))
+        ]
+        temp_t = self.t_data.copy()
         temp_t = temp_t[((temp_t >= low_boundary) & (temp_t <= high_boundary))]
         temp_t[((temp_t >= low_boundary) & (temp_t < med_boundary))] = 0
         temp_t[((temp_t >= med_boundary) & (temp_t <= high_boundary))] = 1
 
         return temp_y, temp_x, temp_t
 
+    def _collect_mean_t_levels(self):
+        """Collects the mean treatment value within each treatment bucket in treatment_grid_bins
+        """
+
+        t_bin_means = []
+
+        for index, _ in enumerate(self.treatment_grid_bins):
+            if index == (len(self.treatment_grid_bins) - 1):
+                continue
+
+            t_bin_means.append(
+                self.t_data[
+                    (
+                        (self.t_data >= self.treatment_grid_bins[index])
+                        & (self.t_data <= self.treatment_grid_bins[index + 1])
+                    )
+                ].mean()
+            )
+
+        return t_bin_means
 
     def fit(self, T, X, y):
         """Fits the TMLE causal dose-response model. For now, this only accepts pandas columns
@@ -282,89 +332,191 @@ class TMLE(Core):
         self : object
 
         """
-        self.T = T
-        self.X = X
-        self.y = y
-        self.n = len(y)
+        self.t_data = T
+        self.x_data = X
+        self.y_data = y
 
         # Validate this input data
         self._validate_fit_data()
 
         # Get the mean, predicted outcome value within the first bucket
         if self.verbose:
-            print("Calculating the mean, predicted outcome value within the first bucket...")
+            print(
+                "Calculating the mean, predicted outcome value within the first bucket..."
+            )
         self.outcome_start_val = self._initial_bucket_mean_prediction()
 
         # Loop through the comparisons in the treatment_grid_bins
         if self.verbose:
             print("Beginning main loop through treatment bins...")
 
+        # Collect loop results in these lists
+        self.t_bin_means = self._collect_mean_t_levels()
+        self.psi_list = []
+        self.std_error_ic_list = []
+
         for index, _ in enumerate(self.treatment_grid_bins):
             if (index == 0) or (index == len(self.treatment_grid_bins) - 1):
                 continue
             if self.verbose:
-                print(f"***** Starting loop {index} of {len(self.treatment_grid_bins) - 2} *****")
+                print(
+                    f"***** Starting iteration {index} of {len(self.treatment_grid_bins) - 2} *****"
+                )
             low_boundary = self.treatment_grid_bins[index - 1]
             med_boundary = self.treatment_grid_bins[index]
             high_boundary = self.treatment_grid_bins[index + 1]
 
             # Create comparison dataset
-            temp_y, temp_x, temp_t = self._create_treatment_comparison_df(low_boundary, med_boundary, high_boundary)
+            temp_y, temp_x, temp_t = self._create_treatment_comparison_df(
+                low_boundary, med_boundary, high_boundary
+            )
+
+            self.n_obs = len(temp_y)
 
             # Fit Q-model and get relevent predictions
             if self.verbose:
                 print("Fitting Q-model and making predictions...")
-            self.Y_hat_a, self.Y_hat_1, self.Y_hat_0 = self._q_model(temp_y, temp_x, temp_t)
+            self.y_hat_a, self.y_hat_1, self.y_hat_0 = self._q_model(
+                temp_y, temp_x, temp_t
+            )
 
             # Fit G-model and get relevent predictions
             if self.verbose:
                 print("Fitting G-model and making predictions...")
             self.pi_hat1, self.pi_hat0 = self._g_model(temp_x, temp_t)
 
+            # Estimate delta_hat
+            if self.verbose:
+                print("Estimating delta hat...")
+            self.delta_hat = self._delta_hat_estimation(temp_y, temp_x, temp_t)
+
+            # Estimate targeted and corrected Psi
+            if self.verbose:
+                print("Estimating Psi...")
+            psi, std_error_IC = self._psi_estimation(temp_y, temp_t)
+
+            self.psi_list.append(psi)
+            self.std_error_ic_list.append(std_error_IC)
+
             if self.verbose:
                 print(f"Finished this loop!")
 
+    def calculate_CDRC(self, ci=0.95, CDRC_grid_num=100):
+        """Using the results of the fitted model, this generates the CDRC by interpolation
+        of the binned treatment comparisons. This returns a confidence interval as well, which
+        is also generated by interpolation.
+
+        Parameters
+        ----------
+        ci: float (default = 0.95)
+            The desired confidence interval to produce. Default value is 0.95, corresponding
+            to 95% confidence intervals. bounded (0, 1.0).
+
+        CDRC_grid_num: int, optional (default = 100)
+            Linear interpolation over a quantile-based grid of treatment values is used
+            to produce the final CDRC. This parameter determines how many points
+            to include on that grid. Higher values will produce a finer estimate of the CDRC,
+            but this increases computation time. Default is usually a reasonable number.
+
+        Returns
+        ----------
+        dataframe: Pandas dataframe
+            Contains treatment grid values, the CDRC point estimate at that value,
+            and the associated lower and upper confidence interval bounds at that point.
+
+        self: object
+        """
+
+        self._validate_calculate_CDRC_params(ci)
+        z_star = norm.ppf((1 + ci) / 2)
+
+        if self.verbose:
+            print(
+                f"Estimating the CDRC and confidence intervals via cubic interpolation..."
+            )
+
+        # Collect discrete t_values
+        t_values = self.t_bin_means
+
+        # Collect discrete y_values
+        y_values = [self.outcome_start_val]
+
+        for index, item in enumerate(self.psi_list):
+            y_values.append(self.outcome_start_val + sum(self.psi_list[: (index + 1)]))
+
+        # Collect discrete lower confidence bounds
+        lower_values = [self.outcome_start_val - (z_star * self.std_error_ic_list[0])]
+        for index, y_value in enumerate(y_values[1:]):
+            lower_values.append(y_value - (z_star * self.std_error_ic_list[index]))
+
+        # Collect discrete upper confidence bounds
+        upper_values = [self.outcome_start_val + (z_star * self.std_error_ic_list[0])]
+        for index, y_value in enumerate(y_values[1:]):
+            upper_values.append(y_value + (z_star * self.std_error_ic_list[index]))
+
+        # Perform cubic interpolation
+        CDRC_interp = interp1d(t_values, y_values, kind="cubic")
+        lower_interp = interp1d(t_values, lower_values, kind="cubic")
+        upper_interp = interp1d(t_values, upper_values, kind="cubic")
+
+        CDRC_t_grid = self._grid_values(CDRC_grid_num, t_values)
+
+        Treatment = CDRC_t_grid
+        CDRC = CDRC_interp(CDRC_t_grid)
+        Lower_CI = lower_interp(CDRC_t_grid)
+        Upper_CI = upper_interp(CDRC_t_grid)
+
+        if self.verbose:
+            print(f"Done!")
+
+        return pd.DataFrame(
+            {
+                "Treatment": Treatment,
+                "CDRC": CDRC,
+                "Lower_CI": Lower_CI,
+                "Upper_CI": Upper_CI,
+            }
+        ).round(3)
+
+    def _grid_values(self, CDRC_grid_num, t_values):
+        """Produces grid values for use in estimating the final CDRC and confidence intervals.
+        """
+
+        return np.quantile(
+            self.t_data[((self.t_data > t_values[0]) & (self.t_data < t_values[-1]))],
+            q=np.linspace(start=0, stop=1, num=CDRC_grid_num,),
+        )
 
     def _q_model(self, temp_y, temp_x, temp_t):
         """Produces the Q-model and gets outcome predictions using the provided treatment
         values, when the treatment is completely present and not present.
         """
 
-        X = pd.concat([temp_t, temp_x], axis = 1).to_numpy()
+        X = pd.concat([temp_t, temp_x], axis=1).to_numpy()
         y = temp_y.to_numpy()
 
         Q_model = XGBRegressor(
-            n_estimators = self.n_estimators,
-            max_depth = self.max_depth,
-            learning_rate = self.learning_rate,
-            gamma = self.gamma,
-            random_state = self.random_seed
+            n_estimators=self.n_estimators,
+            max_depth=self.max_depth,
+            learning_rate=self.learning_rate,
+            gamma=self.gamma,
+            random_state=self.random_seed,
         ).fit(X, y)
 
         # Make predictions with provided treatment values
-        Y_hat_a = Q_model.predict(X)
+        y_hat_a = Q_model.predict(X)
 
-        temp =  np.column_stack(
-        (
-            np.repeat(1, self.n),
-            np.asarray(self.X)
-    	))
+        temp = np.column_stack((np.repeat(1, self.n_obs), np.asarray(temp_x)))
 
         # Make predictions when treatment is completely present
-        Y_hat_1 = Q_model.predict(temp)
+        y_hat_1 = Q_model.predict(temp)
 
         # Make predictions when treatment is completely not present
-        temp = np.column_stack(
-        (
-            np.repeat(0, self.n),
-            np.asarray(self.X)
-        ))
+        temp = np.column_stack((np.repeat(0, self.n_obs), np.asarray(temp_x)))
 
-        Y_hat_0 = Q_model.predict(temp)
+        y_hat_0 = Q_model.predict(temp)
 
-        return Y_hat_a, Y_hat_1, Y_hat_0
-
-
+        return y_hat_a, y_hat_1, y_hat_0
 
     def _g_model(self, temp_x, temp_t):
         """Produces the G-model and gets treatment assignment predictions
@@ -374,17 +526,68 @@ class TMLE(Core):
         t = temp_t.to_numpy()
 
         G_model = XGBClassifier(
-            n_estimators = self.n_estimators,
-            max_depth = self.max_depth,
-            learning_rate = self.learning_rate,
-            gamma = self.gamma,
-            random_state = self.random_seed
+            n_estimators=self.n_estimators,
+            max_depth=self.max_depth,
+            learning_rate=self.learning_rate,
+            gamma=self.gamma,
+            random_state=self.random_seed,
         ).fit(X, t)
 
         # Make predictions of receiving treatment
-        pi_hat1 = G_model.predict_proba(X)
+        pi_hat1 = G_model.predict_proba(X)[:, 1]
 
         # Predictions of not receiving treatment
         pi_hat0 = 1 - pi_hat1
 
         return pi_hat1, pi_hat0
+
+    def _delta_hat_estimation(self, temp_y, temp_x, temp_t):
+        """Estimates delta to correct treatment estimation
+        """
+        H_a = []
+
+        for idx, treatment in enumerate(np.asarray(temp_t)):
+            if treatment == 1:
+                H_a.append(1 / self.pi_hat1[idx])
+            elif treatment == 0:
+                H_a.append(-1 / self.pi_hat0[idx])
+
+        H_a = np.array(H_a)
+
+        # Create GLM using H_a as a forced offset
+        targetting_model = GLM(
+            endog=np.asarray(temp_y), exog=H_a, offset=np.asarray(self.y_hat_a)
+        ).fit()
+
+        return targetting_model.params[0]
+
+    def _psi_estimation(self, temp_y, temp_t):
+        """Estimates final Psi for the treatment comparison, also estimates the
+        standard error via the influence curve
+        """
+
+        # Estimate Psi
+        H_1 = 1 / self.pi_hat1
+        H_0 = -1 / self.pi_hat0
+
+        Y_star_1 = self.y_hat_1 + (self.delta_hat * H_1)
+        Y_star_0 = self.y_hat_0 + (self.delta_hat * H_0)
+
+        Psi = round((Y_star_1 - Y_star_0).mean(), 3)
+
+        # Use Psi and other various variables to estimate the standard error
+        D1 = (
+            ((temp_t / self.pi_hat1) * (temp_y - self.y_hat_1))
+            + self.y_hat_1
+            - Y_star_1
+        )
+        D0 = (
+            (((1 - temp_t) / (1 - self.pi_hat1)) * (temp_y - self.y_hat_0))
+            + self.y_hat_0
+            - Y_star_0
+        )
+        EIC = D1 - D0
+
+        std_error_IC = np.sqrt(EIC.var() / self.n_obs)
+
+        return Psi, std_error_IC

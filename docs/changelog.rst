@@ -4,8 +4,17 @@
 Change Log
 ==========
 
-Version 0.0.10
+Version 0.1.0
 -------------
+
+- Added new TMLE method
+- Updated documentation to reflect new TMLE method
+- Renamed CDRC method to more appropriate `GPS` method
+- Small docstring corrections to GPS method
+
+
+Version 0.0.10
+--------------
 
 - Bug fix in GPS estimation method
 
