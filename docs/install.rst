@@ -36,7 +36,7 @@ you can easily install causal-curve using ``pip``::
     pip install causal-curve
 
 
-You can also get the latest version of pyts by cloning the repository::
+You can also get the latest version of causal-curve by cloning the repository::
 
     git clone https://github.com/ronikobrosly/causal-curve.git
     cd causal-curve

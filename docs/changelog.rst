@@ -4,6 +4,12 @@
 Change Log
 ==========
 
+Version 0.1.2
+-------------
+
+- Added unit and integration tests
+
+
 Version 0.1.1
 -------------
 
