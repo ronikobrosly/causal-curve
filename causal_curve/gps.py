@@ -1,3 +1,4 @@
+# pylint: disable=bad-continuation
 """
 Defines the Generalized Prospensity Score (GPS) model class
 """
@@ -53,9 +54,9 @@ class GPS(Core):
         Takes the treatment, and creates a quantile-based grid across its values.
         For instance, if the number 6 is selected, this means the algorithm will only take
         the 6 treatment variable values at approximately the 0, 20, 40, 60, 80, and 100th
-        percentiles to estimate the causal dose response curve. Higher value here means the final curve
-        will be more finely estimated, but also increases computation time.
-        Default is usually a reasonable number.
+        percentiles to estimate the causal dose response curve.
+        Higher value here means the final curve will be more finely estimated,
+        but also increases computation time. Default is usually a reasonable number.
 
     lower_grid_constraint:  float, optional(default = 0.01)
         This adds an optional constraint of the lower side of the treatment grid.
@@ -360,7 +361,8 @@ class GPS(Core):
             for column in self.X:
                 if not is_numeric_dtype(self.X[column]):
                     raise TypeError(
-                        f"All covariate (X) columns must be int or float type (i.e. must be numeric)"
+                        f"All covariate (X) columns must be int or float type \
+                        (i.e. must be numeric)"
                     )
 
         # Checks for Y column

@@ -1,3 +1,4 @@
+# pylint: disable=bad-continuation
 """
 Defines the Targetted Maximum likelihood Estimation (TMLE) model class
 """
