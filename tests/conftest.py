@@ -7,22 +7,24 @@ import pytest
 
 @pytest.fixture(scope="module")
 def dataset_fixture():
+    """Returns full_example_dataset"""
     return full_example_dataset()
 
 
 def full_example_dataset():
+    """Example dataset with a treatment, two covariates, and outcome variable"""
 
     np.random.seed(500)
 
-    n = 500
+    n_obs = 500
 
-    treatment = np.random.normal(loc=50.0, scale=10.0, size=n)
-    x1 = np.random.normal(loc=50.0, scale=10.0, size=n)
-    x2 = np.random.normal(loc=0, scale=10.0, size=n)
-    outcome = treatment + x1 + x2 + np.random.normal(loc=50.0, scale=3.0, size=n)
+    treatment = np.random.normal(loc=50.0, scale=10.0, size=n_obs)
+    x_1 = np.random.normal(loc=50.0, scale=10.0, size=n_obs)
+    x_2 = np.random.normal(loc=0, scale=10.0, size=n_obs)
+    outcome = treatment + x_1 + x_2 + np.random.normal(loc=50.0, scale=3.0, size=n_obs)
 
     fixture = pd.DataFrame(
-        {"treatment": treatment, "x1": x1, "x2": x2, "outcome": outcome}
+        {"treatment": treatment, "x1": x_1, "x2": x_2, "outcome": outcome}
     )
 
     fixture.reset_index(drop=True, inplace=True)

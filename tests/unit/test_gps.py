@@ -1,14 +1,11 @@
 """ Unit tests of the gps.py module """
 
-
-import pandas as pd
 from pygam import LinearGAM
 
 from causal_curve import GPS
-from tests.test_helpers import assert_df_equal
 
 
-def test_GPS_fit(dataset_fixture):
+def test_gps_fit(dataset_fixture):
     """
     Tests the fit method GPS tool
     """

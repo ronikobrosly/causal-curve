@@ -4,6 +4,11 @@
 Change Log
 ==========
 
+Version 0.1.3
+-------------
+- Simplifying unit and integration tests. 
+
+
 Version 0.1.2
 -------------
 

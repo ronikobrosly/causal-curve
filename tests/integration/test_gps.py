@@ -3,7 +3,6 @@
 import pandas as pd
 
 from causal_curve import GPS
-from tests.test_helpers import assert_df_equal
 
 
 def test_full_gps_flow(dataset_fixture):

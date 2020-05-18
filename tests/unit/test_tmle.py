@@ -1,13 +1,9 @@
 """ Unit tests of the tmle.py module """
 
-
-import pandas as pd
-
 from causal_curve import TMLE
-from tests.test_helpers import assert_df_equal
 
 
-def test_TMLE_fit(dataset_fixture):
+def test_tmle_fit(dataset_fixture):
     """
     Tests the fit method GPS tool
     """
