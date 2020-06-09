@@ -16,7 +16,7 @@ Python tools to perform causal inference using observational data when the treat
 - [Overview](#overview)
 - [Installation](#installation)
 - [Documentation](#documentation)
-- [In Progress](#inprogress)
+- [In Progress](#in-progress)
 - [Contributing](#contributing)
 - [References](#references)
 
