@@ -16,6 +16,7 @@ Python tools to perform causal inference using observational data when the treat
 - [Overview](#overview)
 - [Installation](#installation)
 - [Documentation](#documentation)
+- [In Progress](#inprogress)
 - [Contributing](#contributing)
 - [References](#references)
 
@@ -41,6 +42,11 @@ This library attempts to address this gap, providing tools to estimate causal cu
 ## Documentation
 
 [Documentation is available at readthedocs.org](https://causal-curve.readthedocs.io/en/latest/)
+
+## In Progress
+
+*June 2019: Currently implementing test for mediation with a continuous treatment, with either discrete or
+continuous mediator and outcome*
 
 ## Contributing
 
