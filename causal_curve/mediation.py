@@ -467,12 +467,9 @@ class Mediation(Core):
 
         # Collect effect results in these lists
         self.t_bin_means = self._collect_mean_t_levels()
-        self.direct_effect_list = []
-        self.direct_effect_list_low = []
-        self.direct_effect_list_high = []
-        self.indirect_effect_list = []
-        self.indirect_effect_list_low = []
-        self.indirect_effect_list_high = []
+        self.prop_direct_list = []
+        self.prop_direct_list_low = []
+        self.prop_direct_list_high = []
         self.prop_indirect_list = []
         self.prop_indirect_list_low = []
         self.prop_indirect_list_high = []
@@ -493,30 +490,21 @@ class Mediation(Core):
             tau_coef = (mean_results['d1'] + mean_results['d0'] + mean_results['z1'] + mean_results['z0'])/2
             n0 = mean_results['d0']/tau_coef
             n1 = mean_results['d1']/tau_coef
-            d_avg = (mean_results['d1'] + mean_results['d0'])/2
-            z_avg = (mean_results['z1'] + mean_results['z0'])/2
             n_avg = (n0 + n1)/2
 
             tau_lower = (temp_bootstrap_results['d1'].quantile(lower) + temp_bootstrap_results['d0'].quantile(lower) + temp_bootstrap_results['z1'].quantile(lower) + temp_bootstrap_results['z0'].quantile(lower))/2
             nu_0_lower = temp_bootstrap_results['d0'].quantile(lower)/tau_lower
             nu_1_lower = temp_bootstrap_results['d1'].quantile(lower)/tau_lower
-            delta_avg_lower = (temp_bootstrap_results['d0'].quantile(lower) + temp_bootstrap_results['d1'].quantile(lower))/2
-            zeta_avg_lower = (temp_bootstrap_results['z0'].quantile(lower) + temp_bootstrap_results['z1'].quantile(lower))/2
             nu_avg_lower = (nu_0_lower + nu_1_lower)/2
 
             tau_upper = (temp_bootstrap_results['d1'].quantile(upper) + temp_bootstrap_results['d0'].quantile(upper) + temp_bootstrap_results['z1'].quantile(upper) + temp_bootstrap_results['z0'].quantile(upper))/2
             nu_0_upper = temp_bootstrap_results['d0'].quantile(upper)/tau_upper
             nu_1_upper = temp_bootstrap_results['d1'].quantile(upper)/tau_upper
-            delta_avg_upper = (temp_bootstrap_results['d0'].quantile(upper) + temp_bootstrap_results['d1'].quantile(upper))/2
-            zeta_avg_upper = (temp_bootstrap_results['z0'].quantile(upper) + temp_bootstrap_results['z1'].quantile(upper))/2
             nu_avg_upper = (nu_0_upper + nu_1_upper)/2
 
-            self.direct_effect_list.append(z_avg)
-            self.direct_effect_list_low.append(zeta_avg_lower)
-            self.direct_effect_list_high.append(zeta_avg_upper)
-            self.indirect_effect_list.append(d_avg)
-            self.indirect_effect_list_low.append(delta_avg_lower)
-            self.indirect_effect_list_high.append(delta_avg_upper)
+            self.prop_direct_list.append(n_avg)
+            self.prop_direct_list_low.append(nu_avg_lower)
+            self.prop_direct_list_high.append(nu_avg_upper)
             self.prop_indirect_list.append(n_avg)
             self.prop_indirect_list_low.append(nu_avg_lower)
             self.prop_indirect_list_high.append(nu_avg_upper)
@@ -524,8 +512,7 @@ class Mediation(Core):
         final_results = pd.DataFrame(
             {
                 'treatment_value': self.t_bin_means,
-                'direct_effect': self.direct_effect_list,
-                'indirect_effect_list': self.indirect_effect_list,
+                'prop_direct_list': self.prop_direct_list,
                 'prop_indirect_list': self.prop_indirect_list,
             }
         )
