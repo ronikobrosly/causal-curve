@@ -70,3 +70,6 @@ maximum likelihood estimation. In: The International Journal of Biostatistics 6(
 
 van der Laan MJ and Rubin D. Targeted maximum likelihood learning. In: The International
 Journal of Biostatistics, 2(1), 2006.
+
+Imai K., Keele L., Tingley D. A General Approach to Causal Mediation Analysis. Psychological
+Methods. 15(4), 2010, pp.309–334.
