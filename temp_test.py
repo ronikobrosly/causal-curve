@@ -18,7 +18,7 @@ df = pd.read_csv("~/Desktop/R_data.csv")
 # Instantiate mediation class
 #######################
 
-med = Mediation(verbose = True, bootstrap_draws=500, bootstrap_replicates=50)
+med = Mediation(verbose = True, bootstrap_draws=100, bootstrap_replicates=100, n_splines = 5)
 
 med.fit(df['x'], df['w'], df['y'])
 

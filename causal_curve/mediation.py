@@ -58,8 +58,8 @@ class Mediation(Core):
         Order of the splines to use fitting the final GAM.
         Must be integer >= 1. Default value creates cubic splines.
 
-    n_splines: int, optional (default = 30)
-        Number of splines to use for the treatment and GPS in the final GAM.
+    n_splines: int, optional (default = 5)
+        Number of splines to use for the mediation and outcome GAMs.
         Must be integer >= 2. Must be non-negative.
 
     lambda_: int or float, optional (default = 0.5)
@@ -116,7 +116,7 @@ class Mediation(Core):
         bootstrap_draws=500,
         bootstrap_replicates=100,
         spline_order=3,
-        n_splines=30,
+        n_splines=5,
         lambda_=0.5,
         max_iter=100,
         random_seed=None,
@@ -126,8 +126,8 @@ class Mediation(Core):
         self.treatment_grid_num = treatment_grid_num
         self.lower_grid_constraint = lower_grid_constraint
         self.upper_grid_constraint = upper_grid_constraint
-        self.bootstrap_draws=bootstrap_draws
-        self.bootstrap_replicates=bootstrap_replicates
+        self.bootstrap_draws = bootstrap_draws
+        self.bootstrap_replicates = bootstrap_replicates
         self.spline_order = spline_order
         self.n_splines = n_splines
         self.lambda_ = lambda_
@@ -142,7 +142,6 @@ class Mediation(Core):
         if self.verbose:
             print("Using the following params for the mediation analysis:")
             pprint(self.get_params(), indent=4)
-
 
     def _validate_init_params(self):
         """
@@ -162,9 +161,7 @@ class Mediation(Core):
                 have enough resolution, but found value {self.treatment_grid_num}"
             )
 
-        if (
-            isinstance(self.treatment_grid_num, int)
-        ) and self.treatment_grid_num > 100:
+        if (isinstance(self.treatment_grid_num, int)) and self.treatment_grid_num > 100:
             raise ValueError(f"treatment_grid_num parameter is too high!")
 
         # Checks for lower_grid_constraint
@@ -213,7 +210,6 @@ class Mediation(Core):
                 but found value {self.upper_grid_constraint}"
             )
 
-
         # Checks for bootstrap_draws
         if not isinstance(self.bootstrap_draws, int):
             raise TypeError(
@@ -221,22 +217,17 @@ class Mediation(Core):
                 but found type {type(self.bootstrap_draws)}"
             )
 
-        if (
-            isinstance(self.bootstrap_draws, float)
-        ) and self.bootstrap_draws < 100:
+        if (isinstance(self.bootstrap_draws, float)) and self.bootstrap_draws < 100:
             raise ValueError(
                 f"bootstrap_draws parameter cannot be < 100, \
                 but found value {self.bootstrap_draws}"
             )
 
-        if (
-            isinstance(self.bootstrap_draws, float)
-        ) and self.bootstrap_draws > 500000:
+        if (isinstance(self.bootstrap_draws, float)) and self.bootstrap_draws > 500000:
             raise ValueError(
                 f"bootstrap_draws parameter cannot > 500000, \
                 but found value {self.bootstrap_draws}"
             )
-
 
         # Checks for bootstrap_replicates
         if not isinstance(self.bootstrap_replicates, int):
@@ -261,7 +252,6 @@ class Mediation(Core):
                 but found value {self.bootstrap_replicates}"
             )
 
-
         # Checks for lower_grid_constraint isn't higher than upper_grid_constraint
         if self.lower_grid_constraint >= self.upper_grid_constraint:
             raise ValueError(
@@ -275,7 +265,7 @@ class Mediation(Core):
                 but found type {type(self.spline_order)}"
             )
 
-        if (isinstance(self.spline_order, int)) and self.spline_order < 1:
+        if (isinstance(self.spline_order, int)) and self.spline_order < 3:
             raise ValueError(
                 f"spline_order parameter should be >= 1, but found {self.spline_order}"
             )
@@ -355,7 +345,6 @@ class Mediation(Core):
         if not is_float_dtype(self.y):
             raise TypeError(f"Outcome data must be of type float")
 
-
     def _grid_values(self):
         """Produces initial grid values for the treatment variable
         """
@@ -367,7 +356,6 @@ class Mediation(Core):
                 num=self.treatment_grid_num,
             ),
         )
-
 
     def _collect_mean_t_levels(self):
         """Collects the mean treatment value within each treatment bucket in the grid_values
@@ -389,7 +377,6 @@ class Mediation(Core):
             )
 
         return t_bin_means
-
 
     def fit(self, T, M, y):
         """Fits models so that mediation analysis can be run.
@@ -430,7 +417,7 @@ class Mediation(Core):
 
         # Begin main loop
         for index, _ in enumerate(self.grid_values):
-            if (index == 0):
+            if index == 0:
                 continue
             if self.verbose:
                 print(
@@ -440,11 +427,11 @@ class Mediation(Core):
             temp_low_treatment = self.grid_values[index - 1]
             temp_high_treatment = self.grid_values[index]
 
-            bootstrap_results = self._bootstrap_analysis(temp_low_treatment, temp_high_treatment)
+            bootstrap_results = self._bootstrap_analysis(
+                temp_low_treatment, temp_high_treatment
+            )
 
             self.final_bootstrap_results.append(bootstrap_results)
-
-
 
     def calculate_mediation(self, ci=0.95):
         """Conducts mediation analysis on the fit data
@@ -452,14 +439,15 @@ class Mediation(Core):
         Parameters
         ----------
         ci: float (default = 0.95)
-            The desired confidence interval to produce. Default value is 0.95, corresponding
+            The desired bootstrap confidence interval to produce. Default value is 0.95, corresponding
             to 95% confidence intervals. bounded (0, 1.0).
 
         Returns
         ----------
         dataframe: Pandas dataframe
             Contains the estimate of the direct and indirect effects
-            and the proportion of indirect effects across the treatment grid values
+            and the proportion of indirect effects across the treatment grid values.
+            The bootstrap confidence interval that is returned might not be symmetric.
 
         self : object
 
@@ -468,71 +456,83 @@ class Mediation(Core):
         # Collect effect results in these lists
         self.t_bin_means = self._collect_mean_t_levels()
         self.prop_direct_list = []
-        self.prop_direct_list_low = []
-        self.prop_direct_list_high = []
         self.prop_indirect_list = []
-        self.prop_indirect_list_low = []
-        self.prop_indirect_list_high = []
+        general_indirect = []
 
-        lower = (1 - ci)/2
+        lower = (1 - ci) / 2
         upper = ci + lower
 
         # Calculate results for each treatment bin
         for index, _ in enumerate(self.grid_values):
 
-            if (index == (len(self.grid_values) - 1)):
+            if index == (len(self.grid_values) - 1):
                 continue
 
             temp_bootstrap_results = self.final_bootstrap_results[index]
 
-            mean_results = {key: temp_bootstrap_results[key].mean() for key in temp_bootstrap_results}
+            mean_results = {
+                key: temp_bootstrap_results[key].mean()
+                for key in temp_bootstrap_results
+            }
 
-            tau_coef = (mean_results['d1'] + mean_results['d0'] + mean_results['z1'] + mean_results['z0'])/2
-            n0 = mean_results['d0']/tau_coef
-            n1 = mean_results['d1']/tau_coef
-            n_avg = (n0 + n1)/2
+            tau_coef = (
+                mean_results["d1"]
+                + mean_results["d0"]
+                + mean_results["z1"]
+                + mean_results["z0"]
+            ) / 2
+            n0 = mean_results["d0"] / tau_coef
+            n1 = mean_results["d1"] / tau_coef
+            n_avg = (n0 + n1) / 2
 
-            tau_lower = (temp_bootstrap_results['d1'].quantile(lower) + temp_bootstrap_results['d0'].quantile(lower) + temp_bootstrap_results['z1'].quantile(lower) + temp_bootstrap_results['z0'].quantile(lower))/2
-            nu_0_lower = temp_bootstrap_results['d0'].quantile(lower)/tau_lower
-            nu_1_lower = temp_bootstrap_results['d1'].quantile(lower)/tau_lower
-            nu_avg_lower = (nu_0_lower + nu_1_lower)/2
+            tau_general = (
+                temp_bootstrap_results["d1"]
+                + temp_bootstrap_results["d0"]
+                + temp_bootstrap_results["z1"]
+                + temp_bootstrap_results["z0"]
+            ) / 2
+            nu_0_general = temp_bootstrap_results["d0"] / tau_general
+            nu_1_general = temp_bootstrap_results["d1"] / tau_general
+            nu_avg_general = (nu_0_general + nu_1_general) / 2
 
-            tau_upper = (temp_bootstrap_results['d1'].quantile(upper) + temp_bootstrap_results['d0'].quantile(upper) + temp_bootstrap_results['z1'].quantile(upper) + temp_bootstrap_results['z0'].quantile(upper))/2
-            nu_0_upper = temp_bootstrap_results['d0'].quantile(upper)/tau_upper
-            nu_1_upper = temp_bootstrap_results['d1'].quantile(upper)/tau_upper
-            nu_avg_upper = (nu_0_upper + nu_1_upper)/2
-
-            self.prop_direct_list.append(n_avg)
-            self.prop_direct_list_low.append(nu_avg_lower)
-            self.prop_direct_list_high.append(nu_avg_upper)
+            self.prop_direct_list.append(1 - n_avg)
             self.prop_indirect_list.append(n_avg)
-            self.prop_indirect_list_low.append(nu_avg_lower)
-            self.prop_indirect_list_high.append(nu_avg_upper)
+            general_indirect.append(nu_avg_general)
+
+        general_indirect = pd.concat(general_indirect)
+
+        # Bootstrap these general_indirect values
+        bootstrap_overall_means = []
+        for i in range(0, 1000):
+            bootstrap_overall_means.append(
+                general_indirect.sample(
+                    frac=0.25, replace=True, random_state=self.random_seed
+                ).mean()
+            )
+
+        bootstrap_overall_means = np.array(bootstrap_overall_means)
 
         final_results = pd.DataFrame(
             {
-                'treatment_value': self.t_bin_means,
-                'prop_direct_list': self.prop_direct_list,
-                'prop_indirect_list': self.prop_indirect_list,
+                "Treatment_Value": self.t_bin_means,
+                "Proportion_Direct_Effect": self.prop_direct_list,
+                "Proportion_Indirect_Effect": self.prop_indirect_list,
             }
-        )
+        ).round(4)
 
-        print(f"\n\nFinal results: {final_results}")
-
+        print(f"\n\nFinal results: \n\n {final_results}")
 
         total_prop_mean = round(np.array(self.prop_indirect_list).mean(), 4)
-        total_prop_lower = round(np.array(self.prop_indirect_list_low).mean(), 4)
-        total_prop_upper = round(np.array(self.prop_indirect_list_high).mean(), 4)
+        total_prop_lower = round(
+            np.percentile(bootstrap_overall_means, q=lower * 100), 4
+        )
+        total_prop_upper = round(
+            np.percentile(bootstrap_overall_means, q=upper * 100), 4
+        )
 
-        print(f"\n\nMean indirect effect proportion: {total_prop_mean} ({total_prop_lower} - {total_prop_upper})")
-
-
-
-
-
-
-
-
+        print(
+            f"\n\nMean indirect effect proportion: {total_prop_mean} ({total_prop_lower} - {total_prop_upper})"
+        )
 
     def _bootstrap_analysis(self, temp_low_treatment, temp_high_treatment):
         """The top-level function used in the fitting method
@@ -544,7 +544,9 @@ class Mediation(Core):
             # Create single bootstrap replicate
             temp_t, temp_m, temp_y = self._create_bootstrap_replicate()
             # Create the models from this
-            temp_mediator_model, temp_outcome_model = self._fit_gams(temp_t, temp_m, temp_y)
+            temp_mediator_model, temp_outcome_model = self._fit_gams(
+                temp_t, temp_m, temp_y
+            )
             # Make mediator predictions
             predict_m1, predict_m0 = self._mediator_prediction(
                 temp_mediator_model,
@@ -552,7 +554,7 @@ class Mediation(Core):
                 temp_m,
                 temp_y,
                 temp_low_treatment,
-                temp_high_treatment
+                temp_high_treatment,
             )
             # Make outcome predictions
             outcome_preds = self._outcome_prediction(
@@ -560,7 +562,7 @@ class Mediation(Core):
                 temp_high_treatment,
                 predict_m1,
                 predict_m0,
-                temp_outcome_model
+                temp_outcome_model,
             )
             # Collect the replicate results here
             bootstrap_collection.append(outcome_preds)
@@ -570,45 +572,48 @@ class Mediation(Core):
 
         return bootstrap_results
 
-
-
     def _create_bootstrap_replicate(self):
         """Creates a single bootstrap replicate from the data
         """
-        temp_t = self.T.sample(n = self.bootstrap_draws, replace = True, random_state = self.random_seed)
+        temp_t = self.T.sample(
+            n=self.bootstrap_draws, replace=True, random_state=self.random_seed
+        )
         temp_m = self.M.iloc[temp_t.index]
         temp_y = self.y.iloc[temp_t.index]
 
         return temp_t, temp_m, temp_y
 
-
-
-
     def _fit_gams(self, temp_t, temp_m, temp_y):
         """Fits the mediator and outcome GAMs
         """
         temp_mediator_model = LinearGAM(
-            s(0, n_splines = self.n_splines, spline_order = self.spline_order),
-            fit_intercept = True,
-            max_iter = self.max_iter,
-            lam=self.lambda_
+            s(0, n_splines=self.n_splines, spline_order=self.spline_order),
+            fit_intercept=True,
+            max_iter=self.max_iter,
+            lam=self.lambda_,
         )
         temp_mediator_model.fit(temp_t, temp_m)
 
         temp_outcome_model = LinearGAM(
-            s(0, n_splines = self.n_splines, spline_order = self.spline_order) + s(1, n_splines = self.n_splines, spline_order = self.spline_order),
-            fit_intercept = True,
-            max_iter = self.max_iter,
-            lam=self.lambda_
+            s(0, n_splines=self.n_splines, spline_order=self.spline_order)
+            + s(1, n_splines=self.n_splines, spline_order=self.spline_order),
+            fit_intercept=True,
+            max_iter=self.max_iter,
+            lam=self.lambda_,
         )
-        temp_outcome_model.fit(pd.concat([temp_t, temp_m], axis = 1), temp_m)
+        temp_outcome_model.fit(pd.concat([temp_t, temp_m], axis=1), temp_y)
 
         return temp_mediator_model, temp_outcome_model
 
-
-
-
-    def _mediator_prediction(self, temp_mediator_model, temp_t, temp_m, temp_y, temp_low_treatment, temp_high_treatment):
+    def _mediator_prediction(
+        self,
+        temp_mediator_model,
+        temp_t,
+        temp_m,
+        temp_y,
+        temp_low_treatment,
+        temp_high_treatment,
+    ):
         """Makes predictions based on the mediator models
         """
 
@@ -616,19 +621,24 @@ class Mediation(Core):
         m0_mean = temp_mediator_model.predict(temp_low_treatment)[0]
 
         std_dev = (
-            ((temp_mediator_model.deviance_residuals(temp_t, temp_m)**2).sum()) /
-            (self.n - (len(temp_mediator_model.get_params()['terms']._terms) + 1))
-        )
+            (temp_mediator_model.deviance_residuals(temp_t, temp_m) ** 2).sum()
+        ) / (self.n - (len(temp_mediator_model.get_params()["terms"]._terms) + 1))
 
-        est_error = np.random.normal(loc = 0, scale = std_dev, size = self.n)
+        est_error = np.random.normal(loc=0, scale=std_dev, size=self.n)
 
         predict_m1 = m1_mean + est_error
         predict_m0 = m0_mean + est_error
 
         return predict_m1, predict_m0
 
-
-    def _outcome_prediction(self, temp_low_treatment, temp_high_treatment, predict_m1, predict_m0, temp_outcome_model):
+    def _outcome_prediction(
+        self,
+        temp_low_treatment,
+        temp_high_treatment,
+        predict_m1,
+        predict_m0,
+        temp_outcome_model,
+    ):
         """Makes predictions based on the outcome models
         """
 
@@ -652,21 +662,11 @@ class Mediation(Core):
             m_0 = input[4]
 
             pr_1 = temp_outcome_model.predict(
-                np.column_stack(
-                    (
-                        np.repeat(t_1, self.n),
-                        m_1
-                    )
-                )
+                np.column_stack((np.repeat(t_1, self.n), m_1))
             )
 
             pr_0 = temp_outcome_model.predict(
-                np.column_stack(
-                    (
-                        np.repeat(t_0, self.n),
-                        m_0
-                    )
-                )
+                np.column_stack((np.repeat(t_0, self.n), m_0))
             )
 
             outcome_preds[input[0]] = (pr_1 - pr_0).mean()
