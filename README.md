@@ -16,6 +16,7 @@ Python tools to perform causal inference using observational data when the treat
 - [Overview](#overview)
 - [Installation](#installation)
 - [Documentation](#documentation)
+- [In Progress](#in-progress)
 - [Contributing](#contributing)
 - [References](#references)
 
@@ -42,6 +43,11 @@ This library attempts to address this gap, providing tools to estimate causal cu
 
 [Documentation is available at readthedocs.org](https://causal-curve.readthedocs.io/en/latest/)
 
+## In Progress
+
+*June 2019: Currently implementing test for mediation with a continuous treatment, with either discrete or
+continuous mediator and outcome*
+
 ## Contributing
 
 Your help is absolutely welcome! Please do reach out or create a feature branch!
@@ -64,3 +70,6 @@ maximum likelihood estimation. In: The International Journal of Biostatistics 6(
 
 van der Laan MJ and Rubin D. Targeted maximum likelihood learning. In: The International
 Journal of Biostatistics, 2(1), 2006.
+
+Imai K., Keele L., Tingley D. A General Approach to Causal Mediation Analysis. Psychological
+Methods. 15(4), 2010, pp.309–334.
