@@ -24,6 +24,7 @@ Welcome to causal-curve's documentation!
 
   GPS_example
   TMLE_example
+  Mediation_example
 
 .. toctree::
    :maxdepth: 1
