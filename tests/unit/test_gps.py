@@ -7,7 +7,7 @@ from causal_curve import GPS
 
 def test_gps_fit(dataset_fixture):
     """
-    Tests the fit method GPS tool
+    Tests the fit method of the GPS tool
     """
 
     gps = GPS(

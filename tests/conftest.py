@@ -30,3 +30,30 @@ def full_example_dataset():
     fixture.reset_index(drop=True, inplace=True)
 
     return fixture
+
+
+@pytest.fixture(scope="module")
+def mediation_fixture():
+    """Returns mediation_dataset"""
+    return mediation_dataset()
+
+
+def mediation_dataset():
+    """Example dataset to test / demonstrate mediation with a treatment,
+    a mediator, and an outcome variable"""
+
+    np.random.seed(500)
+
+    n_obs = 500
+
+    treatment = np.random.normal(loc=50.0, scale=10.0, size=n_obs)
+    mediator = np.random.normal(loc=70.0 + treatment, scale=8.0, size=n_obs)
+    outcome = np.random.normal(loc=(treatment + mediator - 50), scale=10.0, size=n_obs)
+
+    fixture = pd.DataFrame(
+        {"treatment": treatment, "mediator": mediator, "outcome": outcome}
+    )
+
+    fixture.reset_index(drop=True, inplace=True)
+
+    return fixture
