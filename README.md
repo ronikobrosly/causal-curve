@@ -43,11 +43,6 @@ This library attempts to address this gap, providing tools to estimate causal cu
 
 [Documentation is available at readthedocs.org](https://causal-curve.readthedocs.io/en/latest/)
 
-## In Progress
-
-*June 2019: Currently implementing test for mediation with a continuous treatment, with either discrete or
-continuous mediator and outcome*
-
 ## Contributing
 
 Your help is absolutely welcome! Please do reach out or create a feature branch!
