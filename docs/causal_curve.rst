@@ -18,6 +18,14 @@ causal\_curve.tmle module
   :undoc-members:
   :show-inheritance:
 
+causal\_curve.mediation module
+------------------------------
+
+.. automodule:: causal_curve.mediation
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
 causal\_curve.core module
 -------------------------
 

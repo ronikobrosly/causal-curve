@@ -4,9 +4,16 @@
 Change Log
 ==========
 
+Version 0.2.0
+-------------
+- Added new Mediation class
+- Updated documentation to reflect this
+- Added unit and integration tests for Mediation methods
+
+
 Version 0.1.3
 -------------
-- Simplifying unit and integration tests. 
+- Simplifying unit and integration tests.
 
 
 Version 0.1.2
@@ -24,7 +31,7 @@ Version 0.1.1
 Version 0.1.0
 -------------
 
-- Added new TMLE method
+- Added new TMLE class
 - Updated documentation to reflect new TMLE method
 - Renamed CDRC method to more appropriate `GPS` method
 - Small docstring corrections to GPS method
