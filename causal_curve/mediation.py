@@ -7,9 +7,8 @@ from pprint import pprint
 
 import numpy as np
 import pandas as pd
-from pandas.api.types import is_float_dtype, is_numeric_dtype
+from pandas.api.types import is_float_dtype
 from pygam import LinearGAM, s
-from tqdm import tqdm
 
 from causal_curve.core import Core
 from causal_curve.utils import rand_seed_wrapper
@@ -438,8 +437,8 @@ class Mediation(Core):
         Parameters
         ----------
         ci: float (default = 0.95)
-            The desired bootstrap confidence interval to produce. Default value is 0.95, corresponding
-            to 95% confidence intervals. bounded (0, 1.0).
+            The desired bootstrap confidence interval to produce. Default value is 0.95,
+            corresponding to 95% confidence intervals. bounded (0, 1.0).
 
         Returns
         ----------
@@ -532,7 +531,9 @@ class Mediation(Core):
         )
 
         print(
-            f"\n\nMean indirect effect proportion: {total_prop_mean} ({total_prop_lower} - {total_prop_upper})"
+            f"""\n\nMean indirect effect proportion:
+            {total_prop_mean} ({total_prop_lower} - {total_prop_upper})
+            """
         )
         return final_results
 

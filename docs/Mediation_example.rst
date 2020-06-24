@@ -87,12 +87,16 @@ around 52% (+/- 1%) of the effect of the treatment on the outcome. This indicate
 moderate mediation is occurring here. The remaining 48% occurs through a direct effect of the
 treatment on the outcome.
 
-The report also shows how this mediation effect various as a function of the continuous treatment.
-In this case, it looks the effect is relatively flat (as expected).
-
 So long as we are confident that the mediator doesn't play another role in the causal graph
 (it isn't a confounder of the treatment and outcome association), this supports the idea that
 the mediator is in fact a mediator.
+
+The report also shows how this mediation effect various as a function of the continuous treatment.
+In this case, it looks the effect is relatively flat (as expected). With a little processing
+and some basic interpolation, we can plot this mediation effect:
+
+.. image:: ../imgs/mediation/mediation_effect.png
+
 
 
 References

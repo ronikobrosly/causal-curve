@@ -4,6 +4,12 @@
 Change Log
 ==========
 
+Version 0.2.1
+-------------
+- Fixed Mediation tool error / removed `tqdm` from requirements
+- Misc documentation cleanup / revisions
+
+
 Version 0.2.0
 -------------
 - Added new Mediation class

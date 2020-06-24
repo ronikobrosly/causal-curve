@@ -44,7 +44,7 @@ Feature request
 A good feature request usually contains:
 
 - a description of the requested feature,
-- a description of the relevance of this feature to time series classification,
+- a description of the relevance of this feature to causal inference,
 - references if applicable, with links to the papers if they are in open access.
 
 This makes reviewing the relevance of the requested feature easier.

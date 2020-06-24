@@ -40,7 +40,7 @@ Welcome to causal-curve's documentation!
    :caption: Contents:
 
 
-**causal-curve** is a Python package dedicated with tools to perform causal inference
+**causal-curve** is a Python package with tools to perform causal inference
 using observational data when the treatment of interest is continuous.
 
 
@@ -72,7 +72,7 @@ This library attempts to address this gap, providing tools to estimate causal cu
 
 
 Quick example (of the ``GPS`` tool)
---------------------------------------
+-----------------------------------
 
 **causal-curve** uses a sklearn-like API that should feel familiar to python machine learning users.
 The following example estimates the causal dose-response curve (CDRC) by calculating
@@ -105,18 +105,30 @@ generalized propensity scores.
 
 6. Explore or plot your results!
 
+None of the methods provided in causal-curve rely on inference via instrumental variables, they only
+rely on the data from the observed treatment, confounders, and the outcome of interest (like the above GPS example).
+
+
+
+A caution about assumptions
+---------------------------
+
+There is a well-documented set of assumptions one must make to infer causal effects from
+observational data. These are covered elsewhere in more detail, but briefly:
+
+- Causes always occur before effects: The treatment variable needs to have occurred before the outcome.
+- SUTVA: The treatment status of a given individual does not affect the potential outcomes of any other individuals.
+- Positivity: Any individual has a positive probability of receiving all values of the treatment variable.
+- Ignorability: All major confounding variables are included in the data you provide.
+
+Violations of these assumptions will lead to biased results and incorrect conclusions!
+
+In addition, any covariates that are included in `causal-curve` models are assumed to only
+be **confounding** variables.
+
+
 
 `Getting started <install.html>`_
 ---------------------------------
 
 Information to install, test, and contribute to the package.
-
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
