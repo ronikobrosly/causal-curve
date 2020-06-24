@@ -512,32 +512,30 @@ class Mediation(Core):
 
         bootstrap_overall_means = np.array(bootstrap_overall_means)
 
-        final_results = pd.DataFrame(
-            {
-                "Treatment_Value": self.t_bin_means,
-                "Proportion_Direct_Effect": self.prop_direct_list,
-                "Proportion_Indirect_Effect": self.prop_indirect_list,
-            }
-        ).round(4).clip(lower=0)
-
-        print(f"\n\nFinal results: \n\n {final_results}")
+        final_results = (
+            pd.DataFrame(
+                {
+                    "Treatment_Value": self.t_bin_means,
+                    "Proportion_Direct_Effect": self.prop_direct_list,
+                    "Proportion_Indirect_Effect": self.prop_indirect_list,
+                }
+            )
+            .round(4)
+            .clip(lower=0)
+        )
 
         total_prop_mean = round(np.array(self.prop_indirect_list).mean(), 4)
         total_prop_lower = self._clip_negatives(
-            round(
-                np.percentile(bootstrap_overall_means, q=lower * 100), 4
-            )
+            round(np.percentile(bootstrap_overall_means, q=lower * 100), 4)
         )
         total_prop_upper = self._clip_negatives(
-            round(
-                np.percentile(bootstrap_overall_means, q=upper * 100), 4
-            )
+            round(np.percentile(bootstrap_overall_means, q=upper * 100), 4)
         )
 
         print(
             f"\n\nMean indirect effect proportion: {total_prop_mean} ({total_prop_lower} - {total_prop_upper})"
         )
-
+        return final_results
 
     def _clip_negatives(self, number):
         """Helper function to clip negative numbers to zero
@@ -545,7 +543,6 @@ class Mediation(Core):
         if number < 0:
             return 0
         return number
-
 
     def _bootstrap_analysis(self, temp_low_treatment, temp_high_treatment):
         """The top-level function used in the fitting method
