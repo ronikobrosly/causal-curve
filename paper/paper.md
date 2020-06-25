@@ -92,7 +92,7 @@ For a quick reference, the following citation commands can be used:
 # Figures
 
 Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
+![Caption for example figure.\label{fig:example}](welcome_plot.png)
 and referenced from text using \autoref{fig:example}.
 
 Fenced code blocks are rendered with syntax highlighting:
