@@ -4,7 +4,7 @@ language: python
 sudo: false
 
 python:
-  - 3.7
+  - 3.6
 
 env:
   global:
@@ -13,10 +13,7 @@ env:
 
 before_install:
 # Here we download miniconda and install the dependencies
-- sudo apt-get update
-- sudo apt-get -y install python3-setuptools
-- sudo apt-get -y install python3-pip
-- sudo pip3 install future joblib numpy numpydoc pandas patsy progressbar2 pygam pytest python-dateutil python-utils pytz scikit-learn scipy six statsmodels xgboost
+- pip install black future joblib numpy numpydoc pandas patsy progressbar2 pygam pytest python-dateutil python-utils pytz scikit-learn scipy six statsmodels xgboost
 
 install:
 - python setup.py install
