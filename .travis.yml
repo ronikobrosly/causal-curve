@@ -1,0 +1,26 @@
+language: python
+
+# sudo false implies containerized builds
+sudo: false
+
+python:
+  - 3.76
+
+env:
+  global:
+    # List package dependencies for conda
+    - DEPS="black future joblib numpy numpydoc pandas patsy progressbar2 pygam pytest python-dateutil python-utils pytz scikit-learn scipy six statsmodels xgboost"
+    # test invocation
+    - TESTFOLDER="tests"
+
+before_install:
+# Here we download miniconda and install the dependencies
+- sudo apt-get update
+- sudo apt-get -y install python3-pip
+- sudo pip3 install $DEPS
+
+install:
+- python setup.py install
+
+script:
+- pytest $TESTFOLDER

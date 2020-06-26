@@ -1,4 +1,7 @@
 # causal-curve
+
+[![build status](http://img.shields.io/travis/ronikobrosly/causal-curve/master.svg?style=flat)](https://travis-ci.org/ronikobrosly/causal-curve)
+
 Python tools to perform causal inference using observational data when the treatment of interest is continuous.
 
 
