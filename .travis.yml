@@ -16,7 +16,7 @@ before_install:
 - sudo apt-get update
 - sudo apt-get -y install python3-setuptools
 - sudo apt-get -y install python3-pip
-- sudo pip3 install black future joblib numpy numpydoc pandas patsy progressbar2 pygam pytest python-dateutil python-utils pytz scikit-learn scipy six statsmodels xgboost
+- sudo pip3 install future joblib numpy numpydoc pandas patsy progressbar2 pygam pytest python-dateutil python-utils pytz scikit-learn scipy six statsmodels xgboost
 
 install:
 - python setup.py install
