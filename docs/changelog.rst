@@ -4,6 +4,11 @@
 Change Log
 ==========
 
+Version 0.2.2
+-------------
+- Travis CI integration
+
+
 Version 0.2.1
 -------------
 - Fixed Mediation tool error / removed `tqdm` from requirements
