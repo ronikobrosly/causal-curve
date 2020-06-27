@@ -13,10 +13,13 @@ env:
 
 before_install:
 # Here we download miniconda and install the dependencies
-- pip install black future joblib numpy numpydoc pandas patsy progressbar2 pygam pytest python-dateutil python-utils pytz scikit-learn scipy six statsmodels xgboost
+- pip install black coverage future joblib numpy numpydoc pandas patsy progressbar2 pygam pytest python-dateutil python-utils pytz scikit-learn scipy six statsmodels xgboost
 
 install:
 - python setup.py install
 
 script:
-- pytest $TESTFOLDER
+- coverage run -m pytest $TESTFOLDER
+
+after_success:
+- bash <(curl -s https://codecov.io/bash)

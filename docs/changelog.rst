@@ -4,6 +4,11 @@
 Change Log
 ==========
 
+Version 0.2.3
+-------------
+- codecov integration
+
+
 Version 0.2.2
 -------------
 - Travis CI integration

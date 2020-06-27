@@ -9,13 +9,17 @@ Dependencies
 
 causal-curve requires:
 
+- black
+- coverage
 - future
 - joblib
 - numpy
+- numpydoc
 - pandas
 - patsy
 - progressbar2
 - pygam
+- pytest
 - python-dateutil
 - python-utils
 - pytz
