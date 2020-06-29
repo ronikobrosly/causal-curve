@@ -14,14 +14,14 @@ def test_full_mediation_flow(mediation_fixture):
         treatment_grid_num=10,
         lower_grid_constraint=0.01,
         upper_grid_constraint=0.99,
-        bootstrap_draws=10,
-        bootstrap_replicates=10,
+        bootstrap_draws=100,
+        bootstrap_replicates=50,
         spline_order=3,
         n_splines=5,
         lambda_=0.5,
-        max_iter=100,
+        max_iter=20,
         random_seed=None,
-        verbose=False,
+        verbose=True,
     )
     med.fit(
         T=mediation_fixture["treatment"],

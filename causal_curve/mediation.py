@@ -215,13 +215,13 @@ class Mediation(Core):
                 but found type {type(self.bootstrap_draws)}"
             )
 
-        if (isinstance(self.bootstrap_draws, float)) and self.bootstrap_draws < 100:
+        if (isinstance(self.bootstrap_draws, int)) and self.bootstrap_draws < 100:
             raise ValueError(
                 f"bootstrap_draws parameter cannot be < 100, \
                 but found value {self.bootstrap_draws}"
             )
 
-        if (isinstance(self.bootstrap_draws, float)) and self.bootstrap_draws > 500000:
+        if (isinstance(self.bootstrap_draws, int)) and self.bootstrap_draws > 500000:
             raise ValueError(
                 f"bootstrap_draws parameter cannot > 500000, \
                 but found value {self.bootstrap_draws}"
@@ -235,7 +235,7 @@ class Mediation(Core):
             )
 
         if (
-            isinstance(self.bootstrap_replicates, float)
+            isinstance(self.bootstrap_replicates, int)
         ) and self.bootstrap_replicates < 50:
             raise ValueError(
                 f"bootstrap_replicates parameter cannot be < 50, \
@@ -243,7 +243,7 @@ class Mediation(Core):
             )
 
         if (
-            isinstance(self.bootstrap_replicates, float)
+            isinstance(self.bootstrap_replicates, int)
         ) and self.bootstrap_replicates > 100000:
             raise ValueError(
                 f"bootstrap_replicates parameter cannot > 100000, \
