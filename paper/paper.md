@@ -1,62 +1,79 @@
 ---
-title: 'Gala: A Python package for galactic dynamics'
+title: 'causal-curve: A Python Causal Inference Package to Estimate Causal Dose-Response Curves'
 tags:
   - Python
-  - astronomy
-  - dynamics
-  - galactic dynamics
-  - milky way
+  - causal inference
+  - causality
+  - machine learning
+
 authors:
-  - name: Adrian M. Price-Whelan^[Custom footnotes for e.g. denoting who the corresspoinding author is can be included like this.]
-    orcid: 0000-0003-0872-7098
+  - name: Roni W. Kobrosly^[Custom footnotes for e.g. denoting who the corresspoinding author is can be included like this.]
+    orcid: 0000-0003-0363-9662
     affiliation: "1, 2" # (Multiple affiliations must be quoted)
-  - name: Author Without ORCID
-    affiliation: 2
 affiliations:
- - name: Lyman Spitzer, Jr. Fellow, Princeton University
+ - name: Department of Environmental Medicine and Public Health, Icahn School of Medicine at Mount Sinai, New York, NY, USA
    index: 1
- - name: Institution 2
+ - name: Flowcast, 44 Tehama St, San Francisco, CA, USA
    index: 2
-date: 13 August 2017
+date: 1 July 2020
 bibliography: paper.bib
 
-# Optional fields if submitting to a AAS journal too, see this blog post:
-# https://blog.joss.theoj.org/2018/12/a-new-collaboration-with-aas-publishing
-aas-doi: 10.3847/xxxxx <- update this with the DOI from AAS once you know it.
-aas-journal: Astrophysical Journal <- The name of the AAS journal.
 ---
 
 # Summary
 
-The forces on stars, galaxies, and dark matter under external gravitational
-fields lead to the dynamical evolution of structures in the universe. The orbits
-of these bodies are therefore key to understanding the formation, history, and
-future state of galaxies. The field of "galactic dynamics," which aims to model
-the gravitating components of galaxies to study their structure and evolution,
-is now well-established, commonly taught, and frequently used in astronomy.
-Aside from toy problems and demonstrations, the majority of problems require
-efficient numerical tools, many of which require the same base code (e.g., for
-performing numerical orbit integration).
+In academia and industry, randomized controlled experiments (colloquially "A/B tests")
+are considered the gold standard approach for assessing the impact of a treatment or intervention.
+However, for ethical or financial reasons, these experiments may not always be feasible to carry out.
+"Causal inference" methods are a set of approaches that attempt to estimate causal effects
+from observational rather than experimental data, correcting for the biases that are inherent
+to analyzing observational data (e.g. confounding and selection bias).
 
-`Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
-enables wrapping low-level languages (e.g., C) for speed without losing
-flexibility or ease-of-use in the user-interface. The API for `Gala` was
-designed to provide a class-based and user-friendly interface to fast (C or
-Cython-optimized) implementations of common operations such as gravitational
-potential and force evaluation, orbit integration, dynamical transformations,
-and chaos indicators for nonlinear dynamics. `Gala` also relies heavily on and
-interfaces well with the implementations of physical units and astronomical
-coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
-`astropy.coordinates`).
+Although much significant research and implementation effort has gone towards methods in
+causal inference to estimate the effects of binary treatments (e.g. did the population receive
+treatment "A" or "B"), much less has gone towards estimating the effects of continuous treatments.
+This is unfortunate because there are there are a large number of use cases in research
+and industry that could benefit from tools to estimate the effect of
+continuous treatments, such as estimating how:
 
-`Gala` was designed to be used by both astronomical researchers and by
-students in courses on gravitational dynamics or astronomy. It has already been
-used in a number of scientific publications [@Pearson:2017] and has also been
-used in graduate courses on Galactic dynamics to, e.g., provide interactive
-visualizations of textbook material [@Binney:2008]. The combination of speed,
-design, and support for Astropy functionality in `Gala` will enable exciting
-scientific explorations of forthcoming data releases from the *Gaia* mission
-[@gaia] by students and experts alike.
+- the number of minutes per week of aerobic exercise causes positive health outcomes,
+after controlling for confounding effects.
+- increasing or decreasing the price of a product would impact demand (price elasticity).
+- changing neighborhood income inequality (via the continuous Gini index)
+might or might not be causally related to the neighborhood crime rate.
+- blood lead levels are causally related to neurodevelopment delays in children.
+
+`causal-curve` is a Python package created to address this gap; it is designed to perform
+causal inference when the treatment of interest is continuous in nature.
+From the observational data that is provided by the user, it estimates the
+"causal dose-response curve" (as known as the average or marginal dose-response function).
+
+`causal-curve` attempts to make the user-experience as painless as possible:
+
+- This API for this package was designed to resemble that of `scikit-learn`,
+as this is a very commonly used predictive modeling framework in Python that most machine learning
+practioners are familiar with.
+- All of the major classes contained in `causal-curve` readily use Pandas DataFrames and Series as
+inputs, to make this package more easily integrate with the standard Python data analysis tools.
+- Full tutorials of the three major classes are available online in the documentation,
+along with full documentation of all of their parameters, methods, and attributes.
+
+
+# Methods
+
+In the current release of `causal-curve`, there are two unique model classes for
+constructing the causal dose-response curve: the Generalized Propensity Score (GPS) and the
+Targetted Maximum Likelihood Estimation (TMLE) tools. In addition to this, there is also tool
+to assess causal mediation effects in the presence of a continuous mediator and treatment.
+
+The `GPS` method ...
+
+The `TMLE` method ...
+
+`causal-curve` allows for continuous mediation assessment with the `Mediation` tool
+
+Pytest, Travis CI, code coverage > 90%
+
 
 # Figures
 
@@ -65,9 +82,19 @@ Figures can be included like this:
 and referenced from text using \autoref{fig:example}.
 
 
+# Statement of Need
+
+While there are a few established Python packages related to causal inference, to the best of
+the author's knowledge, there is no Python package available that can provide support for
+continuous treatments as `causal-curve` does. Similarly, the author isn't aware of any python
+implementation of a causal mediation analysis for continuous treatments and mediators. Finally,
+the tutorials available in the documentation introduce the concept of continuous treatments
+and how their analysis might be interpretted and carried out.  
+
+
 # Acknowledgements
 
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
+We acknowledge contributions from Miguel-Angel Luque, Erica Moodie, and Mark van der Laan
+during the creation of this project.
 
 # References
