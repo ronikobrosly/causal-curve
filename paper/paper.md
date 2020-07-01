@@ -48,6 +48,11 @@ causal inference when the treatment of interest is continuous in nature.
 From the observational data that is provided by the user, it estimates the
 "causal dose-response curve" (as known as the average or marginal dose-response function).
 
+In the current release of the package there are two unique model classes for
+constructing the causal dose-response curve: the Generalized Propensity Score (GPS) and the
+Targetted Maximum Likelihood Estimation (TMLE) tools. In addition to this, there is also tool
+to assess causal mediation effects in the presence of a continuous mediator and treatment.
+
 `causal-curve` attempts to make the user-experience as painless as possible:
 
 - This API for this package was designed to resemble that of `scikit-learn`,
@@ -59,14 +64,15 @@ inputs, to make this package more easily integrate with the standard Python data
 along with full documentation of all of their parameters, methods, and attributes.
 
 
+
+
+aaaa[@Galagate:2016] bbbb[@Moodie:2010] cccc[@Hirano:2004] dddd[@van_der_Laan:2010] eeee[@van_der_Laan:2006] ffff[@Imai:2010]
+
+
+
 # Methods
 
-In the current release of `causal-curve`, there are two unique model classes for
-constructing the causal dose-response curve: the Generalized Propensity Score (GPS) and the
-Targetted Maximum Likelihood Estimation (TMLE) tools. In addition to this, there is also tool
-to assess causal mediation effects in the presence of a continuous mediator and treatment.
-
-The `GPS` method ...
+The `GPS` method was originally described by Hirano, and expanded by Moodie and Galagate.
 
 The `TMLE` method ...
 
