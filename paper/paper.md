@@ -59,6 +59,12 @@ inputs, to make this package more easily integrate with the standard Python data
 along with full documentation of all of their parameters, methods, and attributes.
 
 
+
+
+aaaa[@Galagate:2016] bbbb[@Moodie:2010] cccc[@Hirano:2004] dddd[@van_der_Laan:2010] eeee[@van_der_Laan:2006] ffff[@Imai:2010]
+
+
+
 # Methods
 
 In the current release of `causal-curve`, there are two unique model classes for
