@@ -10,7 +10,7 @@ Welcome to causal-curve's documentation!
    contribute
 
 
- .. toctree::
+.. toctree::
    :maxdepth: 1
    :hidden:
    :caption: End-to-end demonstration
@@ -18,24 +18,21 @@ Welcome to causal-curve's documentation!
    full_example
 
 
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Tutorials of Individual Tools
 
+   GPS_example
+   TMLE_example
+   Mediation_example
 
 .. toctree::
-  :maxdepth: 1
-  :hidden:
-  :caption: Tutorials of Individual Tools
+   :maxdepth: 1
+   :hidden:
+   :caption: Module details
 
-  GPS_example
-  TMLE_example
-  Mediation_example
-
-
-.. toctree::
-  :maxdepth: 1
-  :hidden:
-  :caption: Module details
-
-  modules
+   modules
 
 
 .. toctree::
