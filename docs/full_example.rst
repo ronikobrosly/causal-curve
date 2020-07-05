@@ -81,30 +81,33 @@ difficult to say).
 
 The above curves differ from standard regression curves in a few big ways:
 
-- Even though the data that we used to generate these curves are observational,
-if the standard causal inference assumptions are met, these curves can be interpretted as causal.
-
-- These models were created using the potential outcomes / counterfactual framework, while
-standard models are not. Along these lines, the approach we used here essentially
-simulates experimental conditions by balancing out treatment assignment across the various
-confounders, and controlling for their effects.
-
-- Even if complex interactions between the variables are modelled, these curves average over the
-various interaction effects and subgroups. In this sense, these are "marginal" curves.
-
-- These curves should not be used to make predictions at the individual level. These are population
-level estimates and should remain that way.
+- Even though the data that we used to generate these curves are observational, if causal inference assumptions are met, these curves can be interpretted as causal.
+- These models were created using the potential outcomes / counterfactual framework, while standard models are not. Also, the approach we used here essentially simulates experimental conditions by balancing out treatment assignment across the various confounders, and controlling for their effects.
+- Even if complex interactions between the variables are modelled, these curves average over the various interaction effects and subgroups. In this sense, these are "marginal" curves.
+- These curves should not be used to make predictions at the individual level. These are population level estimates and should remain that way.
 
 
 
 Do blood lead levels mediate the relationship between poverty and cognitive performance?
 ----------------------------------------------------------------------------------------
 
+There is a well-known link between household income and child academic performance. Now that we
+have some evidence of a potentially causal relationship between BLLs and test performance in
+children, one might wonder if lead exposure might mediate the relationship between household income
+academic performance. In other words, in this population does low income cause one to be
+exposed more to lead, which in turn causes lower performance? Or is household income directly
+linked with academic performance or through other variables?
 
+NHANES III captured each household's Poverty Index Ratio (the ratio of total family income to
+the federal poverty level for the year of the interview). For this example, let's focus just
+on the math test as an outcome. Using `causal-curve`'s mediation tool,
+we found that the overall, mediating indirect effect of BLLs are 0.20 (0.17 - 0.23). This means
+that lead exposure accounts for 20% of the relationship between low income and low test
+performance in this population. The mediation tool also allows you to see how the indirect effect
+varies as a function of the treatment. As the plot shows, the mediating effect is relatively flat,
+although interesting there is a hint of an increase as income increases relative to the povetry line.
 
-
-
-
+.. image:: ../imgs/full_example/mediation_curve.png
 
 
 References
