@@ -189,29 +189,29 @@ class GPS(Core):
         # Checks for gps_family param
         if not isinstance(self.gps_family, (str, type(None))):
             raise TypeError(
-                f"gps_family parameter must be a string or None, \
-                 but found type {type(self.gps_family)}"
+                f"gps_family parameter must be a string or None "
+                 f"but found type {type(self.gps_family)}"
             )
 
         if (isinstance(self.gps_family, str)) and (
             self.gps_family not in ["normal", "lognormal", "gamma"]
         ):
             raise ValueError(
-                f"gps_family parameter must take on values of \
-                'normal', 'lognormal', or 'gamma', but found {self.gps_family}"
+                f"gps_family parameter must take on values of "
+                f"'normal', 'lognormal', or 'gamma', but found {self.gps_family}"
             )
 
         # Checks for treatment_grid_num
         if not isinstance(self.treatment_grid_num, int):
             raise TypeError(
-                f"treatment_grid_num parameter must be an integer, \
-                but found type {type(self.treatment_grid_num)}"
+                f"treatment_grid_num parameter must be an integer, "
+                f"but found type {type(self.treatment_grid_num)}"
             )
 
         if (isinstance(self.treatment_grid_num, int)) and self.treatment_grid_num < 10:
             raise ValueError(
-                f"treatment_grid_num parameter should be >= 10 so your final curve \
-                has enough resolution, but found value {self.treatment_grid_num}"
+                f"treatment_grid_num parameter should be >= 10 so your final curve "
+                f"has enough resolution, but found value {self.treatment_grid_num}"
             )
 
         if (
@@ -222,47 +222,47 @@ class GPS(Core):
         # Checks for lower_grid_constraint
         if not isinstance(self.lower_grid_constraint, float):
             raise TypeError(
-                f"lower_grid_constraint parameter must be a float, \
-                but found type {type(self.lower_grid_constraint)}"
+                f"lower_grid_constraint parameter must be a float, "
+                f"but found type {type(self.lower_grid_constraint)}"
             )
 
         if (
             isinstance(self.lower_grid_constraint, float)
         ) and self.lower_grid_constraint < 0:
             raise ValueError(
-                f"lower_grid_constraint parameter cannot be < 0, \
-                but found value {self.lower_grid_constraint}"
+                f"lower_grid_constraint parameter cannot be < 0, "
+                f"but found value {self.lower_grid_constraint}"
             )
 
         if (
             isinstance(self.lower_grid_constraint, float)
         ) and self.lower_grid_constraint >= 1.0:
             raise ValueError(
-                f"lower_grid_constraint parameter cannot >= 1.0, \
-                but found value {self.lower_grid_constraint}"
+                f"lower_grid_constraint parameter cannot >= 1.0, "
+                f"but found value {self.lower_grid_constraint}"
             )
 
         # Checks for upper_grid_constraint
         if not isinstance(self.upper_grid_constraint, float):
             raise TypeError(
-                f"upper_grid_constraint parameter must be a float, \
-                but found type {type(self.upper_grid_constraint)}"
+                f"upper_grid_constraint parameter must be a float, "
+                f"but found type {type(self.upper_grid_constraint)}"
             )
 
         if (
             isinstance(self.upper_grid_constraint, float)
         ) and self.upper_grid_constraint <= 0:
             raise ValueError(
-                f"upper_grid_constraint parameter cannot be <= 0, \
-                but found value {self.upper_grid_constraint}"
+                f"upper_grid_constraint parameter cannot be <= 0, "
+                f"but found value {self.upper_grid_constraint}"
             )
 
         if (
             isinstance(self.upper_grid_constraint, float)
         ) and self.upper_grid_constraint > 1.0:
             raise ValueError(
-                f"upper_grid_constraint parameter cannot > 1.0, \
-                but found value {self.upper_grid_constraint}"
+                f"upper_grid_constraint parameter cannot > 1.0, "
+                f"but found value {self.upper_grid_constraint}"
             )
 
         # Checks for lower_grid_constraint isn't higher than upper_grid_constraint
@@ -274,8 +274,8 @@ class GPS(Core):
         # Checks for spline_order
         if not isinstance(self.spline_order, int):
             raise TypeError(
-                f"spline_order parameter must be an integer, \
-                but found type {type(self.spline_order)}"
+                f"spline_order parameter must be an integer, "
+                f"but found type {type(self.spline_order)}"
             )
 
         if (isinstance(self.spline_order, int)) and self.spline_order < 1:
@@ -361,8 +361,8 @@ class GPS(Core):
             for column in self.X:
                 if not is_numeric_dtype(self.X[column]):
                     raise TypeError(
-                        f"All covariate (X) columns must be int or float type \
-                        (i.e. must be numeric)"
+                        f"All covariate (X) columns must be int or float type "
+                        f"(i.e. must be numeric)"
                     )
 
         # Checks for Y column
@@ -399,9 +399,9 @@ class GPS(Core):
         self : object
 
         """
-        self.T = T
-        self.X = X
-        self.y = y
+        self.T = T.reset_index(drop=True, inplace=False)
+        self.X = X.reset_index(drop=True, inplace=False)
+        self.y = y.reset_index(drop=True, inplace=False)
 
         # Validate this input data
         self._validate_fit_data()
@@ -425,8 +425,8 @@ class GPS(Core):
 
             if self.verbose:
                 print(
-                    f"Best fitting model was {self.best_gps_family}, which \
-                    produced a deviance of {self.gps_deviance}"
+                    f"Best fitting model was {self.best_gps_family}, which "
+                    f"produced a deviance of {self.gps_deviance}"
                 )
 
         # Otherwise, go with the what the user provided...
@@ -500,8 +500,8 @@ class GPS(Core):
 
         if self.verbose:
             print(
-                f"Generating predictions for each value of treatment grid, \
-                and averaging to get the CDRC..."
+                """Generating predictions for each value of treatment grid,
+                and averaging to get the CDRC..."""
             )
 
         # For each column of _cdrc_preds, calculate the mean and confidence interval bounds

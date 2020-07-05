@@ -4,6 +4,13 @@
 Change Log
 ==========
 
+Version 0.3.2
+-------------
+- Fixed random seed issue with Mediation tool
+- Fixed Mediation bootstrap issue. Confidence interval bounded [0,1]
+- Fixed issue with all classes not accepting non-sequential indicies in pandas Dataframes/Series
+- Class init checks for all classes now print cleaner errors if bad input
+
 
 Version 0.3.1
 -------------

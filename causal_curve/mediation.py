@@ -149,14 +149,14 @@ class Mediation(Core):
         # Checks for treatment_grid_num
         if not isinstance(self.treatment_grid_num, int):
             raise TypeError(
-                f"treatment_grid_num parameter must be an integer, \
-                but found type {type(self.treatment_grid_num)}"
+                f"treatment_grid_num parameter must be an integer, "
+                f"but found type {type(self.treatment_grid_num)}"
             )
 
         if (isinstance(self.treatment_grid_num, int)) and self.treatment_grid_num < 4:
             raise ValueError(
-                f"treatment_grid_num parameter should be >= 4 so the internal models \
-                have enough resolution, but found value {self.treatment_grid_num}"
+                f"treatment_grid_num parameter should be >= 4 so the internal models "
+                f"have enough resolution, but found value {self.treatment_grid_num}"
             )
 
         if (isinstance(self.treatment_grid_num, int)) and self.treatment_grid_num > 100:
@@ -165,89 +165,89 @@ class Mediation(Core):
         # Checks for lower_grid_constraint
         if not isinstance(self.lower_grid_constraint, float):
             raise TypeError(
-                f"lower_grid_constraint parameter must be a float, \
-                but found type {type(self.lower_grid_constraint)}"
+                f"lower_grid_constraint parameter must be a float, "
+                f"but found type {type(self.lower_grid_constraint)}"
             )
 
         if (
             isinstance(self.lower_grid_constraint, float)
         ) and self.lower_grid_constraint < 0:
             raise ValueError(
-                f"lower_grid_constraint parameter cannot be < 0, \
-                but found value {self.lower_grid_constraint}"
+                f"lower_grid_constraint parameter cannot be < 0, "
+                f"but found value {self.lower_grid_constraint}"
             )
 
         if (
             isinstance(self.lower_grid_constraint, float)
         ) and self.lower_grid_constraint >= 1.0:
             raise ValueError(
-                f"lower_grid_constraint parameter cannot >= 1.0, \
-                but found value {self.lower_grid_constraint}"
+                f"lower_grid_constraint parameter cannot >= 1.0, "
+                f"but found value {self.lower_grid_constraint}"
             )
 
         # Checks for upper_grid_constraint
         if not isinstance(self.upper_grid_constraint, float):
             raise TypeError(
-                f"upper_grid_constraint parameter must be a float, \
-                but found type {type(self.upper_grid_constraint)}"
+                f"upper_grid_constraint parameter must be a float, "
+                f"but found type {type(self.upper_grid_constraint)}"
             )
 
         if (
             isinstance(self.upper_grid_constraint, float)
         ) and self.upper_grid_constraint <= 0:
             raise ValueError(
-                f"upper_grid_constraint parameter cannot be <= 0, \
-                but found value {self.upper_grid_constraint}"
+                f"upper_grid_constraint parameter cannot be <= 0, "
+                f"but found value {self.upper_grid_constraint}"
             )
 
         if (
             isinstance(self.upper_grid_constraint, float)
         ) and self.upper_grid_constraint > 1.0:
             raise ValueError(
-                f"upper_grid_constraint parameter cannot > 1.0, \
-                but found value {self.upper_grid_constraint}"
+                f"upper_grid_constraint parameter cannot > 1.0, "
+                f"but found value {self.upper_grid_constraint}"
             )
 
         # Checks for bootstrap_draws
         if not isinstance(self.bootstrap_draws, int):
             raise TypeError(
-                f"bootstrap_draws parameter must be a int, \
-                but found type {type(self.bootstrap_draws)}"
+                f"bootstrap_draws parameter must be a int, "
+                f"but found type {type(self.bootstrap_draws)}"
             )
 
         if (isinstance(self.bootstrap_draws, int)) and self.bootstrap_draws < 100:
             raise ValueError(
-                f"bootstrap_draws parameter cannot be < 100, \
-                but found value {self.bootstrap_draws}"
+                f"bootstrap_draws parameter cannot be < 100, "
+                f"but found value {self.bootstrap_draws}"
             )
 
         if (isinstance(self.bootstrap_draws, int)) and self.bootstrap_draws > 500000:
             raise ValueError(
-                f"bootstrap_draws parameter cannot > 500000, \
-                but found value {self.bootstrap_draws}"
+                f"bootstrap_draws parameter cannot > 500000, "
+                f"but found value {self.bootstrap_draws}"
             )
 
         # Checks for bootstrap_replicates
         if not isinstance(self.bootstrap_replicates, int):
             raise TypeError(
-                f"bootstrap_replicates parameter must be a int, \
-                but found type {type(self.bootstrap_replicates)}"
+                f"bootstrap_replicates parameter must be a int, "
+                f"but found type {type(self.bootstrap_replicates)}"
             )
 
         if (
             isinstance(self.bootstrap_replicates, int)
         ) and self.bootstrap_replicates < 50:
             raise ValueError(
-                f"bootstrap_replicates parameter cannot be < 50, \
-                but found value {self.bootstrap_replicates}"
+                f"bootstrap_replicates parameter cannot be < 50, "
+                f"but found value {self.bootstrap_replicates}"
             )
 
         if (
             isinstance(self.bootstrap_replicates, int)
         ) and self.bootstrap_replicates > 100000:
             raise ValueError(
-                f"bootstrap_replicates parameter cannot > 100000, \
-                but found value {self.bootstrap_replicates}"
+                f"bootstrap_replicates parameter cannot > 100000, "
+                f"but found value {self.bootstrap_replicates}"
             )
 
         # Checks for lower_grid_constraint isn't higher than upper_grid_constraint
@@ -259,8 +259,8 @@ class Mediation(Core):
         # Checks for spline_order
         if not isinstance(self.spline_order, int):
             raise TypeError(
-                f"spline_order parameter must be an integer, \
-                but found type {type(self.spline_order)}"
+                f"spline_order parameter must be an integer, "
+                f"but found type {type(self.spline_order)}"
             )
 
         if (isinstance(self.spline_order, int)) and self.spline_order < 3:
@@ -394,9 +394,9 @@ class Mediation(Core):
         self : object
 
         """
-        self.T = T
-        self.M = M
-        self.y = y
+        self.T = T.reset_index(drop=True, inplace=False)
+        self.M = M.reset_index(drop=True, inplace=False)
+        self.y = y.reset_index(drop=True, inplace=False)
 
         # Validate this input data
         self._validate_fit_data()
@@ -504,7 +504,7 @@ class Mediation(Core):
         for i in range(0, 1000):
             bootstrap_overall_means.append(
                 general_indirect.sample(
-                    frac=0.25, replace=True, random_state=self.random_seed
+                    frac=0.25, replace=True
                 ).mean()
             )
 
@@ -519,7 +519,7 @@ class Mediation(Core):
                 }
             )
             .round(4)
-            .clip(lower=0)
+            .clip(lower=0, upper=1.0)
         )
 
         total_prop_mean = round(np.array(self.prop_indirect_list).mean(), 4)
@@ -586,7 +586,7 @@ class Mediation(Core):
         """Creates a single bootstrap replicate from the data
         """
         temp_t = self.T.sample(
-            n=self.bootstrap_draws, replace=True, random_state=self.random_seed
+            n=self.bootstrap_draws, replace=True
         )
         temp_m = self.M.iloc[temp_t.index]
         temp_y = self.y.iloc[temp_t.index]

@@ -144,15 +144,15 @@ class TMLE(Core):
         # Checks for treatment_grid_bins
         if not isinstance(self.treatment_grid_bins, list):
             raise TypeError(
-                f"treatment_grid_bins parameter must be a list, \
-                 but found type {type(self.treatment_grid_bins)}"
+                f"treatment_grid_bins parameter must be a list, "
+                 f"but found type {type(self.treatment_grid_bins)}"
             )
 
         for element in self.treatment_grid_bins:
             if not isinstance(element, (int, float)):
                 raise TypeError(
-                    f"'{element}' in `treatment_grid_bins` list is not of type float or int, \
-                     it is {type(element)}"
+                    f"'{element}' in `treatment_grid_bins` list is not of type float or int, "
+                     f"it is {type(element)}"
                 )
 
         if len(self.treatment_grid_bins) < 2:
@@ -161,8 +161,8 @@ class TMLE(Core):
         # Checks for n_estimators
         if not isinstance(self.n_estimators, int):
             raise TypeError(
-                f"n_estimators parameter must be an integer, \
-                but found type {type(self.n_estimators)}"
+                f"n_estimators parameter must be an integer, "
+                f"but found type {type(self.n_estimators)}"
             )
 
         if (self.n_estimators < 10) or (self.n_estimators > 100000):
@@ -171,8 +171,8 @@ class TMLE(Core):
         # Checks for learning_rate
         if not isinstance(self.learning_rate, (int, float)):
             raise TypeError(
-                f"learning_rate parameter must be an integer or float, \
-                but found type {type(self.learning_rate)}"
+                f"learning_rate parameter must be an integer or float, "
+                f"but found type {type(self.learning_rate)}"
             )
 
         if (self.learning_rate <= 0) or (self.learning_rate >= 1000):
@@ -183,8 +183,8 @@ class TMLE(Core):
         # Checks for max_depth
         if not isinstance(self.max_depth, int):
             raise TypeError(
-                f"max_depth parameter must be an integer, \
-                but found type {type(self.max_depth)}"
+                f"max_depth parameter must be an integer, "
+                f"but found type {type(self.max_depth)}"
             )
 
         if self.max_depth <= 0:
@@ -193,8 +193,8 @@ class TMLE(Core):
         # Checks for gamma
         if not isinstance(self.gamma, float):
             raise TypeError(
-                f"gamma parameter must be a float, \
-                but found type {type(self.gamma)}"
+                f"gamma parameter must be a float, "
+                f"but found type {type(self.gamma)}"
             )
 
         if self.gamma <= 0:
@@ -233,8 +233,8 @@ class TMLE(Core):
             for column in self.x_data:
                 if not is_numeric_dtype(self.x_data[column]):
                     raise TypeError(
-                        f"All covariate (X) columns must be int or float type \
-                        (i.e. must be numeric)"
+                        """All covariate (X) columns must be int or float type
+                        (i.e. must be numeric)"""
                     )
 
         # Checks for Y column
@@ -332,9 +332,9 @@ class TMLE(Core):
         self : object
 
         """
-        self.t_data = T
-        self.x_data = X
-        self.y_data = y
+        self.t_data = T.reset_index(drop=True, inplace=False)
+        self.x_data = X.reset_index(drop=True, inplace=False)
+        self.y_data = y.reset_index(drop=True, inplace=False)
 
         # Validate this input data
         self._validate_fit_data()
