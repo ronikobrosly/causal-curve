@@ -87,8 +87,9 @@ but produces significantly wider confidence intervals.
 
 
 
-<img src="welcome_plot.png" width="300" height="300" />
-
+```{r  out.width = "100%"}
+include_graphics(welcome_plot.png) 
+```
 
 
 
