@@ -81,57 +81,13 @@ but produces significantly wider confidence intervals.
 
 
 
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
 
 
 
 
 
 
-
-
-![Caption for example figure.\label{fig:example}](welcome_plot.png) <!-- .element height="200%" width="200%" -->
-
-
-
-
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-
-
-
-
-
-
+<img src="welcome_plot.png" width="300" height="300" />
 
 
 
