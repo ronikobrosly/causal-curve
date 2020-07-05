@@ -39,35 +39,32 @@ continuous treatments, such as estimating how:
 - the number of minutes per week of aerobic exercise causes positive health outcomes,
 after controlling for confounding effects.
 - increasing or decreasing the price of a product would impact demand (price elasticity).
-- changing neighborhood income inequality (via the continuous Gini index)
+- changing neighborhood income inequality (as measured by the continuous Gini index)
 might or might not be causally related to the neighborhood crime rate.
 - blood lead levels are causally related to neurodevelopment delays in children.
 
 `causal-curve` is a Python package created to address this gap; it is designed to perform
 causal inference when the treatment of interest is continuous in nature.
 From the observational data that is provided by the user, it estimates the
-"causal dose-response curve" (as known as the average or marginal dose-response function).
+"causal dose-response curve" (or simply the "causal curve").
 
 In the current release of the package there are two unique model classes for
 constructing the causal dose-response curve: the Generalized Propensity Score (GPS) and the
-Targetted Maximum Likelihood Estimation (TMLE) tools. In addition to this, there is also tool
+Targetted Maximum Likelihood Estimation (TMLE) tools. There is also tool
 to assess causal mediation effects in the presence of a continuous mediator and treatment.
 
 `causal-curve` attempts to make the user-experience as painless as possible:
 
-- This API for this package was designed to resemble that of `scikit-learn`,
-as this is a very commonly used predictive modeling framework in Python that most machine learning
-practioners are familiar with.
+- This package's API was designed to resemble that of `scikit-learn`, as this is a commonly
+used Python predictive modeling framework that most machine learning practioners are familiar with.
 - All of the major classes contained in `causal-curve` readily use Pandas DataFrames and Series as
 inputs, to make this package more easily integrate with the standard Python data analysis tools.
-- A full, end-to-end example of applying the package to the analysis of health data. Full tutorials of the three major classes are available online in the documentation,
-along with full documentation of all of their parameters, methods, and attributes.
+- A full, end-to-end example of applying the package to a causal inference problem (the analysis of health data)
+is provided. In addition to this, there are shorter tutorials for each of the three major classes are available online in the documentation, along with full documentation of all of their parameters, methods, and attributes.
 
-
-
-
-aaaa[@Galagate:2016] bbbb[@Moodie:2010] cccc[@Hirano:2004] dddd[@van_der_Laan:2010] eeee[@van_der_Laan:2006] ffff[@Imai:2010]
-
+This package includes a suite of unit and integration tests made using the pytest framework. The
+repo containing the latest project code is integrated with TravisCI for continuous integration. Code
+coverage is monitored via codecov and is presently above 90%.
 
 
 # Methods
@@ -78,7 +75,9 @@ The `TMLE` method ...
 
 `causal-curve` allows for continuous mediation assessment with the `Mediation` tool
 
-Pytest, Travis CI, code coverage > 90%
+
+
+aaaa[@Galagate:2016] bbbb[@Moodie:2010] cccc[@Hirano:2004] dddd[@van_der_Laan:2010] eeee[@van_der_Laan:2006] ffff[@Imai:2010]
 
 
 # Figures
@@ -92,10 +91,10 @@ and referenced from text using \autoref{fig:example}.
 
 While there are a few established Python packages related to causal inference, to the best of
 the author's knowledge, there is no Python package available that can provide support for
-continuous treatments as `causal-curve` does. Similarly, the author isn't aware of any python
+continuous treatments as `causal-curve` does. Similarly, the author isn't aware of any Python
 implementation of a causal mediation analysis for continuous treatments and mediators. Finally,
 the tutorials available in the documentation introduce the concept of continuous treatments
-and how their analysis might be interpretted and carried out.  
+and are instructive as to how the results of their analysis should be interpretted.
 
 
 # Acknowledgements
