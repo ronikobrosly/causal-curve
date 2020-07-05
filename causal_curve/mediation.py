@@ -503,9 +503,7 @@ class Mediation(Core):
         bootstrap_overall_means = []
         for i in range(0, 1000):
             bootstrap_overall_means.append(
-                general_indirect.sample(
-                    frac=0.25, replace=True
-                ).mean()
+                general_indirect.sample(frac=0.25, replace=True).mean()
             )
 
         bootstrap_overall_means = np.array(bootstrap_overall_means)
@@ -585,9 +583,7 @@ class Mediation(Core):
     def _create_bootstrap_replicate(self):
         """Creates a single bootstrap replicate from the data
         """
-        temp_t = self.T.sample(
-            n=self.bootstrap_draws, replace=True
-        )
+        temp_t = self.T.sample(n=self.bootstrap_draws, replace=True)
         temp_m = self.M.iloc[temp_t.index]
         temp_y = self.y.iloc[temp_t.index]
 

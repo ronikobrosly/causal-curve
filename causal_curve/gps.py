@@ -190,7 +190,7 @@ class GPS(Core):
         if not isinstance(self.gps_family, (str, type(None))):
             raise TypeError(
                 f"gps_family parameter must be a string or None "
-                 f"but found type {type(self.gps_family)}"
+                f"but found type {type(self.gps_family)}"
             )
 
         if (isinstance(self.gps_family, str)) and (

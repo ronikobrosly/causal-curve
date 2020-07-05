@@ -145,14 +145,14 @@ class TMLE(Core):
         if not isinstance(self.treatment_grid_bins, list):
             raise TypeError(
                 f"treatment_grid_bins parameter must be a list, "
-                 f"but found type {type(self.treatment_grid_bins)}"
+                f"but found type {type(self.treatment_grid_bins)}"
             )
 
         for element in self.treatment_grid_bins:
             if not isinstance(element, (int, float)):
                 raise TypeError(
                     f"'{element}' in `treatment_grid_bins` list is not of type float or int, "
-                     f"it is {type(element)}"
+                    f"it is {type(element)}"
                 )
 
         if len(self.treatment_grid_bins) < 2:
