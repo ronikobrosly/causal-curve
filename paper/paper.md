@@ -101,7 +101,7 @@ potential outcomes / counterfactual framework [@Imai:2010]. While this approach 
 continuous mediator and outcome, as put forward by Imai it only allows for a binary treatment. As
 mentioned above with the `TMLE` approach, the tool creates a series of binary treatment comparisons
 and connects them to show the user how mediation varies as a function of the treatment. An interpretable,
-overall mediation percentage is provided as well.
+overall mediation proportion is provided as well.
 
 
 # Statement of Need
@@ -116,7 +116,7 @@ and are instructive as to how the results of their analysis should be interprett
 
 # Acknowledgements
 
-We acknowledge contributions from Miguel-Angel Luque, Erica Moodie, and Mark van der Laan
+We acknowledge the valuable feedback from Miguel-Angel Luque, Erica Moodie, and Mark van der Laan
 during the creation of this project.
 
 

@@ -4,14 +4,15 @@
 Health data: generating causal curves and examining mediation
 =============================================================
 
-The causal effect of blood lead levels on cognitive performance in children
----------------------------------------------------------------------------
-
 To provide an end-to-end example of the sorts of analyses `cause-curve` can be used for, we'll
-begin with an epidemiology topic. A notebook containing the pipeline to produce the following
+begin with a health topic. A notebook containing the pipeline to produce the following
 output `is available here <https://github.com/ronikobrosly/causal-curve/blob/master/examples/NHANES_BLL_example.ipynb>`_.
 Note: Specific examples of the individual `causal-curve` tools with
 code are available elsewhere in this documentation.
+
+
+The causal effect of blood lead levels on cognitive performance in children
+---------------------------------------------------------------------------
 
 Despite the banning of the use of lead-based paint and the use of lead in gasoline in the United
 States, lead exposure remains an enormous public health problem for children and adolescents. This
@@ -105,7 +106,7 @@ we found that the overall, mediating indirect effect of BLLs are 0.20 (0.17 - 0.
 that lead exposure accounts for 20% of the relationship between low income and low test
 performance in this population. The mediation tool also allows you to see how the indirect effect
 varies as a function of the treatment. As the plot shows, the mediating effect is relatively flat,
-although interesting there is a hint of an increase as income increases relative to the povetry line.
+although interesting there is a hint of an increase as income increases relative to the poverty line.
 
 .. image:: ../imgs/full_example/mediation_curve.png
 
