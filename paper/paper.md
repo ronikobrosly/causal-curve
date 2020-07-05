@@ -80,7 +80,35 @@ this GPS method is more computationally efficient, better suited for large datas
 but produces significantly wider confidence intervals.
 
 
-<img src="welcome_plot.png" alt="example causal curve" width="300" height="200"/>
+
+
+
+
+
+
+
+
+
+
+
+![Caption for example figure.\label{fig:example}](welcome_plot.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 The `TMLE` method is based on van der Laan's work on an approach to causal inference that would
