@@ -60,7 +60,7 @@ as this is a very commonly used predictive modeling framework in Python that mos
 practioners are familiar with.
 - All of the major classes contained in `causal-curve` readily use Pandas DataFrames and Series as
 inputs, to make this package more easily integrate with the standard Python data analysis tools.
-- Full tutorials of the three major classes are available online in the documentation,
+- A full, end-to-end example of applying the package to the analysis of health data. Full tutorials of the three major classes are available online in the documentation,
 along with full documentation of all of their parameters, methods, and attributes.
 
 
@@ -102,5 +102,6 @@ and how their analysis might be interpretted and carried out.
 
 We acknowledge contributions from Miguel-Angel Luque, Erica Moodie, and Mark van der Laan
 during the creation of this project.
+
 
 # References
