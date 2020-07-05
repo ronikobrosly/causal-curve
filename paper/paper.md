@@ -79,7 +79,7 @@ final causal curve. Compared with the package’s TMLE method,
 this GPS method is more computationally efficient, better suited for large datasets,
 but produces significantly wider confidence intervals.
 
-![Example of a causal curve.\label{fig:example}](welcome_plot.png =300x200)
+![Example of a causal curve.\label{fig:example}](welcome_plot.png){:height="36px" width="36px"}
 
 The `TMLE` method is based on van der Laan's work on an approach to causal inference that would
 employ powerful machine learning approaches to estimate a causal effect [@van_der_Laan:2010] [@van_der_Laan:2006].
