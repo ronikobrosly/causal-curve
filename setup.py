@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="causal-curve",
-    version="0.2.1",
+    version="0.2.4",
     author="Roni Kobrosly",
     author_email="roni.kobrosly@gmail.com",
     description="A python library with tools to perform causal inference using \
@@ -21,13 +21,17 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     install_requires=[
+        'black',
+        'coverage',
         'future',
         'joblib',
         'numpy',
+        'numpydoc',
         'pandas',
         'patsy',
         'progressbar2',
         'pygam',
+        'pytest',
         'python-dateutil',
         'python-utils',
         'pytz',

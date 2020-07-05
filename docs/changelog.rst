@@ -4,6 +4,21 @@
 Change Log
 ==========
 
+Version 0.2.4
+-------------
+- Strengthened unit tests
+
+
+Version 0.2.3
+-------------
+- codecov integration
+
+
+Version 0.2.2
+-------------
+- Travis CI integration
+
+
 Version 0.2.1
 -------------
 - Fixed Mediation tool error / removed `tqdm` from requirements

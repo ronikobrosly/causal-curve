@@ -18,7 +18,7 @@ def test_full_gps_flow(dataset_fixture):
         n_splines=10,
         max_iter=100,
         random_seed=100,
-        verbose=False,
+        verbose=True,
     )
     gps.fit(
         T=dataset_fixture["treatment"],

@@ -13,7 +13,7 @@ def test_full_tmle_flow(dataset_fixture):
     tmle = TMLE(
         treatment_grid_bins=[22.1, 30, 40, 50, 60, 70, 80.1],
         random_seed=100,
-        verbose=False,
+        verbose=True,
     )
     tmle.fit(
         T=dataset_fixture["treatment"],
