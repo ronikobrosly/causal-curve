@@ -27,7 +27,7 @@ are considered the gold standard approach for assessing the impact of a treatmen
 However, for ethical or financial reasons, these experiments may not always be feasible to carry out.
 "Causal inference" methods are a set of approaches that attempt to estimate causal effects
 from observational rather than experimental data, correcting for the biases that are inherent
-to analyzing observational data (e.g. confounding and selection bias).
+to analyzing observational data (e.g. confounding and selection bias) [@Hernán:2020].
 
 Although much significant research and implementation effort has gone towards methods in
 causal inference to estimate the effects of binary treatments (e.g. did the population receive
@@ -69,22 +69,31 @@ coverage is monitored via codecov and is presently above 90%.
 
 # Methods
 
-The `GPS` method was originally described by Hirano, and expanded by Moodie and Galagate.
+The `GPS` method was originally described by Hirano [@Hirano:2004],
+and expanded by Moodie [@Moodie:2010] and more recently by Galagate [@Galagate:2016]. GPS is
+an extension of the standard propensity tool method. It is the treatment assignment density calculated
+at a particular treatment (and covariate) value. Similar to the standard propensity score approach,
+the GPS random variable is used to balance covariates. Compared with the package’s TMLE method,
+this GPS method is more computationally efficient, better suited for large datasets,
+but produces significantly wider confidence intervals.
 
-The `TMLE` method ...
+![Example of a causal curve.\label{fig:example}](welcome_plot.png)
 
-`causal-curve` allows for continuous mediation assessment with the `Mediation` tool
+The `TMLE` method is based on van der Laan's work on an approach to causal inference that would
+employ powerful machine learning approaches to estimate a causal effect [@van_der_Laan:2010] [@van_der_Laan:2006].
+TMLE involves, predicting the outcome from the treatment and covariates using a machine learning model,
+then predicting treatment assignment from the covariates, and employs a substitution “targeting”
+step correct for covariate imbalance and to estimate an unbiased causal effect.
+Currently, there is no implementation of TMLE that is suitable for continuous treatments, so the
+implemention in `causal-curve` constructs as series of binary treatment comparisons across the
+user-specified range of treatment values, and then connects these binary estimates to construct
+the final causal curve. Compared with the package’s GPS method, this TMLE method is double robust
+against model misspecification, incorporates more powerful machine learning techniques internally, produces significantly
+smaller confidence intervals, however it is less computationally efficient.
 
 
-
-aaaa[@Galagate:2016] bbbb[@Moodie:2010] cccc[@Hirano:2004] dddd[@van_der_Laan:2010] eeee[@van_der_Laan:2006] ffff[@Imai:2010]
-
-
-# Figures
-
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](welcome_plot.png)
-and referenced from text using \autoref{fig:example}.
+`causal-curve` allows for continuous mediation assessment with the `Mediation` tool. As described
+by Imai this approach [@Imai:2010].
 
 
 # Statement of Need
