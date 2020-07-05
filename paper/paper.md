@@ -73,11 +73,13 @@ The `GPS` method was originally described by Hirano [@Hirano:2004],
 and expanded by Moodie [@Moodie:2010] and more recently by Galagate [@Galagate:2016]. GPS is
 an extension of the standard propensity tool method. It is the treatment assignment density calculated
 at a particular treatment (and covariate) value. Similar to the standard propensity score approach,
-the GPS random variable is used to balance covariates. Compared with the package’s TMLE method,
+the GPS random variable is used to balance covariates. At the core of this tool, generalized linear
+models are used to estimate the GPS, and generalized additive models are used to estimate the
+final causal curve. Compared with the package’s TMLE method,
 this GPS method is more computationally efficient, better suited for large datasets,
 but produces significantly wider confidence intervals.
 
-![Example of a causal curve.\label{fig:example}](welcome_plot.png)
+![Example of a causal curve.\label{fig:example}](welcome_plot.png =300x200)
 
 The `TMLE` method is based on van der Laan's work on an approach to causal inference that would
 employ powerful machine learning approaches to estimate a causal effect [@van_der_Laan:2010] [@van_der_Laan:2006].
