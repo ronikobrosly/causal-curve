@@ -4,6 +4,13 @@
 Change Log
 ==========
 
+Version 0.3.0
+-------------
+- Added full, end-to-end example of package usage to documentation
+- Cleaned up documentation
+- Added example folder with end-to-end notebook
+- Added manuscript to paper folder
+
 Version 0.2.4
 -------------
 - Strengthened unit tests

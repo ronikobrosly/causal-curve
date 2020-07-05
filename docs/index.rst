@@ -9,22 +9,31 @@ Welcome to causal-curve's documentation!
    install
    contribute
 
-.. toctree::
-  :maxdepth: 1
-  :hidden:
-  :caption: Module details
-
-  modules
-
 
 .. toctree::
-  :maxdepth: 1
-  :hidden:
-  :caption: Tutorial - Examples
+   :maxdepth: 1
+   :hidden:
+   :caption: End-to-end demonstration
 
-  GPS_example
-  TMLE_example
-  Mediation_example
+   full_example
+
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Tutorials of Individual Tools
+
+   GPS_example
+   TMLE_example
+   Mediation_example
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Module details
+
+   modules
+
 
 .. toctree::
    :maxdepth: 1
