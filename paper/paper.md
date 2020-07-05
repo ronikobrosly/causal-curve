@@ -91,7 +91,7 @@ but produces significantly wider confidence intervals.
 
 
 
-![Caption for example figure.\label{fig:example}](welcome_plot.png)
+![Caption for example figure.\label{fig:example}](welcome_plot.png) <!-- .element height="200%" width="200%" -->
 
 
 
