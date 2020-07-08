@@ -29,10 +29,10 @@ However, for ethical or financial reasons, these experiments may not always be f
 from observational rather than experimental data, correcting for the biases that are inherent
 to analyzing observational data (e.g. confounding and selection bias) [@Hernán:2020].
 
-Although much significant research and implementation effort has gone towards methods in
+Although significant research and implementation effort has gone towards methods in
 causal inference to estimate the effects of binary treatments (e.g. did the population receive
 treatment "A" or "B"), much less has gone towards estimating the effects of continuous treatments.
-This is unfortunate because there are there are a large number of use cases in research
+This is unfortunate because there are a large number of use cases in research
 and industry that could benefit from tools to estimate the effect of
 continuous treatments, such as estimating how:
 
@@ -56,7 +56,7 @@ to assess causal mediation effects in the presence of a continuous mediator and 
 `causal-curve` attempts to make the user-experience as painless as possible:
 
 - This package's API was designed to resemble that of `scikit-learn`, as this is a commonly
-used Python predictive modeling framework that most machine learning practioners are familiar with.
+used Python predictive modeling framework familiar to most machine learning practitioners.
 - All of the major classes contained in `causal-curve` readily use Pandas DataFrames and Series as
 inputs, to make this package more easily integrate with the standard Python data analysis tools.
 - A full, end-to-end example of applying the package to a causal inference problem (the analysis of health data)
@@ -85,13 +85,13 @@ but produces significantly wider confidence intervals.
 
 The `TMLE` method is based on van der Laan's work on an approach to causal inference that would
 employ powerful machine learning approaches to estimate a causal effect [@van_der_Laan:2010] [@van_der_Laan:2006].
-TMLE involves, predicting the outcome from the treatment and covariates using a machine learning model,
-then predicting treatment assignment from the covariates, and employs a substitution “targeting”
-step correct for covariate imbalance and to estimate an unbiased causal effect.
-Currently, there is no implementation of TMLE that is suitable for continuous treatments, so the
-implemention in `causal-curve` constructs as series of binary treatment comparisons across the
-user-specified range of treatment values, and then connects these binary estimates to construct
-the final causal curve. Compared with the package’s GPS method, this TMLE method is double robust
+TMLE involves predicting the outcome from the treatment and covariates using a machine learning model,
+then predicting treatment assignment from the covariates. TMLE also employs a substitution “targeting”
+step to correct for covariate imbalance and to estimate an unbiased causal effect.
+Currently, there is no implementation of TMLE that is suitable for continuous treatments. The
+implemention in `causal-curve` constructs the final curve through a series of binary treatment comparisons
+across the user-specified range of treatment values and then by connecting them.
+Compared with the package’s GPS method, this TMLE method is double robust
 against model misspecification, incorporates more powerful machine learning techniques internally, produces significantly
 smaller confidence intervals, however it is less computationally efficient.
 
