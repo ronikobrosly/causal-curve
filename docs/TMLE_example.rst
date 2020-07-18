@@ -21,7 +21,7 @@ The quality of the estimate it produces is highly dependent on the user's choice
 of the `treatment_grid_bins` parameter. If the bins are too small, you might violate the
 'positivity' assumption, but if the buckets are too large, your final estiamte of the CDRC will
 not be smooth. We recommend ensure there are at least 100 treatment observations within
-each of your buckets. Exploring the treatment distribution and quantiles is recommended. 
+each of your buckets. Exploring the treatment distribution and quantiles is recommended.
 
 
 >>> from causal_curve import TMLE
@@ -38,8 +38,8 @@ each of your buckets. Exploring the treatment distribution and quantiles is reco
 References
 ----------
 
-van der Laan MJ and Rubin D. Targeted maximum likelihood learning. In: The International
-Journal of Biostatistics, 2(1), 2006.
+van der Laan MJ and Rubin D. Targeted maximum likelihood learning. In: ​U.C. Berkeley Division of
+Biostatistics Working Paper Series, 2006. 
 
 van der Laan MJ and Gruber S. Collaborative double robust penalized targeted
 maximum likelihood estimation. In: The International Journal of Biostatistics 6(1), 2010.

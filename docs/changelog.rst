@@ -4,6 +4,11 @@
 Change Log
 ==========
 
+Version 0.3.3
+-------------
+- Misc edits to paper and bibliography
+
+
 Version 0.3.2
 -------------
 - Fixed random seed issue with Mediation tool

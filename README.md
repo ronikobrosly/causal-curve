@@ -68,8 +68,8 @@ from incomplete-data perspectives. Oxford, UK: Wiley, 2004, pp.73–84.
 van der Laan MJ and Gruber S. Collaborative double robust penalized targeted
 maximum likelihood estimation. In: The International Journal of Biostatistics 6(1), 2010.
 
-van der Laan MJ and Rubin D. Targeted maximum likelihood learning. In: The International
-Journal of Biostatistics, 2(1), 2006.
+van der Laan MJ and Rubin D. Targeted maximum likelihood learning. In: ​U.C. Berkeley Division of
+Biostatistics Working Paper Series, 2006. 
 
 Imai K., Keele L., Tingley D. A General Approach to Causal Mediation Analysis. Psychological
 Methods. 15(4), 2010, pp.309–334.
