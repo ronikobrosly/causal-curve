@@ -83,7 +83,7 @@ computationally efficient, better suited for large datasets, but produces signif
 
 
 The `TMLE` method is based on van der Laan's work on an approach to causal inference that would
-employ powerful machine learning approaches to estimate a causal effect [@van_der_Laan:2010] [@van_der_Laan:2006].
+employ powerful machine learning approaches to estimate a causal effect [@van_der_Laan:2010].
 TMLE involves predicting the outcome from the treatment and covariates using a machine learning model,
 then predicting treatment assignment from the covariates. TMLE also employs a substitution “targeting”
 step to correct for covariate imbalance and to estimate an unbiased causal effect.
