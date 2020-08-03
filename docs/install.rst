@@ -27,7 +27,6 @@ causal-curve requires:
 - scipy
 - six
 - statsmodels
-- xgboost
 
 
 
