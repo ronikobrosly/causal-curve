@@ -13,7 +13,7 @@ env:
 
 before_install:
 # Here we download miniconda and install the dependencies
-- pip install black coverage future joblib numpy numpydoc pandas patsy progressbar2 pygam pytest python-dateutil python-utils pytz scikit-learn scipy six statsmodels xgboost
+- pip install black coverage future joblib numpy numpydoc pandas patsy progressbar2 pygam pytest python-dateutil python-utils pytz scikit-learn scipy six statsmodels
 
 install:
 - python setup.py install

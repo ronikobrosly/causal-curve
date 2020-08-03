@@ -19,7 +19,7 @@ from causal_curve.utils import rand_seed_wrapper
 class TMLE(Core):
     """
     Constructs a causal dose response curve through a series of TMLE comparisons across a grid
-    of the treatment values. XGBoost is used for prediction in Q model and G model.
+    of the treatment values. Gradient boosting is used for prediction in Q model and G model.
     Assumes continuous treatment and outcome variable.
 
     WARNING:
@@ -47,18 +47,14 @@ class TMLE(Core):
         treatment values between the bin edges will be used to generate the CDRC.
 
     n_estimators: int, optional (default = 100)
-        Optional argument to set the number of learners to use when XGBoost
+        Optional argument to set the number of learners to use when sklearn
         creates TMLE's Q and G models.
 
     learning_rate: float, optional (default = 0.1)
-        Optional argument to set the XGBoost's learning rate for TMLE's Q and G models.
+        Optional argument to set the sklearn's learning rate for TMLE's Q and G models.
 
     max_depth: int, optional (default = 5)
-        Optional argument to set XGBoost's maximum depth when creating TMLE's Q and G models.
-
-    gamma: float, optional (default = 1.0)
-        Optional argument to set XGBoost's gamma parameter (regularization) when
-        creating TMLE's Q and G models.
+        Optional argument to set sklearn's maximum depth when creating TMLE's Q and G models.
 
     random_seed: int, optional (default = None)
         Sets the random seed.
@@ -115,7 +111,6 @@ class TMLE(Core):
         n_estimators=100,
         learning_rate=0.1,
         max_depth=5,
-        gamma=1.0,
         random_seed=None,
         verbose=False,
     ):
@@ -124,7 +119,6 @@ class TMLE(Core):
         self.n_estimators = n_estimators
         self.learning_rate = learning_rate
         self.max_depth = max_depth
-        self.gamma = gamma
         self.random_seed = random_seed
         self.verbose = verbose
 
@@ -189,16 +183,6 @@ class TMLE(Core):
 
         if self.max_depth <= 0:
             raise TypeError("max_depth parameter must be greater than 0")
-
-        # Checks for gamma
-        if not isinstance(self.gamma, float):
-            raise TypeError(
-                f"gamma parameter must be a float, "
-                f"but found type {type(self.gamma)}"
-            )
-
-        if self.gamma <= 0:
-            raise TypeError("gamma parameter must be greater than 0")
 
         # Checks for random_seed
         if not isinstance(self.random_seed, (int, type(None))):
