@@ -13,7 +13,7 @@ tool to estimate the marginal causal curve of some continuous treatment on a con
 accounting for some mild confounding effects.
 
 Compared with the package's GPS method, this TMLE method is double robust against model
-misspecification, incorporates more powerful machine learning techniques internally,
+misspecification, incorporates more powerful machine learning techniques internally (gradient boosting),
 produces significantly smaller confidence intervals, however it is not computationally efficient
 and will take longer to run.
 
@@ -39,7 +39,7 @@ References
 ----------
 
 van der Laan MJ and Rubin D. Targeted maximum likelihood learning. In: ​U.C. Berkeley Division of
-Biostatistics Working Paper Series, 2006. 
+Biostatistics Working Paper Series, 2006.
 
 van der Laan MJ and Gruber S. Collaborative double robust penalized targeted
 maximum likelihood estimation. In: The International Journal of Biostatistics 6(1), 2010.
