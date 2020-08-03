@@ -16,4 +16,3 @@ scikit-learn
 scipy
 six
 statsmodels
-xgboost

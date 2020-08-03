@@ -9,8 +9,8 @@ import pandas as pd
 from pandas.api.types import is_float_dtype, is_numeric_dtype
 from scipy.interpolate import interp1d
 from scipy.stats import norm
+from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 from statsmodels.genmod.generalized_linear_model import GLM
-from xgboost import XGBClassifier, XGBRegressor
 
 from causal_curve.core import Core
 from causal_curve.utils import rand_seed_wrapper
@@ -263,11 +263,10 @@ class TMLE(Core):
             self.t_data < self.treatment_grid_bins[1]
         ]
 
-        init_model = XGBRegressor(
+        init_model = GradientBoostingRegressor(
             n_estimators=self.n_estimators,
             max_depth=self.max_depth,
             learning_rate=self.learning_rate,
-            gamma=self.gamma,
             random_state=self.random_seed,
         ).fit(X, y)
 
@@ -495,11 +494,10 @@ class TMLE(Core):
         X = pd.concat([temp_t, temp_x], axis=1).to_numpy()
         y = temp_y.to_numpy()
 
-        Q_model = XGBRegressor(
+        Q_model = GradientBoostingRegressor(
             n_estimators=self.n_estimators,
             max_depth=self.max_depth,
             learning_rate=self.learning_rate,
-            gamma=self.gamma,
             random_state=self.random_seed,
         ).fit(X, y)
 
@@ -525,11 +523,10 @@ class TMLE(Core):
         X = temp_x.to_numpy()
         t = temp_t.to_numpy()
 
-        G_model = XGBClassifier(
+        G_model = GradientBoostingClassifier(
             n_estimators=self.n_estimators,
             max_depth=self.max_depth,
             learning_rate=self.learning_rate,
-            gamma=self.gamma,
             random_state=self.random_seed,
         ).fit(X, t)
 

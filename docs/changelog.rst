@@ -4,6 +4,12 @@
 Change Log
 ==========
 
+Version 0.3.4
+-------------
+- Removed XGBoost as dependency.
+- Now using sklearn's gradient boosting implementation. 
+
+
 Version 0.3.3
 -------------
 - Misc edits to paper and bibliography
