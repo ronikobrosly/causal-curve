@@ -4,10 +4,16 @@
 Change Log
 ==========
 
+Version 0.3.5
+-------------
+- Re-organized documentation
+- Added `Introduction` section to explain purpose and need for the package
+
+
 Version 0.3.4
 -------------
 - Removed XGBoost as dependency.
-- Now using sklearn's gradient boosting implementation. 
+- Now using sklearn's gradient boosting implementation.
 
 
 Version 0.3.3

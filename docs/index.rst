@@ -1,11 +1,13 @@
 Welcome to causal-curve's documentation!
 ========================================
 
+
 .. toctree::
    :maxdepth: 2
    :hidden:
    :caption: Getting Started
 
+   intro
    install
    contribute
 
@@ -52,32 +54,16 @@ Welcome to causal-curve's documentation!
 **causal-curve** is a Python package with tools to perform causal inference
 using observational data when the treatment of interest is continuous.
 
-
 .. image:: ../imgs/welcome_plot.png
-
 
 
 Summary
 -------
 
-Sometimes it would be nice to run a randomized, controlled experiment to determine whether drug `A`
-is superior to drug `B`, whether the blue button gets more clicks than the orange button on your
-e-commerce site, etc. Unfortunately, it isn't always possible (resources are finite, the
-test might not be ethical, you lack a proper A/B testing infrastructure, etc).
-In these situations, there are methods can be employed to help you infer causality from observational data.
-
-There are many methods to perform causal inference when your intervention of interest is binary
-(see the drug and button examples above), but few methods exist to handle continuous treatments.
-
-This is unfortunate because there are many scenarios (in industry and research) where these methods would be useful.
-For example, when you would like to:
-
-* Estimate the causal response to increasing or decreasing the price of a product across a wide range.
-* Understand how the number of hours per week of aerobic exercise causes positive health outcomes.
-* Estimate how decreasing order wait time will impact customer satisfaction, after controlling for confounding effects.
-* Estimate how changing neighborhood income inequality (Gini index) could be causally related to neighborhood crime rate.
-
-This library attempts to address this gap, providing tools to estimate causal curves (AKA causal dose-response curves).
+There are many available methods to perform causal inference when your intervention of interest is binary,
+but few methods exist to handle continuous treatments. This is unfortunate because there are many
+scenarios (in industry and research) where these methods would be useful. This library attempts to
+address this gap, providing tools to estimate causal curves (AKA causal dose-response curves).
 
 
 Quick example (of the ``GPS`` tool)
@@ -113,31 +99,3 @@ generalized propensity scores.
 5. Estimate the points of the causal curve (along with 95% confidence interval bounds) with the ``.calculate_CDRC()`` method.
 
 6. Explore or plot your results!
-
-None of the methods provided in causal-curve rely on inference via instrumental variables, they only
-rely on the data from the observed treatment, confounders, and the outcome of interest (like the above GPS example).
-
-
-
-A caution about assumptions
----------------------------
-
-There is a well-documented set of assumptions one must make to infer causal effects from
-observational data. These are covered elsewhere in more detail, but briefly:
-
-- Causes always occur before effects: The treatment variable needs to have occurred before the outcome.
-- SUTVA: The treatment status of a given individual does not affect the potential outcomes of any other individuals.
-- Positivity: Any individual has a positive probability of receiving all values of the treatment variable.
-- Ignorability: All major confounding variables are included in the data you provide.
-
-Violations of these assumptions will lead to biased results and incorrect conclusions!
-
-In addition, any covariates that are included in `causal-curve` models are assumed to only
-be **confounding** variables.
-
-
-
-`Getting started <install.html>`_
----------------------------------
-
-Information to install, test, and contribute to the package.
