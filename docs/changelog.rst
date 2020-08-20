@@ -4,6 +4,14 @@
 Change Log
 ==========
 
+Version 0.3.6
+-------------
+- Fixed bug in Mediation.calculate_mediation that would clip treatments < 0 or > 1
+- Fixed incorrect horizontal axis labels in lead example
+- Fixed typos in documentation
+- Added links to resources so users could learn more about causal inference theory
+
+
 Version 0.3.5
 -------------
 - Re-organized documentation

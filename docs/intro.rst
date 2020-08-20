@@ -4,13 +4,12 @@
 Introduction to causal-curve
 ============================
 
-In academia and industry, randomized controlled experiments (or simply experiments or colloquially
-known as "A/B tests") are considered the gold standard approach for assessing the true, causal impact
+In academia and industry, randomized controlled experiments (or simply experiments or "A/B tests") are considered the gold standard approach for assessing the true, causal impact
 of a treatment or intervention. For example:
 
-* We want to increase the number of times per day new customers log into our business's website. Will it help if send daily emails out to our customers? We take a group of 2000 new business customers and half is randomly chosen to receive daily emails while the other half receives one email per week. We follow both groups forward in time for a month compare each group's average number of logins per day.
+* We want to increase the number of times per day new customers log into our business's website. Will it help if we send daily emails out to our customers? We take a group of 2000 new business customers and half is randomly chosen to receive daily emails while the other half receives one email per week. We follow both groups forward in time for a month compare each group's average number of logins per day.
 
-However, for ethical or financial reasons experiments may not always be feasible to carry out.
+However, for ethical or financial reasons, experiments may not always be feasible to carry out.
 
 * It's not ethical to randomly assign some people to receive a possible carcinogen in pill form while others receive a sugar pill, and then see which group is more likely to develop cancer.
 * It's not feasible to increase the household incomes of some New York neighborhoods, while leaving others unchanged to see if changing a neighborhood's income inequality would improve the local crime rate.
@@ -65,6 +64,16 @@ be **confounding** variables.
 
 None of the methods provided in causal-curve rely on inference via instrumental variables, they only
 rely on the data from the observed treatment, confounders, and the outcome of interest (like the above GPS example).
+
+
+Additional resources
+--------------------------------------------
+
+There are a number of excellent blogs and books covering the math behind causal inference in more depth.
+In addition to these, the following resources are recommended:
+
+- Miguel Hernan and Jamie Robin's book `"Causal Inference: What if" <https://cdn1.sph.harvard.edu/wp-content/uploads/sites/1268/2020/07/ci_hernanrobins_31july20.pdf>`_.
+- Cloudera Fast Forward Labs Research's `book on causal inference <https://ff13.fastforwardlabs.com/>`_.
 
 
 References
