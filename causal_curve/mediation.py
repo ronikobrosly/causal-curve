@@ -508,18 +508,21 @@ class Mediation(Core):
 
         bootstrap_overall_means = np.array(bootstrap_overall_means)
 
-        final_results = (
-            pd.DataFrame(
-                {
-                    "Treatment_Value": self.t_bin_means,
-                    "Proportion_Direct_Effect": self.prop_direct_list,
-                    "Proportion_Indirect_Effect": self.prop_indirect_list,
-                }
-            )
-            .round(4)
-            .clip(lower=0, upper=1.0)
+        final_results = pd.DataFrame(
+            {
+                "Treatment_Value": self.t_bin_means,
+                "Proportion_Direct_Effect": self.prop_direct_list,
+                "Proportion_Indirect_Effect": self.prop_indirect_list,
+            }
+        ).round(4)
+
+        # Clip Proportion_Direct_Effect and Proportion_Indirect_Effect
+        final_results["Proportion_Direct_Effect"].clip(lower=0, upper=1.0, inplace=True)
+        final_results["Proportion_Indirect_Effect"].clip(
+            lower=0, upper=1.0, inplace=True
         )
 
+        # Calculate overall, mean, indirect effect
         total_prop_mean = round(np.array(self.prop_indirect_list).mean(), 4)
         total_prop_lower = self._clip_negatives(
             round(np.percentile(bootstrap_overall_means, q=lower * 100), 4)

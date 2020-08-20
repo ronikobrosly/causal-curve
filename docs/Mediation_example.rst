@@ -18,7 +18,7 @@ and mortality (Havumaki et al.):
 At some point though, it's helpful to validate these ideas with empirical tests.
 This tool provides a test that can estimate the amount of mediation that occurs between
 a treatment, a purported mediator, and an outcome. In keeping with the causal curve theme,
-this tool uses a test developed my Imai et al. when handling a continuous treatment and
+this tool uses a test developed by Imai et al. when handling a continuous treatment and
 mediator.
 
 In this example we use the following simulated data, and assume that the `mediator`
