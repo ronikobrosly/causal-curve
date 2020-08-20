@@ -4,6 +4,11 @@
 Change Log
 ==========
 
+Version 0.3.7
+-------------
+- Bumped version for PyPi
+
+
 Version 0.3.6
 -------------
 - Fixed bug in Mediation.calculate_mediation that would clip treatments < 0 or > 1
