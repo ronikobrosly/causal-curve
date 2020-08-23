@@ -4,6 +4,8 @@
 
 [![codecov](https://codecov.io/gh/ronikobrosly/causal-curve/branch/master/graph/badge.svg)](https://codecov.io/gh/ronikobrosly/causal-curve)
 
+[![DOI](https://zenodo.org/badge/256017107.svg)](https://zenodo.org/badge/latestdoi/256017107)
+
 Python tools to perform causal inference using observational data when the treatment of interest is continuous.
 
 
