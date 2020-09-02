@@ -4,6 +4,11 @@
 Change Log
 ==========
 
+Version 0.3.8
+-------------
+- Added citation (yay!)
+
+
 Version 0.3.7
 -------------
 - Bumped version for PyPi

@@ -1,9 +1,7 @@
 # causal-curve
 
 [![build status](http://img.shields.io/travis/ronikobrosly/causal-curve/master.svg?style=flat)](https://travis-ci.org/ronikobrosly/causal-curve)
-
 [![codecov](https://codecov.io/gh/ronikobrosly/causal-curve/branch/master/graph/badge.svg)](https://codecov.io/gh/ronikobrosly/causal-curve)
-
 [![DOI](https://zenodo.org/badge/256017107.svg)](https://zenodo.org/badge/latestdoi/256017107)
 
 Python tools to perform causal inference using observational data when the treatment of interest is continuous.
@@ -25,6 +23,7 @@ Python tools to perform causal inference using observational data when the treat
 - [Documentation](#documentation)
 - [In Progress](#in-progress)
 - [Contributing](#contributing)
+- [Citation](#citation)
 - [References](#references)
 
 ## Overview
@@ -54,6 +53,10 @@ This library attempts to address this gap, providing tools to estimate causal cu
 
 Your help is absolutely welcome! Please do reach out or create a feature branch!
 
+## Citation
+
+Kobrosly, R. W., (2020). causal-curve: A Python Causal Inference Package to Estimate Causal Dose-Response Curves. Journal of Open Source Software, 5(52), 2523, [https://doi.org/10.21105/joss.02523](https://doi.org/10.21105/joss.02523)
+
 ## References
 
 Galagate, D. Causal Inference with a Continuous Treatment and Outcome: Alternative
@@ -71,7 +74,7 @@ van der Laan MJ and Gruber S. Collaborative double robust penalized targeted
 maximum likelihood estimation. In: The International Journal of Biostatistics 6(1), 2010.
 
 van der Laan MJ and Rubin D. Targeted maximum likelihood learning. In: ​U.C. Berkeley Division of
-Biostatistics Working Paper Series, 2006. 
+Biostatistics Working Paper Series, 2006.
 
 Imai K., Keele L., Tingley D. A General Approach to Causal Mediation Analysis. Psychological
 Methods. 15(4), 2010, pp.309–334.
