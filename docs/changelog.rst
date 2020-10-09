@@ -4,6 +4,12 @@
 Change Log
 ==========
 
+Version 0.4.0
+-------------
+- Added support for binary outcomes in GPS tool
+- Small changes to repo README
+
+
 Version 0.3.8
 -------------
 - Added citation (yay!)

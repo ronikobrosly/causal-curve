@@ -40,10 +40,21 @@ For example, when you would like to:
 * Estimate how changing neighborhood income inequality (Gini index) could be causally related to neighborhood crime rate.
 
 This library attempts to address this gap, providing tools to estimate causal curves (AKA causal dose-response curves).
+Both continuous and binary outcomes can be modeled against a continuous treatment.
 
 ## Installation
 
+Available via PyPI:
+
 `pip install causal-curve`
+
+You can also get the latest version of causal-curve by cloning the repository::
+
+```
+git clone -b master https://github.com/ronikobrosly/causal-curve.git
+cd causal-curve
+pip install .
+```
 
 ## Documentation
 
