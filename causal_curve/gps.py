@@ -370,7 +370,7 @@ class GPS(Core):
             raise TypeError(f"Outcome data must be of type float or integer")
 
         if is_integer_dtype(self.y) and (
-            not np.array_equal(x=np.sort(self.y.unique()), y=np.array([0, 1]))
+            not np.array_equal(np.sort(self.y.unique()), np.array([0, 1]))
         ):
             raise TypeError(
                 f"If your outcome data is of type integer (binary outcome),"
@@ -415,9 +415,9 @@ class GPS(Core):
         self.y = y.reset_index(drop=True, inplace=False)
 
         # Determine what type of outcome variable we're working with
-        if is_float_dtype(self.T):
+        if is_float_dtype(self.y):
             self.outcome_type = "continuous"
-        elif is_integer_dtype(self.T):
+        elif is_integer_dtype(self.y):
             self.outcome_type = "binary"
 
         if self.verbose:

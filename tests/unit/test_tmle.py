@@ -5,7 +5,7 @@ import pytest
 from causal_curve import TMLE
 
 
-def test_tmle_fit(dataset_fixture):
+def test_tmle_fit(continuous_dataset_fixture):
     """
     Tests the fit method GPS tool
     """
@@ -16,9 +16,9 @@ def test_tmle_fit(dataset_fixture):
         verbose=True,
     )
     tmle.fit(
-        T=dataset_fixture["treatment"],
-        X=dataset_fixture[["x1", "x2"]],
-        y=dataset_fixture["outcome"],
+        T=continuous_dataset_fixture["treatment"],
+        X=continuous_dataset_fixture[["x1", "x2"]],
+        y=continuous_dataset_fixture["outcome"],
     )
 
     assert tmle.n_obs == 72
