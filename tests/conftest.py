@@ -3,16 +3,17 @@
 import numpy as np
 import pandas as pd
 import pytest
+from scipy.stats import norm
 
 
 @pytest.fixture(scope="module")
-def dataset_fixture():
-    """Returns full_example_dataset"""
-    return full_example_dataset()
+def continuous_dataset_fixture():
+    """Returns full_continuous_example_dataset (with a continuous outcome)"""
+    return full_continuous_example_dataset()
 
 
-def full_example_dataset():
-    """Example dataset with a treatment, two covariates, and outcome variable"""
+def full_continuous_example_dataset():
+    """Example dataset with a treatment, two covariates, and continuous outcome variable"""
 
     np.random.seed(500)
 
@@ -26,7 +27,41 @@ def full_example_dataset():
     fixture = pd.DataFrame(
         {"treatment": treatment, "x1": x_1, "x2": x_2, "outcome": outcome}
     )
+    fixture.reset_index(drop=True, inplace=True)
 
+    return fixture
+
+
+@pytest.fixture(scope="module")
+def binary_dataset_fixture():
+    """Returns full_binary_example_dataset (with a binary outcome)"""
+    return full_binary_example_dataset()
+
+
+def full_binary_example_dataset():
+    """Example dataset with a treatment, two covariates, and binary outcome variable"""
+
+    np.random.seed(500)
+    treatment = np.linspace(
+        start=0,
+        stop=100,
+        num=100,
+    )
+    x_1 = norm.rvs(size=100, loc = 50, scale = 5)
+    outcome = [
+        0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,1,0,0,
+        0,0,0,0,0,0,0,0,1,1,
+        0,0,0,0,0,0,0,0,0,1,
+        1,1,1,1,1,0,1,1,1,1,
+        1,0,1,1,1,1,1,0,1,1,
+        1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,
+    ]
+
+    fixture = pd.DataFrame({'treatment':treatment, 'x1': x_1, 'outcome': outcome})
     fixture.reset_index(drop=True, inplace=True)
 
     return fixture

@@ -4,16 +4,16 @@ from pygam import LinearGAM
 import pytest
 
 from causal_curve import GPS
-from tests.conftest import full_example_dataset
+from tests.conftest import full_continuous_example_dataset
 
 
 @pytest.mark.parametrize(
     ("df_fixture", "family"),
     [
-        (full_example_dataset, "normal"),
-        (full_example_dataset, "lognormal"),
-        (full_example_dataset, "gamma"),
-        (full_example_dataset, None),
+        (full_continuous_example_dataset, "normal"),
+        (full_continuous_example_dataset, "lognormal"),
+        (full_continuous_example_dataset, "gamma"),
+        (full_continuous_example_dataset, None),
     ],
 )
 def test_gps_fit(df_fixture, family):
@@ -90,6 +90,9 @@ def test_bad_gps_instantiation(
     random_seed,
     verbose,
 ):
+    """
+    Tests for exceptions when the GPS class if call with bad inputs.
+    """
     with pytest.raises(Exception) as bad:
         GPS(
             gps_family=gps_family,
@@ -102,3 +105,13 @@ def test_bad_gps_instantiation(
             random_seed=random_seed,
             verbose=verbose,
         )
+
+def test_calculate_z_score():
+    """
+    Tests that that `_calculate_z_score` methods returns expected z-scores
+    """
+    gps = GPS()
+    assert round(gps._calculate_z_score(0.99), 2) == 2.58
+    assert round(gps._calculate_z_score(0.95), 2) == 1.96
+    assert round(gps._calculate_z_score(0.90), 2) == 1.64
+    assert round(gps._calculate_z_score(0.80), 2) == 1.28

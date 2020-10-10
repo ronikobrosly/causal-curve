@@ -14,7 +14,6 @@ However, for ethical or financial reasons, experiments may not always be feasibl
 * It's not ethical to randomly assign some people to receive a possible carcinogen in pill form while others receive a sugar pill, and then see which group is more likely to develop cancer.
 * It's not feasible to increase the household incomes of some New York neighborhoods, while leaving others unchanged to see if changing a neighborhood's income inequality would improve the local crime rate.
 
-
 "Causal inference" methods are a set of approaches that attempt to estimate causal effects
 from observational rather than experimental data, correcting for the biases that are inherent
 to analyzing observational data (e.g. confounding and selection bias) [@Hernán:2020].
@@ -24,11 +23,14 @@ and potentially confounding variables across your units of analysis (in addition
 then you can essentially simulate a proper experiment and make causal claims.
 
 
-Interpretting the causal curve
+Interpreting the causal curve
 ------------------------------
 
 Two of the methods contained within this package produce causal curves for continuous treatments
-(see the GPS and TMLE methods).
+(see the GPS and TMLE methods). Both continuous and binary treatments can be modeled
+(only the GPS tool can handle binary outcomes).
+
+**Continuous outcome:**
 
 .. image:: ../imgs/welcome_plot.png
 
@@ -44,6 +46,18 @@ generated through standard multivariable regression modeling in a few important 
 * This curve represents the estimated causal effect of a treatment on an outcome, not the association between treatment and outcome.
 * This curve represents a population-level effect, and should not be used to infer effects at the individual-level (or whatever the unit of analysis is).
 * To generate a similar-looking plot using multivariable regression, you would have to hold covariates constant, and any treatment effect that is inferred occurs within the levels of the covariates specified in the model. The causal curve averages out across all of these strata and gives us the population marginal effect.
+
+**Binary outcome:**
+
+.. image:: ../imgs/binary_OR_fig.png
+
+In the case of binary outcome, the GPS tool can be used to estimate a curve of odds ratio. Every
+point on the curve is relative to the lowest treatment value. The highest effect (relative to the lowest treatment value)
+is around a treatment value of -1.2. At this point in the treatment, the odds of a positive class
+occurring is 5.6 times higher compared with the lowest treatment value. This curve is always on
+the relative scale. This is why the odds ratio for the lowest point is always 1.0, because it is
+relative to itself. Odds ratios are bounded [0, inf] and cannot take on a negative value. Note that
+the confidence intervals at any given point in the curve isn't symmetric.
 
 
 A caution about causal inference assumptions

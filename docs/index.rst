@@ -64,6 +64,7 @@ There are many available methods to perform causal inference when your intervent
 but few methods exist to handle continuous treatments. This is unfortunate because there are many
 scenarios (in industry and research) where these methods would be useful. This library attempts to
 address this gap, providing tools to estimate causal curves (AKA causal dose-response curves).
+Both continuous and binary outcomes can be modeled with this package.
 
 
 Quick example (of the ``GPS`` tool)

@@ -200,8 +200,7 @@ class TMLE(Core):
             )
 
     def _validate_fit_data(self):
-        """Verifies that T, X, and y are formatted the right way
-        """
+        """Verifies that T, X, and y are formatted the right way"""
         # Checks for T column
         if not is_float_dtype(self.t_data):
             raise TypeError(f"Treatment data must be of type float")
@@ -226,8 +225,7 @@ class TMLE(Core):
             raise TypeError(f"Outcome data must be of type float")
 
     def _validate_calculate_CDRC_params(self, ci):
-        """Validates the parameters given to `calculate_CDRC`
-        """
+        """Validates the parameters given to `calculate_CDRC`"""
 
         if not isinstance(ci, float):
             raise TypeError(
@@ -276,8 +274,7 @@ class TMLE(Core):
         return temp_y, temp_x, temp_t
 
     def _collect_mean_t_levels(self):
-        """Collects the mean treatment value within each treatment bucket in treatment_grid_bins
-        """
+        """Collects the mean treatment value within each treatment bucket in treatment_grid_bins"""
 
         t_bin_means = []
 
@@ -455,19 +452,22 @@ class TMLE(Core):
         return pd.DataFrame(
             {
                 "Treatment": Treatment,
-                "CDRC": CDRC,
+                "Causal_Dose_Response": CDRC,
                 "Lower_CI": Lower_CI,
                 "Upper_CI": Upper_CI,
             }
         ).round(3)
 
     def _grid_values(self, CDRC_grid_num, t_values):
-        """Produces grid values for use in estimating the final CDRC and confidence intervals.
-        """
+        """Produces grid values for use in estimating the final CDRC and confidence intervals."""
 
         return np.quantile(
             self.t_data[((self.t_data > t_values[0]) & (self.t_data < t_values[-1]))],
-            q=np.linspace(start=0, stop=1, num=CDRC_grid_num,),
+            q=np.linspace(
+                start=0,
+                stop=1,
+                num=CDRC_grid_num,
+            ),
         )
 
     def _q_model(self, temp_y, temp_x, temp_t):
@@ -501,8 +501,7 @@ class TMLE(Core):
         return y_hat_a, y_hat_1, y_hat_0
 
     def _g_model(self, temp_x, temp_t):
-        """Produces the G-model and gets treatment assignment predictions
-        """
+        """Produces the G-model and gets treatment assignment predictions"""
 
         X = temp_x.to_numpy()
         t = temp_t.to_numpy()
@@ -523,8 +522,7 @@ class TMLE(Core):
         return pi_hat1, pi_hat0
 
     def _delta_hat_estimation(self, temp_y, temp_x, temp_t):
-        """Estimates delta to correct treatment estimation
-        """
+        """Estimates delta to correct treatment estimation"""
         H_a = []
 
         for idx, treatment in enumerate(np.asarray(temp_t)):

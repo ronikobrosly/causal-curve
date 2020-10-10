@@ -5,7 +5,7 @@ import pandas as pd
 from causal_curve import TMLE
 
 
-def test_full_tmle_flow(dataset_fixture):
+def test_full_tmle_flow(continuous_dataset_fixture):
     """
     Tests the full flow of the TMLE tool
     """
@@ -16,12 +16,12 @@ def test_full_tmle_flow(dataset_fixture):
         verbose=True,
     )
     tmle.fit(
-        T=dataset_fixture["treatment"],
-        X=dataset_fixture[["x1", "x2"]],
-        y=dataset_fixture["outcome"],
+        T=continuous_dataset_fixture["treatment"],
+        X=continuous_dataset_fixture[["x1", "x2"]],
+        y=continuous_dataset_fixture["outcome"],
     )
     tmle_results = tmle.calculate_CDRC(0.95)
 
     assert isinstance(tmle_results, pd.DataFrame)
-    check = tmle_results.columns == ["Treatment", "CDRC", "Lower_CI", "Upper_CI"]
+    check = tmle_results.columns == ["Treatment", "Causal_Dose_Response", "Lower_CI", "Upper_CI"]
     assert check.all()

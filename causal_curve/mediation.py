@@ -329,8 +329,7 @@ class Mediation(Core):
             )
 
     def _validate_fit_data(self):
-        """Verifies that T, M, and y are formatted the right way
-        """
+        """Verifies that T, M, and y are formatted the right way"""
         # Checks for T column
         if not is_float_dtype(self.T):
             raise TypeError(f"Treatment data must be of type float")
@@ -344,8 +343,7 @@ class Mediation(Core):
             raise TypeError(f"Outcome data must be of type float")
 
     def _grid_values(self):
-        """Produces initial grid values for the treatment variable
-        """
+        """Produces initial grid values for the treatment variable"""
         return np.quantile(
             self.T,
             q=np.linspace(
@@ -356,8 +354,7 @@ class Mediation(Core):
         )
 
     def _collect_mean_t_levels(self):
-        """Collects the mean treatment value within each treatment bucket in the grid_values
-        """
+        """Collects the mean treatment value within each treatment bucket in the grid_values"""
 
         t_bin_means = []
 
@@ -539,15 +536,13 @@ class Mediation(Core):
         return final_results
 
     def _clip_negatives(self, number):
-        """Helper function to clip negative numbers to zero
-        """
+        """Helper function to clip negative numbers to zero"""
         if number < 0:
             return 0
         return number
 
     def _bootstrap_analysis(self, temp_low_treatment, temp_high_treatment):
-        """The top-level function used in the fitting method
-        """
+        """The top-level function used in the fitting method"""
 
         bootstrap_collection = []
 
@@ -584,8 +579,7 @@ class Mediation(Core):
         return bootstrap_results
 
     def _create_bootstrap_replicate(self):
-        """Creates a single bootstrap replicate from the data
-        """
+        """Creates a single bootstrap replicate from the data"""
         temp_t = self.T.sample(n=self.bootstrap_draws, replace=True)
         temp_m = self.M.iloc[temp_t.index]
         temp_y = self.y.iloc[temp_t.index]
@@ -593,8 +587,7 @@ class Mediation(Core):
         return temp_t, temp_m, temp_y
 
     def _fit_gams(self, temp_t, temp_m, temp_y):
-        """Fits the mediator and outcome GAMs
-        """
+        """Fits the mediator and outcome GAMs"""
         temp_mediator_model = LinearGAM(
             s(0, n_splines=self.n_splines, spline_order=self.spline_order),
             fit_intercept=True,
@@ -623,8 +616,7 @@ class Mediation(Core):
         temp_low_treatment,
         temp_high_treatment,
     ):
-        """Makes predictions based on the mediator models
-        """
+        """Makes predictions based on the mediator models"""
 
         m1_mean = temp_mediator_model.predict(temp_high_treatment)[0]
         m0_mean = temp_mediator_model.predict(temp_low_treatment)[0]
@@ -648,8 +640,7 @@ class Mediation(Core):
         predict_m0,
         temp_outcome_model,
     ):
-        """Makes predictions based on the outcome models
-        """
+        """Makes predictions based on the outcome models"""
 
         outcome_preds = {}
 
