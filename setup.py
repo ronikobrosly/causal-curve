@@ -38,6 +38,7 @@ setuptools.setup(
         'scikit-learn',
         'scipy',
         'six',
+        'sphinx_rtd_theme',
         'statsmodels'
     ]
 )

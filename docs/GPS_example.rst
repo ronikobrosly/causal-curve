@@ -84,8 +84,8 @@ half the error of a simple LOESS estimate using only the treatment and the outco
 
 .. image:: ../imgs/cdrc/CDRC.png
 
-
-
+A binary outcome can also be handled with the GPS tool. As long as the outcome series contains
+binary integer values (e.g. 0's and 1's) the GPS `fit` method will work as it's supposed to.
 
 
 References
