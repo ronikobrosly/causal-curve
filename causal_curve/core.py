@@ -1,6 +1,7 @@
 """
 Core classes (with basic methods) that will be invoked when other, model classes are defined
 """
+import pkg_resources
 
 
 class Core:
@@ -24,3 +25,5 @@ class Core:
         return dict(
             [(k, v) for k, v in list(attrs.items()) if (k[0] != "_") and (k[-1] != "_")]
         )
+
+    __version__ = pkg_resources.require("causal-curve")[0].version

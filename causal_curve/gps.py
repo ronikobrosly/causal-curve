@@ -429,43 +429,8 @@ class GPS(Core):
         # Create grid_values
         self.grid_values = self._grid_values()
 
-        # Estimating the GPS
-        self.best_gps_family = self.gps_family
-
-        # If no family specified, pick the best family
-        if self.gps_family == None:
-            if self.verbose:
-                print(f"Fitting several GPS models and picking the best fitting one...")
-
-            (
-                self.best_gps_family,
-                self.gps_function,
-                self.gps_deviance,
-            ) = self._find_best_gps_model()
-
-            if self.verbose:
-                print(
-                    f"Best fitting model was {self.best_gps_family}, which "
-                    f"produced a deviance of {self.gps_deviance}"
-                )
-
-        # Otherwise, go with the what the user provided...
-        else:
-            if self.verbose:
-                print(f"Fitting GPS model of family '{self.best_gps_family}'...")
-
-            if self.best_gps_family == "normal":
-                (
-                    self.gps_function,
-                    self.gps_deviance,
-                ) = self._create_normal_gps_function()
-            elif self.best_gps_family == "lognormal":
-                (
-                    self.gps_function,
-                    self.gps_deviance,
-                ) = self._create_lognormal_gps_function()
-            elif self.best_gps_family == "gamma":
-                self.gps_function, self.gps_deviance = self._create_gamma_gps_function()
+        # Determine which GPS family to use
+        self._determine_gps_function()
 
         # Estimate the GPS
         if self.verbose:
@@ -709,6 +674,58 @@ class GPS(Core):
             max_iter=self.max_iter,
             lam=self.lambda_,
         ).fit(X, y)
+
+    def _determine_gps_function(self):
+        """Based on the user input, distribution of treatment values, and/or model deviances,
+        this function determines which GPS function family should be used.
+        """
+
+        # If any negative values in treatment, you must use the normal GLM family.
+        if any(self.T <= 0):
+            self.best_gps_family = "normal"
+            self.gps_function, self.gps_deviance = self._create_normal_gps_function()
+            if self.verbose:
+                print(
+                    f"Must fit `normal` GLM family to model treatment since treatment takes on zero or negative values..."
+                )
+
+        # If treatment has no negative values and user provides in put, use that.
+        elif (all(self.T > 0)) & (not isinstance(self.gps_family, type(None))):
+            if self.verbose:
+                print(f"Fitting GPS model of family '{self.gps_family}'...")
+
+            if self.gps_family == "normal":
+                self.best_gps_family = "normal"
+                (
+                    self.gps_function,
+                    self.gps_deviance,
+                ) = self._create_normal_gps_function()
+            elif self.gps_family == "lognormal":
+                self.best_gps_family = "lognormal"
+                (
+                    self.gps_function,
+                    self.gps_deviance,
+                ) = self._create_lognormal_gps_function()
+            elif self.gps_family == "gamma":
+                self.best_gps_family = "gamma"
+                self.gps_function, self.gps_deviance = self._create_gamma_gps_function()
+
+        # If no zero or negative treatment values and user didn't provide input, figure out best-fitting family
+        elif (all(self.T > 0)) & (isinstance(self.gps_family, type(None))):
+            if self.verbose:
+                print(f"Fitting several GPS models and picking the best fitting one...")
+
+            (
+                self.best_gps_family,
+                self.gps_function,
+                self.gps_deviance,
+            ) = self._find_best_gps_model()
+
+            if self.verbose:
+                print(
+                    f"Best fitting model was {self.best_gps_family}, which "
+                    f"produced a deviance of {self.gps_deviance}"
+                )
 
     def _create_normal_gps_function(self):
         """Models the GPS using a GLM of the Gaussian family"""
