@@ -26,6 +26,7 @@ causal-curve requires:
 - scikit-learn
 - scipy
 - six
+- sphinx_rtd_theme
 - statsmodels
 
 
