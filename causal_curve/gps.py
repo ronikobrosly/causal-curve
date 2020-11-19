@@ -118,10 +118,23 @@ class GPS(Core):
     Methods
     ----------
     fit: (self, T, X, y)
-        Fits the causal dose-response model
+        Fits the causal dose-response model.
 
     calculate_CDRC: (self, ci)
-        Calculates the CDRC (and confidence interval) from trained model
+        Calculates the CDRC (and confidence interval) from trained model.
+
+    predict: (self, T, X)
+        Calculates point estimate within the CDRC given treatment and covariate values.
+        Can only be used when outcome is continuous.
+
+    predict_interval: (self, T, X, ci)
+        Calculates the prediction confidence interval associated with a point estimate
+        within the CDRC given treatment and covariate values. Can only be used
+        when outcome is continuous.
+
+    predict_log_odds: (self, T, X)
+        Calculates the predicted log odds of the highest integer class. Can
+        only be used when the outcome is binary.
 
     print_gam_summary: (self)
         Prints pyGAM text summary of GAM predicting outcome from the treatment and the GPS.
@@ -793,3 +806,87 @@ class GPS(Core):
             models_to_try_dict[best_model][0],
             models_to_try_dict[best_model][1],
         )
+
+
+
+    def predict(self, T, X):
+        """Calculates point estimate within the CDRC given treatment and covariate values.
+        Can only be used when outcome is continuous. Can be estimate for a single
+        data point or can be run in batch for many observations. Extrapolation is
+        not permitted; the provided treatment and covariate data must be within
+        the range of the training data.
+
+
+        Parameters
+        ----------
+        T: array-like, shape (n_samples,)
+            A continuous treatment variable.
+        X: array-like, shape (n_samples, m_features)
+            Covariates, where n_samples is the number of samples
+            and m_features is the number of features. Features can be a mix of continuous
+            and nominal/categorical variables.
+
+        Returns
+        ----------
+        array: Numpy array
+            Contains a set of CDRC point estimates
+
+        """
+
+
+
+
+    def predict_interval(self, T, X, ci):
+        """Calculates the prediction confidence interval associated with a point estimate
+        within the CDRC given treatment and covariate values. Can only be used
+        when outcome is continuous. Can be estimate for a single data point
+        or can be run in batch for many observations. Extrapolation is
+        not permitted; the provided treatment and covariate data must be within
+        the range of the training data.
+
+
+        Parameters
+        ----------
+        T: array-like, shape (n_samples,)
+            A continuous treatment variable.
+        X: array-like, shape (n_samples, m_features)
+            Covariates, where n_samples is the number of samples
+            and m_features is the number of features. Features can be a mix of continuous
+            and nominal/categorical variables.
+        ci: float (default = 0.95)
+            The desired confidence interval to produce. Default value is 0.95, corresponding
+            to 95% confidence intervals. bounded (0, 1.0).
+
+        Returns
+        ----------
+        array: Numpy array
+            Contains a set of CDRC prediction intervals ([lower bound, higher bound])
+
+        """
+
+
+
+
+    def predict_log_odds(self, T, X):
+        """Calculates the predicted log odds of the highest integer class. Can
+        only be used when the outcome is binary. Can be estimate for a single
+        data point or can be run in batch for many observations. Extrapolation is
+        not permitted; the provided treatment and covariate data must be within
+        the range of the training data.
+
+
+        Parameters
+        ----------
+        T: array-like, shape (n_samples,)
+            A continuous treatment variable.
+        X: array-like, shape (n_samples, m_features)
+            Covariates, where n_samples is the number of samples
+            and m_features is the number of features. Features can be a mix of continuous
+            and nominal/categorical variables.
+
+        Returns
+        ----------
+        array: Numpy array
+            Contains a set of log odds
+
+        """
