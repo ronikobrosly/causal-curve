@@ -455,6 +455,12 @@ class GPS(Core):
         if self.verbose:
             print(f"Fitting GAM using treatment and GPS...")
 
+
+        import pdb
+        pdb.set_trace()
+
+
+
         # Save model results
         self.gam_results = self._fit_gam()
 
