@@ -87,6 +87,11 @@ half the error of a simple LOESS estimate using only the treatment and the outco
 A binary outcome can also be handled with the GPS tool. As long as the outcome series contains
 binary integer values (e.g. 0's and 1's) the GPS `fit` method will work as it's supposed to.
 
+The GPS tool also allows you to estimate a specific set of points along the causal curve.
+In the case of a continuous outcome, use the `predict` and `predict_interval` methods
+to produce a point estimate and prediction interval, respectively. In the case of a
+binary outcome, use the `predict_log_odds` methods to calculate the log odds of the
+highest outcome class. 
 
 References
 ----------

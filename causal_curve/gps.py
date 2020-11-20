@@ -145,6 +145,9 @@ class GPS(Core):
     >>> gps = GPS(treatment_grid_num = 200, random_seed = 512)
     >>> gps.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
     >>> gps_results = gps.calculate_CDRC(0.95)
+    >>> treatment_points = np.array([10,15,20,25])
+    >>> preds = gps.predict(treatment_points)
+    >>> conf_ints = gps.predict_interval(treatment_points, 0.95)
 
 
     References
