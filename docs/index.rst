@@ -88,6 +88,8 @@ generalized propensity scores.
 
 >>> gps.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
 >>> gps_results = gps.calculate_CDRC(ci = 0.95)
+>>> gps_pred = gps.predict(0.0003)
+>>> gps_pred_interval = gps.predict_interval(0.0003, ci = 0.95)
 
 1. First we import our GPS class.
 
@@ -99,4 +101,6 @@ generalized propensity scores.
 
 5. Estimate the points of the causal curve (along with 95% confidence interval bounds) with the ``.calculate_CDRC()`` method.
 
-6. Explore or plot your results!
+6. Estimate user-provided points along the causal curve with the ``.predict()``, ``.predict_interval()``, and ``.predict_log_odds()`` methods.
+
+7. Explore or plot your results!

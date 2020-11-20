@@ -5,11 +5,17 @@ Change Log
 ==========
 
 
+Version 0.5.0
+-------------
+- Added new `predict`, `predict_interval`, and `predict_log_odds` methods to GPS tool
+- Slight updates to doc to reflect new features
+
+
 Version 0.4.1
 -------------
 - When using GPS tool with a treatment with negative values, only the normal GLM family can be picked
 - Added 'sphinx_rtd_theme' to dependency list in `.travis.yml` and `install.rst`
-- core.py base class now has __version__ attribute 
+- core.py base class now has __version__ attribute
 
 
 Version 0.4.0

@@ -28,7 +28,12 @@ def test_full_continuous_gps_flow(continuous_dataset_fixture):
     gps_results = gps.calculate_CDRC(0.95)
 
     assert isinstance(gps_results, pd.DataFrame)
-    check = gps_results.columns == ["Treatment", "Causal_Dose_Response", "Lower_CI", "Upper_CI"]
+    check = gps_results.columns == [
+        "Treatment",
+        "Causal_Dose_Response",
+        "Lower_CI",
+        "Upper_CI",
+    ]
     assert check.all()
 
 
@@ -56,5 +61,10 @@ def test_binary_continuous_gps_flow(binary_dataset_fixture):
     gps_results = gps.calculate_CDRC(0.95)
 
     assert isinstance(gps_results, pd.DataFrame)
-    check = gps_results.columns == ["Treatment", "Causal_Odds_Ratio", "Lower_CI", "Upper_CI"]
+    check = gps_results.columns == [
+        "Treatment",
+        "Causal_Odds_Ratio",
+        "Lower_CI",
+        "Upper_CI",
+    ]
     assert check.all()

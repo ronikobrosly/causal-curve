@@ -118,10 +118,22 @@ class GPS(Core):
     Methods
     ----------
     fit: (self, T, X, y)
-        Fits the causal dose-response model
+        Fits the causal dose-response model.
 
     calculate_CDRC: (self, ci)
-        Calculates the CDRC (and confidence interval) from trained model
+        Calculates the CDRC (and confidence interval) from trained model.
+
+    predict: (self, T)
+        Calculates point estimate within the CDRC given treatment values.
+        Can only be used when outcome is continuous.
+
+    predict_interval: (self, T, ci)
+        Calculates the prediction confidence interval associated with a point estimate
+        within the CDRC given treatment values. Can only be used when outcome is continuous.
+
+    predict_log_odds: (self, T)
+        Calculates the predicted log odds of the highest integer class. Can
+        only be used when the outcome is binary.
 
     print_gam_summary: (self)
         Prints pyGAM text summary of GAM predicting outcome from the treatment and the GPS.
@@ -133,6 +145,9 @@ class GPS(Core):
     >>> gps = GPS(treatment_grid_num = 200, random_seed = 512)
     >>> gps.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
     >>> gps_results = gps.calculate_CDRC(0.95)
+    >>> treatment_points = np.array([10,15,20,25])
+    >>> preds = gps.predict(treatment_points)
+    >>> conf_ints = gps.predict_interval(treatment_points, 0.95)
 
 
     References
@@ -792,4 +807,104 @@ class GPS(Core):
             best_model,
             models_to_try_dict[best_model][0],
             models_to_try_dict[best_model][1],
+        )
+
+    def predict(self, T):
+        """Calculates point estimate within the CDRC given treatment values.
+        Can only be used when outcome is continuous. Can be estimate for a single
+        data point or can be run in batch for many observations. Extrapolation will produce
+        untrustworthy results; the provided treatment should be within
+        the range of the training data.
+
+        Parameters
+        ----------
+        T: Numpy array, shape (n_samples,)
+            A continuous treatment variable.
+
+        Returns
+        ----------
+        array: Numpy array
+            Contains a set of CDRC point estimates
+
+        """
+        if self.outcome_type != "continuous":
+            raise TypeError("Your outcome must be continuous to use this function!")
+
+        return np.apply_along_axis(self._create_predict, 0, T.reshape(1, -1))
+
+    def _create_predict(self, T):
+        """Takes a single treatment value and produces a single point estimate
+        in the case of a continuous outcome.
+        """
+        return self.gam_results.predict(
+            np.array([T, self.gps_function(T).mean()]).reshape(1, -1)
+        )
+
+    def predict_interval(self, T, ci=0.95):
+        """Calculates the prediction confidence interval associated with a point estimate
+        within the CDRC given treatment values. Can only be used
+        when outcome is continuous. Can be estimate for a single data point
+        or can be run in batch for many observations. Extrapolation will produce
+        untrustworthy results; the provided treatment should be within
+        the range of the training data.
+
+        Parameters
+        ----------
+        T: Numpy array, shape (n_samples,)
+            A continuous treatment variable.
+        ci: float (default = 0.95)
+            The desired confidence interval to produce. Default value is 0.95, corresponding
+            to 95% confidence intervals. bounded (0, 1.0).
+
+        Returns
+        ----------
+        array: Numpy array
+            Contains a set of CDRC prediction intervals ([lower bound, higher bound])
+
+        """
+        if self.outcome_type != "continuous":
+            raise TypeError("Your outcome must be continuous to use this function!")
+
+        return np.apply_along_axis(
+            self._create_predict_interval, 0, T.reshape(1, -1)
+        ).T.reshape(-1, 2)
+
+    def _create_predict_interval(self, T):
+        """Takes a single treatment value and produces confidence interval
+        associated with a point estimate in the case of a continuous outcome.
+        """
+        return self.gam_results.prediction_intervals(
+            np.array([T, self.gps_function(T).mean()]).reshape(1, -1)
+        )
+
+    def predict_log_odds(self, T):
+        """Calculates the predicted log odds of the highest integer class. Can
+        only be used when the outcome is binary. Can be estimate for a single
+        data point or can be run in batch for many observations. Extrapolation will produce
+        untrustworthy results; the provided treatment should be within
+        the range of the training data.
+
+        Parameters
+        ----------
+        T: Numpy array, shape (n_samples,)
+            A continuous treatment variable.
+
+        Returns
+        ----------
+        array: Numpy array
+            Contains a set of log odds
+        """
+        if self.outcome_type != "binary":
+            raise TypeError("Your outcome must be binary to use this function!")
+
+        return np.apply_along_axis(self._create_log_odds, 0, T.reshape(1, -1))
+
+    def _create_log_odds(self, T):
+        """Take a single treatment value and produces the log odds of the higher
+        integer class, in the case of a binary outcome.
+        """
+        return logit(
+            self.gam_results.predict_proba(
+                np.array([T, self.gps_function(T).mean()]).reshape(1, -1)
+            )
         )

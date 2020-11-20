@@ -5,6 +5,8 @@ import pandas as pd
 import pytest
 from scipy.stats import norm
 
+from causal_curve import GPS
+
 
 @pytest.fixture(scope="module")
 def continuous_dataset_fixture():
@@ -47,21 +49,111 @@ def full_binary_example_dataset():
         stop=100,
         num=100,
     )
-    x_1 = norm.rvs(size=100, loc = 50, scale = 5)
+    x_1 = norm.rvs(size=100, loc=50, scale=5)
     outcome = [
-        0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,1,0,0,
-        0,0,0,0,0,0,0,0,1,1,
-        0,0,0,0,0,0,0,0,0,1,
-        1,1,1,1,1,0,1,1,1,1,
-        1,0,1,1,1,1,1,0,1,1,
-        1,1,1,1,1,1,1,1,1,1,
-        1,1,1,1,1,1,1,1,1,1,
-        1,1,1,1,1,1,1,1,1,1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
     ]
 
-    fixture = pd.DataFrame({'treatment':treatment, 'x1': x_1, 'outcome': outcome})
+    fixture = pd.DataFrame({"treatment": treatment, "x1": x_1, "outcome": outcome})
     fixture.reset_index(drop=True, inplace=True)
 
     return fixture
@@ -90,5 +182,66 @@ def mediation_dataset():
     )
 
     fixture.reset_index(drop=True, inplace=True)
+
+    return fixture
+
+
+@pytest.fixture(scope="module")
+def GPS_fitted_model_continuous_fixture():
+    """Returns a GPS model that is already fit with data with a continuous outcome"""
+    return GPS_fitted_model_continuous()
+
+
+def GPS_fitted_model_continuous():
+    """Example GPS model that is fit with data including a continuous outcome"""
+
+    df = full_continuous_example_dataset()
+
+    fixture = GPS(
+        treatment_grid_num=10,
+        lower_grid_constraint=0.0,
+        upper_grid_constraint=1.0,
+        spline_order=3,
+        n_splines=10,
+        max_iter=100,
+        random_seed=100,
+        verbose=True,
+    )
+    fixture.fit(
+        T=df["treatment"],
+        X=df["x1"],
+        y=df["outcome"],
+    )
+
+    return fixture
+
+
+@pytest.fixture(scope="module")
+def GPS_fitted_model_binary_fixture():
+    """Returns a GPS model that is already fit with data with a continuous outcome"""
+    return GPS_fitted_model_binary()
+
+
+def GPS_fitted_model_binary():
+    """Example GPS model that is fit with data including a continuous outcome"""
+
+    df = full_binary_example_dataset()
+
+    fixture = GPS(
+        gps_family="normal",
+        treatment_grid_num=10,
+        lower_grid_constraint=0.0,
+        upper_grid_constraint=1.0,
+        spline_order=3,
+        n_splines=10,
+        max_iter=100,
+        random_seed=100,
+        verbose=True,
+    )
+    fixture.fit(
+        T=df["treatment"],
+        X=df["x1"],
+        y=df["outcome"],
+    )
 
     return fixture
