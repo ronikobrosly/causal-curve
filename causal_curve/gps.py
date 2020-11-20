@@ -810,7 +810,7 @@ class GPS(Core):
         """Calculates point estimate within the CDRC given treatment values.
         Can only be used when outcome is continuous. Can be estimate for a single
         data point or can be run in batch for many observations. Extrapolation will produce
-        untrustworthy results; the provided treatment and covariate should be within
+        untrustworthy results; the provided treatment should be within
         the range of the training data.
 
         Parameters
@@ -824,6 +824,9 @@ class GPS(Core):
             Contains a set of CDRC point estimates
 
         """
+        if self.outcome_type != "continuous":
+            raise TypeError("Your outcome must be continuous to use this function!")
+
         return np.apply_along_axis(self._create_predict, 0, T.reshape(1, -1))
 
     def _create_predict(self, T):
@@ -839,7 +842,7 @@ class GPS(Core):
         within the CDRC given treatment values. Can only be used
         when outcome is continuous. Can be estimate for a single data point
         or can be run in batch for many observations. Extrapolation will produce
-        untrustworthy results; the provided treatment and covariate should be within
+        untrustworthy results; the provided treatment should be within
         the range of the training data.
 
         Parameters
@@ -856,6 +859,9 @@ class GPS(Core):
             Contains a set of CDRC prediction intervals ([lower bound, higher bound])
 
         """
+        if self.outcome_type != "continuous":
+            raise TypeError("Your outcome must be continuous to use this function!")
+
         return np.apply_along_axis(
             self._create_predict_interval, 0, T.reshape(1, -1)
         ).T.reshape(-1, 2)
@@ -872,7 +878,7 @@ class GPS(Core):
         """Calculates the predicted log odds of the highest integer class. Can
         only be used when the outcome is binary. Can be estimate for a single
         data point or can be run in batch for many observations. Extrapolation will produce
-        untrustworthy results; the provided treatment and covariate should be within
+        untrustworthy results; the provided treatment should be within
         the range of the training data.
 
         Parameters
@@ -885,6 +891,9 @@ class GPS(Core):
         array: Numpy array
             Contains a set of log odds
         """
+        if self.outcome_type != "binary":
+            raise TypeError("Your outcome must be binary to use this function!")
+
         return np.apply_along_axis(self._create_log_odds, 0, T.reshape(1, -1))
 
     def _create_log_odds(self, T):

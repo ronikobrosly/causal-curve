@@ -23,5 +23,10 @@ def test_full_tmle_flow(continuous_dataset_fixture):
     tmle_results = tmle.calculate_CDRC(0.95)
 
     assert isinstance(tmle_results, pd.DataFrame)
-    check = tmle_results.columns == ["Treatment", "Causal_Dose_Response", "Lower_CI", "Upper_CI"]
+    check = tmle_results.columns == [
+        "Treatment",
+        "Causal_Dose_Response",
+        "Lower_CI",
+        "Upper_CI",
+    ]
     assert check.all()
