@@ -123,16 +123,15 @@ class GPS(Core):
     calculate_CDRC: (self, ci)
         Calculates the CDRC (and confidence interval) from trained model.
 
-    predict: (self, T, X)
-        Calculates point estimate within the CDRC given treatment and covariate values.
+    predict: (self, T)
+        Calculates point estimate within the CDRC given treatment values.
         Can only be used when outcome is continuous.
 
-    predict_interval: (self, T, X, ci)
+    predict_interval: (self, T, ci)
         Calculates the prediction confidence interval associated with a point estimate
-        within the CDRC given treatment and covariate values. Can only be used
-        when outcome is continuous.
+        within the CDRC given treatment values. Can only be used when outcome is continuous.
 
-    predict_log_odds: (self, T, X)
+    predict_log_odds: (self, T)
         Calculates the predicted log odds of the highest integer class. Can
         only be used when the outcome is binary.
 
@@ -454,12 +453,6 @@ class GPS(Core):
         # Create GAM that predicts outcome from the treatment and GPS
         if self.verbose:
             print(f"Fitting GAM using treatment and GPS...")
-
-
-        import pdb
-        pdb.set_trace()
-
-
 
         # Save model results
         self.gam_results = self._fit_gam()
@@ -813,24 +806,17 @@ class GPS(Core):
             models_to_try_dict[best_model][1],
         )
 
-
-
-    def predict(self, T, X):
-        """Calculates point estimate within the CDRC given treatment and covariate values.
+    def predict(self, T):
+        """Calculates point estimate within the CDRC given treatment values.
         Can only be used when outcome is continuous. Can be estimate for a single
-        data point or can be run in batch for many observations. Extrapolation is
-        not permitted; the provided treatment and covariate data must be within
+        data point or can be run in batch for many observations. Extrapolation will produce
+        untrustworthy results; the provided treatment and covariate should be within
         the range of the training data.
-
 
         Parameters
         ----------
-        T: array-like, shape (n_samples,)
+        T: Numpy array, shape (n_samples,)
             A continuous treatment variable.
-        X: array-like, shape (n_samples, m_features)
-            Covariates, where n_samples is the number of samples
-            and m_features is the number of features. Features can be a mix of continuous
-            and nominal/categorical variables.
 
         Returns
         ----------
@@ -838,27 +824,28 @@ class GPS(Core):
             Contains a set of CDRC point estimates
 
         """
+        return np.apply_along_axis(self._create_predict, 0, T.reshape(1, -1))
 
+    def _create_predict(self, T):
+        """Takes a single treatment value and produces a single point estimate
+        in the case of a continuous outcome.
+        """
+        return self.gam_results.predict(
+            np.array([T, self.gps_function(T).mean()]).reshape(1, -1)
+        )
 
-
-
-    def predict_interval(self, T, X, ci):
+    def predict_interval(self, T, ci=0.95):
         """Calculates the prediction confidence interval associated with a point estimate
-        within the CDRC given treatment and covariate values. Can only be used
+        within the CDRC given treatment values. Can only be used
         when outcome is continuous. Can be estimate for a single data point
-        or can be run in batch for many observations. Extrapolation is
-        not permitted; the provided treatment and covariate data must be within
+        or can be run in batch for many observations. Extrapolation will produce
+        untrustworthy results; the provided treatment and covariate should be within
         the range of the training data.
-
 
         Parameters
         ----------
-        T: array-like, shape (n_samples,)
+        T: Numpy array, shape (n_samples,)
             A continuous treatment variable.
-        X: array-like, shape (n_samples, m_features)
-            Covariates, where n_samples is the number of samples
-            and m_features is the number of features. Features can be a mix of continuous
-            and nominal/categorical variables.
         ci: float (default = 0.95)
             The desired confidence interval to produce. Default value is 0.95, corresponding
             to 95% confidence intervals. bounded (0, 1.0).
@@ -869,30 +856,43 @@ class GPS(Core):
             Contains a set of CDRC prediction intervals ([lower bound, higher bound])
 
         """
+        return np.apply_along_axis(
+            self._create_predict_interval, 0, T.reshape(1, -1)
+        ).T.reshape(-1, 2)
 
+    def _create_predict_interval(self, T):
+        """Takes a single treatment value and produces confidence interval
+        associated with a point estimate in the case of a continuous outcome.
+        """
+        return self.gam_results.prediction_intervals(
+            np.array([T, self.gps_function(T).mean()]).reshape(1, -1)
+        )
 
-
-
-    def predict_log_odds(self, T, X):
+    def predict_log_odds(self, T):
         """Calculates the predicted log odds of the highest integer class. Can
         only be used when the outcome is binary. Can be estimate for a single
-        data point or can be run in batch for many observations. Extrapolation is
-        not permitted; the provided treatment and covariate data must be within
+        data point or can be run in batch for many observations. Extrapolation will produce
+        untrustworthy results; the provided treatment and covariate should be within
         the range of the training data.
-
 
         Parameters
         ----------
-        T: array-like, shape (n_samples,)
+        T: Numpy array, shape (n_samples,)
             A continuous treatment variable.
-        X: array-like, shape (n_samples, m_features)
-            Covariates, where n_samples is the number of samples
-            and m_features is the number of features. Features can be a mix of continuous
-            and nominal/categorical variables.
 
         Returns
         ----------
         array: Numpy array
             Contains a set of log odds
-
         """
+        return np.apply_along_axis(self._create_log_odds, 0, T.reshape(1, -1))
+
+    def _create_log_odds(self, T):
+        """Take a single treatment value and produces the log odds of the higher
+        integer class, in the case of a binary outcome.
+        """
+        return logit(
+            self.gam_results.predict_proba(
+                np.array([T, self.gps_function(T).mean()]).reshape(1, -1)
+            )
+        )

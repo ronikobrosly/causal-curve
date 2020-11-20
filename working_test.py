@@ -1,7 +1,8 @@
-from causal_curve import GPS
+from causal_curve.gps import GPS
 import numpy as np
 import pandas as pd
 from scipy.stats import expon
+from scipy.special import logit
 
 
 np.random.seed(333)
@@ -35,20 +36,64 @@ gps_results = gps.calculate_CDRC(0.95)
 
 
 
+gps.predict(np.array([4.1, 4.3, 4.7]))
+gps.predict_interval(np.array([4.1, 4.3, 4.7]))
+
+gps.predict(np.array([5]))
+gps.predict_interval(np.array([5]))
+
+
+
+
+
+
+
+
 ####### EXPERIMENTING WITH PREDICTING GIVEN NEW COVARIATE AND TREATMENT DATA
 
-
-df['Treatment'].describe()
-
-# Using the `predict` method will work like this
-
+### Using the `predict` method will work like this
 temp_treatment_value = 4
 temp_gps_value = gps.gps_function(temp_treatment_value).mean()
-
 gps.gam_results.predict(np.array([temp_treatment_value, temp_gps_value]).reshape(1,-1))
+
+
+
 
 
 # Using the `predict_interval` method will work like this
 
-
 gps.gam_results.prediction_intervals(np.array([temp_treatment_value, temp_gps_value]).reshape(1,-1), width = 0.95)
+
+
+
+
+
+##########################################################
+##########################################################
+
+
+from causal_curve.gps import GPS
+import numpy as np
+import pandas as pd
+from scipy.stats import expon
+
+
+df = pd.read_csv("~/Desktop/advertising.csv")
+
+
+gps = GPS()
+gps.fit(T = df['treatment'], X = df[['age', 'income']], y = df['outcome'])
+gps_results = gps.calculate_CDRC(0.95)
+
+
+
+gps.predict_log_odds(np.array([65]))
+
+
+
+# Using the `predict_log_odds` method
+
+temp_treatment_value = 65
+temp_gps_value = gps.gps_function(temp_treatment_value).mean()
+
+logit(gps.gam_results.predict_proba(np.array([temp_treatment_value, temp_gps_value]).reshape(1,-1)))
