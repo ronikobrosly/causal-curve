@@ -5,6 +5,11 @@ Change Log
 ==========
 
 
+Version 0.5.1
+-------------
+- Removed working test file
+
+
 Version 0.5.0
 -------------
 - Added new `predict`, `predict_interval`, and `predict_log_odds` methods to GPS tool
