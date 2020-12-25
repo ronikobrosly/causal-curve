@@ -8,6 +8,7 @@ Change Log
 Version 0.5.2
 -------------
 - Fixed bug that prevented `causal-curve` modules from being shown in Sphinx documentation
+- Augmented tests to capture more error states and improve code coverage
 
 
 Version 0.5.1
