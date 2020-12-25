@@ -36,7 +36,7 @@ def test_tmle_fit(continuous_dataset_fixture):
         "verbose",
     ),
     [
-        ([0, 1, 2, 3, 4], 100, 0.1, 5, None, False),
+        ([0, 1, "2", 3, 4], 100, 0.1, 5, None, False),
         (5, 100, 0.1, 5, None, False),
         ("5", 100, 0.1, 5, None, False),
         ([22.1, 30, 40, 50, 60, 70, 80.1], "100", 0.1, 5, None, False),
@@ -45,8 +45,6 @@ def test_tmle_fit(continuous_dataset_fixture):
         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 1000000, 5, None, False),
         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, "5", None, False),
         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, -5, None, False),
-        ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, 5, None, False),
-        ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, 5, None, False),
         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, 5, "None", False),
         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, 5, -10, False),
         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, 5, None, "False"),
@@ -55,14 +53,14 @@ def test_tmle_fit(continuous_dataset_fixture):
         ([1.0], 100, 0.1, 5, None, False),
         ([22.1, 30, 40, 50, 60, 70, 80.1], 100.0, 0.1, 5, None, False),
         ([22.1, 30, 40, 50, 60, 70, 80.1], 1.0, 0.1, 5, None, False),
-        ([22.1, 30, 40, 50, 60, 70, 80.1], 100000, 0.1, 5, None, False),
+        ([22.1, 30, 40, 50, 60, 70, 80.1], 10000000, 0.1, 5, None, False),
         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, "hehe", 5, None, False),
         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, -0.1, 5, None, False),
         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 10000000, 5, None, False),
         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, "hehe", None, False),
         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, 5.0, None, False),
         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, -5, None, False),
-        ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, 5, True, False),
+        ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, 5, "hehe", False),
         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, 5, -10, False),
         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, 5, None, "thirty two"),
     ],
@@ -76,12 +74,11 @@ def test_bad_tmle_instantiation(
     verbose,
 ):
     with pytest.raises(Exception) as bad:
-        GPS(
+        TMLE(
             treatment_grid_bins=treatment_grid_bins,
             n_estimators=n_estimators,
             learning_rate=learning_rate,
             max_depth=max_depth,
-            gamma=gamma,
             random_seed=random_seed,
             verbose=verbose,
         )
