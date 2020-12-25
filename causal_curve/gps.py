@@ -324,7 +324,7 @@ class GPS(Core):
 
         if (isinstance(self.lambda_, (int, float))) and self.lambda_ <= 0:
             raise ValueError(
-                f"lambda_ parameter should be >= 2, but found {self.lambda_}"
+                f"lambda_ parameter should be > 0, but found {self.lambda_}"
             )
 
         if (isinstance(self.lambda_, (int, float))) and self.lambda_ >= 1000:

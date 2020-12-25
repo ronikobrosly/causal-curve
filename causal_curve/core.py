@@ -26,4 +26,4 @@ class Core:
             [(k, v) for k, v in list(attrs.items()) if (k[0] != "_") and (k[-1] != "_")]
         )
 
-    __version__ = pkg_resources.require("causal-curve")[0].version
+    __version__ = "0.5.2"
