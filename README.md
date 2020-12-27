@@ -60,6 +60,16 @@ pip install .
 
 [Documentation is available at readthedocs.org](https://causal-curve.readthedocs.io/en/latest/)
 
+
+## In Progress
+
+(12/26/2020) Currently working towards version 1.0.0! 
+
+This major update will include:
+* An overhaul of the TMLE tool to make it more accurate and user-friendly. 
+* Separate model classes for predicting binary or continuous outcomes (much like sklearn's approach)
+* Better TMLE example documentation
+
 ## Contributing
 
 Your help is absolutely welcome! Please do reach out or create a feature branch!
