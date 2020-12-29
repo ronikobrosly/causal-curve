@@ -1,5 +1,5 @@
 """
-Defines the Generalized Prospensity Score (GPS) model class
+Defines the Generalized Prospensity Score (GPS) Core model class
 """
 
 import contextlib
@@ -16,11 +16,11 @@ import statsmodels.api as sm
 from statsmodels.genmod.families.links import inverse_power as Inverse_Power
 from statsmodels.tools.tools import add_constant
 
-from causal_curve.core import Core
+from causal_curve import Core
 from causal_curve.utils import calculate_z_score, rand_seed_wrapper
 
 
-class GPS(Core):
+class GPS_core(Core):
     """
     In a multi-stage approach, this computes the generalized propensity score (GPS) function,
     and uses this in a generalized additive model (GAM) to correct treatment prediction of
