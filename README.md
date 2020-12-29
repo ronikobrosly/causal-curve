@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/ronikobrosly/causal-curve/branch/master/graph/badge.svg)](https://codecov.io/gh/ronikobrosly/causal-curve)
 [![DOI](https://zenodo.org/badge/256017107.svg)](https://zenodo.org/badge/latestdoi/256017107)
 
-Python tools to perform causal inference using observational data when the treatment of interest is continuous.
+Python tools to perform causal inference when the treatment of interest is continuous.
 
 
 <p align="center">
@@ -21,7 +21,6 @@ Python tools to perform causal inference using observational data when the treat
 - [Overview](#overview)
 - [Installation](#installation)
 - [Documentation](#documentation)
-- [In Progress](#in-progress)
 - [Contributing](#contributing)
 - [Citation](#citation)
 - [References](#references)
@@ -61,15 +60,6 @@ pip install .
 [Documentation is available at readthedocs.org](https://causal-curve.readthedocs.io/en/latest/)
 
 
-## In Progress
-
-(12/26/2020) Currently working towards version 1.0.0! 
-
-This major update will include:
-* An overhaul of the TMLE tool to make it more accurate and user-friendly. 
-* Separate model classes for predicting binary or continuous outcomes (much like sklearn's approach)
-* Better TMLE example documentation
-
 ## Contributing
 
 Your help is absolutely welcome! Please do reach out or create a feature branch!
@@ -83,19 +73,22 @@ Kobrosly, R. W., (2020). causal-curve: A Python Causal Inference Package to Esti
 Galagate, D. Causal Inference with a Continuous Treatment and Outcome: Alternative
 Estimators for Parametric Dose-Response function with Applications. PhD thesis, 2016.
 
-Moodie E and Stephens DA. Estimation of dose–response functions for
-longitudinal data using the generalised propensity score. In: Statistical Methods in
-Medical Research 21(2), 2010, pp.149–166.
-
 Hirano K and Imbens GW. The propensity score with continuous treatments.
 In: Gelman A and Meng XL (eds) Applied bayesian modeling and causal inference
 from incomplete-data perspectives. Oxford, UK: Wiley, 2004, pp.73–84.
+
+Imai K, Keele L, Tingley D. A General Approach to Causal Mediation Analysis. Psychological
+Methods. 15(4), 2010, pp.309–334.
+
+Kennedy EH, Ma Z, McHugh MD, Small DS. Nonparametric methods for doubly robust estimation
+of continuous treatment effects. Journal of the Royal Statistical Society, Series B. 79(4), 2017, pp.1229-1245.
+
+Moodie E and Stephens DA. Estimation of dose–response functions for
+longitudinal data using the generalised propensity score. In: Statistical Methods in
+Medical Research 21(2), 2010, pp.149–166.
 
 van der Laan MJ and Gruber S. Collaborative double robust penalized targeted
 maximum likelihood estimation. In: The International Journal of Biostatistics 6(1), 2010.
 
 van der Laan MJ and Rubin D. Targeted maximum likelihood learning. In: ​U.C. Berkeley Division of
 Biostatistics Working Paper Series, 2006.
-
-Imai K., Keele L., Tingley D. A General Approach to Causal Mediation Analysis. Psychological
-Methods. 15(4), 2010, pp.309–334.

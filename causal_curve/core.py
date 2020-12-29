@@ -26,4 +26,4 @@ class Core:
             [(k, v) for k, v in list(attrs.items()) if (k[0] != "_") and (k[-1] != "_")]
         )
 
-    __version__ = "0.5.2"
+    __version__ = "1.0.0"
