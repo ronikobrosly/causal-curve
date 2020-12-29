@@ -8,7 +8,7 @@ Python tools to perform causal inference when the treatment of interest is conti
 
 
 <p align="center">
-<img src="https://upload.wikimedia.org/wikipedia/commons/e/e8/Antikythera_mechanism.svg" align="middle" width="350" height="477" />
+<img src="/imgs/curves.png" align="middle" width="350" height="477" />
 </p>
 
 
