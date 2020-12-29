@@ -8,11 +8,8 @@ Python tools to perform causal inference when the treatment of interest is conti
 
 
 <p align="center">
-<img src="/imgs/curves.png" align="middle" width="800" height="477" />
+<img src="/imgs/curves.png" align="middle" width="1000" height="345" />
 </p>
-
-
-[The Antikythera mechanism](https://en.wikipedia.org/wiki/Antikythera_mechanism), an ancient analog computer, with lots of beautiful curves.
 
 
 
