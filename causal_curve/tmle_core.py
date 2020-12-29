@@ -1,4 +1,3 @@
-# pylint: disable=bad-continuation
 """
 Defines the Targetted Maximum likelihood Estimation (TMLE) model class
 """
@@ -191,7 +190,7 @@ class TMLE(Core):
             )
 
         if (isinstance(self.random_seed, int)) and self.random_seed < 0:
-            raise ValueError(f"random_seed parameter must be > 0")
+            raise ValueError("random_seed parameter must be > 0")
 
         # Checks for verbose
         if not isinstance(self.verbose, bool):
@@ -203,13 +202,13 @@ class TMLE(Core):
         """Verifies that T, X, and y are formatted the right way"""
         # Checks for T column
         if not is_float_dtype(self.t_data):
-            raise TypeError(f"Treatment data must be of type float")
+            raise TypeError("Treatment data must be of type float")
 
         # Make sure all X columns are float or int
         if isinstance(self.x_data, pd.Series):
             if not is_numeric_dtype(self.x_data):
                 raise TypeError(
-                    f"All covariate (X) columns must be int or float type (i.e. must be numeric)"
+                    "All covariate (X) columns must be int or float type (i.e. must be numeric)"
                 )
 
         elif isinstance(self.x_data, pd.DataFrame):
@@ -222,7 +221,7 @@ class TMLE(Core):
 
         # Checks for Y column
         if not is_float_dtype(self.y_data):
-            raise TypeError(f"Outcome data must be of type float")
+            raise TypeError("Outcome data must be of type float")
 
     def _validate_calculate_CDRC_params(self, ci):
         """Validates the parameters given to `calculate_CDRC`"""
@@ -368,7 +367,7 @@ class TMLE(Core):
             # Estimate delta_hat
             if self.verbose:
                 print("Estimating delta hat...")
-            self.delta_hat = self._delta_hat_estimation(temp_y, temp_x, temp_t)
+            self.delta_hat = self._delta_hat_estimation(temp_y, temp_t)
 
             # Estimate targeted and corrected Psi
             if self.verbose:
@@ -379,7 +378,7 @@ class TMLE(Core):
             self.std_error_ic_list.append(std_error_IC)
 
             if self.verbose:
-                print(f"Finished this loop!")
+                print("Finished this loop!")
 
     def calculate_CDRC(self, ci=0.95, CDRC_grid_num=100):
         """Using the results of the fitted model, this generates the CDRC by interpolation
@@ -412,7 +411,7 @@ class TMLE(Core):
 
         if self.verbose:
             print(
-                f"Estimating the CDRC and confidence intervals via cubic interpolation..."
+                "Estimating the CDRC and confidence intervals via cubic interpolation..."
             )
 
         # Collect discrete t_values
@@ -421,7 +420,7 @@ class TMLE(Core):
         # Collect discrete y_values
         y_values = [self.outcome_start_val]
 
-        for index, item in enumerate(self.psi_list):
+        for index, _ in enumerate(self.psi_list):
             y_values.append(self.outcome_start_val + sum(self.psi_list[: (index + 1)]))
 
         # Collect discrete lower confidence bounds
@@ -447,7 +446,7 @@ class TMLE(Core):
         Upper_CI = upper_interp(CDRC_t_grid)
 
         if self.verbose:
-            print(f"Done!")
+            print("Done!")
 
         return pd.DataFrame(
             {
@@ -521,7 +520,7 @@ class TMLE(Core):
 
         return pi_hat1, pi_hat0
 
-    def _delta_hat_estimation(self, temp_y, temp_x, temp_t):
+    def _delta_hat_estimation(self, temp_y, temp_t):
         """Estimates delta to correct treatment estimation"""
         H_a = []
 

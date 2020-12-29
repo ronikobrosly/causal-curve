@@ -1,4 +1,3 @@
-# pylint: disable=bad-continuation
 """
 Defines the Generalized Prospensity Score (GPS) model class
 """
@@ -18,7 +17,7 @@ from statsmodels.genmod.families.links import inverse_power as Inverse_Power
 from statsmodels.tools.tools import add_constant
 
 from causal_curve.core import Core
-from causal_curve.utils import rand_seed_wrapper
+from causal_curve.utils import calculate_z_score, rand_seed_wrapper
 
 
 class GPS(Core):
@@ -233,7 +232,7 @@ class GPS(Core):
         if (
             isinstance(self.treatment_grid_num, int)
         ) and self.treatment_grid_num >= 1000:
-            raise ValueError(f"treatment_grid_num parameter is too high!")
+            raise ValueError("treatment_grid_num parameter is too high!")
 
         # Checks for lower_grid_constraint
         if not isinstance(self.lower_grid_constraint, float):
@@ -300,7 +299,7 @@ class GPS(Core):
             )
 
         if (isinstance(self.spline_order, int)) and self.spline_order >= 30:
-            raise ValueError(f"spline_order parameter is too high!")
+            raise ValueError("spline_order parameter is too high!")
 
         # Checks for n_splines
         if not isinstance(self.n_splines, int):
@@ -314,7 +313,7 @@ class GPS(Core):
             )
 
         if (isinstance(self.n_splines, int)) and self.n_splines >= 100:
-            raise ValueError(f"n_splines parameter is too high!")
+            raise ValueError("n_splines parameter is too high!")
 
         # Checks for lambda_
         if not isinstance(self.lambda_, (int, float)):
@@ -328,7 +327,7 @@ class GPS(Core):
             )
 
         if (isinstance(self.lambda_, (int, float))) and self.lambda_ >= 1000:
-            raise ValueError(f"lambda_ parameter is too high!")
+            raise ValueError("lambda_ parameter is too high!")
 
         # Checks for max_iter
         if not isinstance(self.max_iter, int):
@@ -338,11 +337,11 @@ class GPS(Core):
 
         if (isinstance(self.max_iter, int)) and self.max_iter <= 10:
             raise ValueError(
-                f"max_iter parameter is too low! Results won't be reliable!"
+                "max_iter parameter is too low! Results won't be reliable!"
             )
 
         if (isinstance(self.max_iter, int)) and self.max_iter >= 1e6:
-            raise ValueError(f"max_iter parameter is unnecessarily high!")
+            raise ValueError("max_iter parameter is unnecessarily high!")
 
         # Checks for random_seed
         if not isinstance(self.random_seed, (int, type(None))):
@@ -351,7 +350,7 @@ class GPS(Core):
             )
 
         if (isinstance(self.random_seed, int)) and self.random_seed < 0:
-            raise ValueError(f"random_seed parameter must be > 0")
+            raise ValueError("random_seed parameter must be > 0")
 
         # Checks for verbose
         if not isinstance(self.verbose, bool):
@@ -363,33 +362,33 @@ class GPS(Core):
         """Verifies that T, X, and y are formatted the right way"""
         # Checks for T column
         if not is_float_dtype(self.T):
-            raise TypeError(f"Treatment data must be of type float")
+            raise TypeError("Treatment data must be of type float")
 
         # Make sure all X columns are float or int
         if isinstance(self.X, pd.Series):
             if not is_numeric_dtype(self.X):
                 raise TypeError(
-                    f"All covariate (X) columns must be int or float type (i.e. must be numeric)"
+                    "All covariate (X) columns must be int or float type (i.e. must be numeric)"
                 )
 
         elif isinstance(self.X, pd.DataFrame):
             for column in self.X:
                 if not is_numeric_dtype(self.X[column]):
                     raise TypeError(
-                        f"All covariate (X) columns must be int or float type "
-                        f"(i.e. must be numeric)"
+                        "All covariate (X) columns must be int or float type "
+                        "(i.e. must be numeric)"
                     )
 
         # Checks for Y column
         if not (is_float_dtype(self.y) or is_integer_dtype(self.y)):
-            raise TypeError(f"Outcome data must be of type float or integer")
+            raise TypeError("Outcome data must be of type float or integer")
 
         if is_integer_dtype(self.y) and (
             not np.array_equal(np.sort(self.y.unique()), np.array([0, 1]))
         ):
             raise TypeError(
-                f"If your outcome data is of type integer (binary outcome),"
-                f"it should only contain 1's and 0's."
+                "If your outcome data is of type integer (binary outcome),"
+                "it should only contain 1's and 0's."
             )
 
     def _grid_values(self):
@@ -449,13 +448,13 @@ class GPS(Core):
 
         # Estimate the GPS
         if self.verbose:
-            print(f"Saving GPS values...")
+            print("Saving GPS values...")
 
         self.gps = self.gps_function(self.T)
 
         # Create GAM that predicts outcome from the treatment and GPS
         if self.verbose:
-            print(f"Fitting GAM using treatment and GPS...")
+            print("Fitting GAM using treatment and GPS...")
 
         # Save model results
         self.gam_results = self._fit_gam()
@@ -467,7 +466,7 @@ class GPS(Core):
         self._gam_summary_str = f.getvalue()
 
         if self.verbose:
-            print(f"Calculating many CDRC estimates for each treatment grid value...")
+            print("Calculating many CDRC estimates for each treatment grid value...")
 
         # Loop over all grid values (`treatment_grid_num` in total)
         # and give GPS loading for each observation in the dataset
@@ -547,11 +546,11 @@ class GPS(Core):
 
                 temp_lower_bound = np.exp(
                     temp_log_odds_estimate
-                    - (self._calculate_z_score(ci) * self._cdrc_preds[:, i, 1].mean())
+                    - (calculate_z_score(ci) * self._cdrc_preds[:, i, 1].mean())
                 )
                 temp_upper_bound = np.exp(
                     temp_log_odds_estimate
-                    + (self._calculate_z_score(ci) * self._cdrc_preds[:, i, 1].mean())
+                    + (calculate_z_score(ci) * self._cdrc_preds[:, i, 1].mean())
                 )
                 results.append(
                     [
@@ -568,7 +567,8 @@ class GPS(Core):
             results, columns=["Treatment", outcome_name, "Lower_CI", "Upper_CI"]
         ).round(3)
 
-    def _validate_calculate_CDRC_params(self, ci):
+    @staticmethod
+    def _validate_calculate_CDRC_params(ci):
         """Validates the parameters given to `calculate_CDRC`"""
 
         if not isinstance(ci, float):
@@ -578,10 +578,6 @@ class GPS(Core):
 
         if isinstance(ci, float) and ((ci <= 0) or (ci >= 1.0)):
             raise ValueError("`ci` parameter should be between (0, 1)")
-
-    def _calculate_z_score(self, ci):
-        """Calculates the critical z-score for a desired two-sided, confidence interval width."""
-        return norm.ppf((1 + ci) / 2)
 
     def _cdrc_predictions_continuous(self, ci):
         """Returns the predictions of CDRC for each value of the treatment grid. Essentially,
@@ -642,7 +638,7 @@ class GPS(Core):
 
             standard_error = (
                 temp_cdrc_interval[:, 1] - temp_cdrc_preds
-            ) / self._calculate_z_score(ci)
+            ) / calculate_z_score(ci)
 
             cdrc_preds[:, i, 0] = temp_cdrc_preds
             cdrc_preds[:, i, 1] = standard_error
@@ -701,7 +697,8 @@ class GPS(Core):
             self.gps_function, self.gps_deviance = self._create_normal_gps_function()
             if self.verbose:
                 print(
-                    f"Must fit `normal` GLM family to model treatment since treatment takes on zero or negative values..."
+                    "Must fit `normal` GLM family to model treatment since"
+                    " treatment takes on zero or negative values..."
                 )
 
         # If treatment has no negative values and user provides in put, use that.
@@ -725,10 +722,13 @@ class GPS(Core):
                 self.best_gps_family = "gamma"
                 self.gps_function, self.gps_deviance = self._create_gamma_gps_function()
 
-        # If no zero or negative treatment values and user didn't provide input, figure out best-fitting family
+        # If no zero or negative treatment values and user didn't provide
+        # input, figure out best-fitting family
         elif (all(self.T > 0)) & (isinstance(self.gps_family, type(None))):
             if self.verbose:
-                print(f"Fitting several GPS models and picking the best fitting one...")
+                print(
+                    "Fitting several GPS models and" " picking the best fitting one..."
+                )
 
             (
                 self.best_gps_family,
@@ -866,15 +866,15 @@ class GPS(Core):
             raise TypeError("Your outcome must be continuous to use this function!")
 
         return np.apply_along_axis(
-            self._create_predict_interval, 0, T.reshape(1, -1)
+            self._create_predict_interval, 0, T.reshape(1, -1), width=ci
         ).T.reshape(-1, 2)
 
-    def _create_predict_interval(self, T):
+    def _create_predict_interval(self, T, width):
         """Takes a single treatment value and produces confidence interval
         associated with a point estimate in the case of a continuous outcome.
         """
         return self.gam_results.prediction_intervals(
-            np.array([T, self.gps_function(T).mean()]).reshape(1, -1)
+            np.array([T, self.gps_function(T).mean()]).reshape(1, -1), width=width
         )
 
     def predict_log_odds(self, T):

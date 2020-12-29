@@ -1,7 +1,6 @@
 """
 Core classes (with basic methods) that will be invoked when other, model classes are defined
 """
-import pkg_resources
 
 
 class Core:
