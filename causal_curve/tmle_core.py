@@ -17,15 +17,14 @@ from causal_curve.utils import rand_seed_wrapper
 
 class TMLE(Core):
     """
-    Constructs a causal dose response curve through a series of TMLE comparisons across a grid
-    of the treatment values. Gradient boosting is used for prediction in Q model and G model.
+    Constructs a causal dose response curve via a modified version of Targetted
+    Maximum Likelihood Estimation (TMLE) across a grid of the treatment values.
+    Gradient boosting is used for prediction of the Q model and G models, simple
+    kernel regression is used processing those model results, and a generalized
+    additive model is used in the final step to contruct the final curve.
     Assumes continuous treatment and outcome variable.
 
     WARNING:
-
-    -In choosing `treatment_grid_bins` be very careful to respect the "positivity" assumption.
-    There must be sufficient data and variability of treatment within each bin the treatment
-    is split into.
 
     -This algorithm assumes you've already performed the necessary transformations to
     categorical covariates (i.e. these variables are already one-hot encoded and
@@ -38,22 +37,18 @@ class TMLE(Core):
     Parameters
     ----------
 
-    treatment_grid_bins: list of floats or ints
-        Represents the edges of bins of treatment values that are used to construct a smooth curve
-        Look at the distribution of your treatment variable to determine which
-        family is more appropriate. Be mindful of the "positivity" assumption when determining
-        bins. In other words, make sure there aren't too few data points in each bin. Mean
-        treatment values between the bin edges will be used to generate the CDRC.
-
-    n_estimators: int, optional (default = 100)
+    n_estimators: int, optional (default = 200)
         Optional argument to set the number of learners to use when sklearn
         creates TMLE's Q and G models.
 
-    learning_rate: float, optional (default = 0.1)
+    learning_rate: float, optional (default = 0.01)
         Optional argument to set the sklearn's learning rate for TMLE's Q and G models.
 
-    max_depth: int, optional (default = 5)
+    max_depth: int, optional (default = 3)
         Optional argument to set sklearn's maximum depth when creating TMLE's Q and G models.
+
+    bandwidth: float, optional (default = 0.5)
+        Optional argument to set the bandwidth parameter of the kernel regression.
 
     random_seed: int, optional (default = None)
         Sets the random seed.
@@ -64,11 +59,7 @@ class TMLE(Core):
 
     Attributes
     ----------
-    psi_list: array of shape (len(treatment_grid_bins) - 2, )
-        The estimated causal difference between treatment bins
 
-    std_error_ic_list: array of shape (len(treatment_grid_bins) - 2, )
-        The standard errors for the psi estimates found in `psi_list`
 
 
     Methods
@@ -82,19 +73,14 @@ class TMLE(Core):
 
     Examples
     --------
-    >>> from causal_curve import TMLE
-    >>> tmle = TMLE(treatment_grid_bins = [0, 0.03, 0.05, 0.25, 0.5, 1.0, 2.0],
-        n_estimators=500,
-        learning_rate = 0.1,
-        max_depth = 5,
-        random_seed=111
-    )
-    >>> tmle.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
-    >>> tmle_results = tmle.calculate_CDRC(0.95)
+
 
 
     References
     ----------
+
+    Kennedy EH, Ma Z, McHugh MD, Small DS. Nonparametric methods for doubly robust estimation
+    of continuous treatment effects. Journal of the Royal Statistical Society, Series B. 79(4), 2017, pp.1229-1245.
 
     van der Laan MJ and Rubin D. Targeted maximum likelihood learning. In: The International
     Journal of Biostatistics, 2(1), 2006.
@@ -106,18 +92,18 @@ class TMLE(Core):
 
     def __init__(
         self,
-        treatment_grid_bins,
-        n_estimators=100,
-        learning_rate=0.1,
-        max_depth=5,
+        n_estimators=200,
+        learning_rate=0.01,
+        max_depth=3,
+        bandwidth=0.5,
         random_seed=None,
         verbose=False,
     ):
 
-        self.treatment_grid_bins = treatment_grid_bins
         self.n_estimators = n_estimators
         self.learning_rate = learning_rate
         self.max_depth = max_depth
+        self.bandwidth = bandwidth
         self.random_seed = random_seed
         self.verbose = verbose
 
@@ -133,23 +119,6 @@ class TMLE(Core):
         """
         Checks that the params used when instantiating TMLE model are formatted correctly
         """
-
-        # Checks for treatment_grid_bins
-        if not isinstance(self.treatment_grid_bins, list):
-            raise TypeError(
-                f"treatment_grid_bins parameter must be a list, "
-                f"but found type {type(self.treatment_grid_bins)}"
-            )
-
-        for element in self.treatment_grid_bins:
-            if not isinstance(element, (int, float)):
-                raise TypeError(
-                    f"'{element}' in `treatment_grid_bins` list is not of type float or int, "
-                    f"it is {type(element)}"
-                )
-
-        if len(self.treatment_grid_bins) < 2:
-            raise TypeError("treatment_grid_bins list must, at minimum, of length >= 2")
 
         # Checks for n_estimators
         if not isinstance(self.n_estimators, int):
@@ -182,6 +151,18 @@ class TMLE(Core):
 
         if self.max_depth <= 0:
             raise TypeError("max_depth parameter must be greater than 0")
+
+        # Checks for bandwidth
+        if not isinstance(self.bandwidth, (int, float)):
+            raise TypeError(
+                f"bandwidth parameter must be an integer or float, "
+                f"but found type {type(self.bandwidth)}"
+            )
+
+        if (self.bandwidth <= 0) or (self.bandwidth >= 1000):
+            raise TypeError(
+                "bandwidth parameter must be greater than 0 and less than 1000"
+            )
 
         # Checks for random_seed
         if not isinstance(self.random_seed, (int, type(None))):

@@ -38,6 +38,9 @@ each of your buckets. Exploring the treatment distribution and quantiles is reco
 References
 ----------
 
+Kennedy EH, Ma Z, McHugh MD, Small DS. Nonparametric methods for doubly robust estimation
+of continuous treatment effects. Journal of the Royal Statistical Society, Series B. 79(4), 2017, pp.1229-1245.
+
 van der Laan MJ and Rubin D. Targeted maximum likelihood learning. In: ​U.C. Berkeley Division of
 Biostatistics Working Paper Series, 2006.
 
