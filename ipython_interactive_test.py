@@ -6,17 +6,61 @@ pd.set_option('display.max_rows', 1000)
 
 
 ########### READ IN PRE-MADE SIM DATA ###########
+#
+# np.random.seed(222)
+#
+# treatment_grid_num = 100
+# lower_grid_constraint = 0
+# upper_grid_constraint = 1
+#
+# n = 500
+#
+# df = pd.read_csv("my_data2.csv")[['x1', 'x2', 'a', 'y']]
+# df.columns = ['x1', 'x2', 'treatment', 'outcome']
+#
+#
+#
+#
+# from causal_curve import GPS_Regressor
+#
+# gps_model = GPS_Regressor()
+#
+# gps_model.fit(T = df['treatment'], X = df[['x1', 'x2']], y = df['outcome'])
+# gps_model.calculate_CDRC(0.90)
+# gps_model.point_estimate(np.array([0.5]))
+# gps_model.point_estimate_interval(np.array([0.5]))
 
-np.random.seed(222)
 
-treatment_grid_num = 100
-lower_grid_constraint = 0
-upper_grid_constraint = 1
+########### READ IN PRE-MADE CLASSIFICATION DATA ###########
 
-n = 500
-
-df = pd.read_csv("my_data2.csv")[['x1', 'x2', 'a', 'y']]
-df.columns = ['x1', 'x2', 'treatment', 'outcome']
+#
+# np.random.seed(222)
+#
+# treatment_grid_num = 100
+# lower_grid_constraint = 0
+# upper_grid_constraint = 1
+#
+# n = 717
+#
+# df = pd.read_csv("binary_classification.csv")
+# df.columns = ['outcome', 'x1', 'x2', 'treatment']
+#
+#
+# import matplotlib.pyplot as plt
+# from causal_curve import GPS_Classifier
+#
+# gps_model = GPS_Classifier()
+#
+# gps_model.fit(T = df['treatment'], X = df[['x1', 'x2']], y = df['outcome'])
+# cdrc = gps_model.calculate_CDRC(0.95)
+#
+#
+# plt.clf()
+# plt.scatter(cdrc['Treatment'], cdrc['Causal_Odds_Ratio'], color='black', marker = 'o')
+# plt.scatter(cdrc['Treatment'], cdrc['Lower_CI'], color='red', marker = '.')
+# plt.scatter(cdrc['Treatment'], cdrc['Upper_CI'], color='red', marker = '.')
+# plt.show()
+#
 
 
 
@@ -66,4 +110,22 @@ n = 1000
 
 
 
-########### TRY NEW causal-curve FUNCTIONS ###########
+
+import matplotlib.pyplot as plt
+from causal_curve import TMLE_Regressor
+
+
+tmle = TMLE_Regressor()
+
+tmle.fit(T = df['treatment'], X = df[['x1', 'x2']], y = df['outcome'])
+cdrc = tmle.calculate_CDRC()
+
+tmle.point_estimate(np.array([5.5]))
+tmle.point_estimate_interval(np.array([5.5]))
+
+#
+# plt.clf()
+# plt.scatter(cdrc['Treatment'], cdrc['Causal_Dose_Response'], color='black', marker = 'o')
+# plt.scatter(cdrc['Treatment'], cdrc['Lower_CI'], color='red', marker = '.')
+# plt.scatter(cdrc['Treatment'], cdrc['Upper_CI'], color='red', marker = '.')
+# plt.show()

@@ -13,10 +13,9 @@ from sklearn.ensemble import GradientBoostingRegressor
 from statsmodels.nonparametric.kernel_regression import KernelReg
 
 from causal_curve.core import Core
-from causal_curve.utils import rand_seed_wrapper
 
 
-class TMLE_core(Core):
+class TMLE_Core(Core):
     """
     Constructs a causal dose response curve via a modified version of Targetted
     Maximum Likelihood Estimation (TMLE) across a grid of the treatment values.
@@ -141,9 +140,9 @@ class TMLE_core(Core):
 
         # Validate the params
         self._validate_init_params()
-        rand_seed_wrapper()
+        self.rand_seed_wrapper()
 
-        if_verbose_print("Using the following params for TMLE model:")
+        self.if_verbose_print("Using the following params for TMLE model:")
         if self.verbose:
             pprint(self.get_params(), indent=4)
 
@@ -317,13 +316,6 @@ class TMLE_core(Core):
         if isinstance(ci, float) and ((ci <= 0) or (ci >= 1.0)):
             raise ValueError("`ci` parameter should be between (0, 1)")
 
-
-
-
-
-
-
-
     def fit(self, T, X, y):
         """Fits the TMLE causal dose-response model. For now, this only
         accepts pandas columns. You *must* provide at least one covariate column.
@@ -351,43 +343,79 @@ class TMLE_core(Core):
         self._validate_fit_data()
 
         # Capture covariate and treatment column names
-        self.covariate_col_names = self.x.columns
-        self.treatment_col_name = self.t.columns
+        self.treatment_col_name = self.t_data.name
+
+        if len(self.x_data.shape) == 1:
+            self.covariate_col_names = [self.x_data.name]
+        else:
+            self.covariate_col_names = self.x_data.columns.values.tolist()
 
         # Note the size of the data
         self.num_rows = len(self.t_data)
 
         # Produce expanded versions of the inputs
-        if_verbose_print("Transforming data for the Q-model and G-model")
+        self.if_verbose_print("Transforming data for the Q-model and G-model")
         self.grid_values, self.fully_expanded_x , self.fully_expanded_t_and_x = self._transform_inputs()
 
         # Fit G-model and get relevent predictions
-        if_verbose_print("Fitting G-model and making treatment assignment predictions...")
+        self.if_verbose_print("Fitting G-model and making treatment assignment predictions...")
         self.g_model_preds, self.g_model_2_preds = self._g_model()
 
         # Fit Q-model and get relevent predictions
-        if_verbose_print("Fitting Q-model and making outcome predictions...")
+        self.if_verbose_print("Fitting Q-model and making outcome predictions...")
         self.q_model_preds = self._q_model()
 
         # Calculating treatment assignment adjustment using G-model's predictions
-        if_verbose_print("Calculating treatment assignment adjustment using G-model's predictions...")
+        self.if_verbose_print("Calculating treatment assignment adjustment using G-model's predictions...")
         self.n_interpd_values, self.var_n_interpd_values = self._treatment_assignment_correction()
 
         # Adjusting outcome using Q-model's predictions
-        if_verbose_print("Adjusting outcome using Q-model's predictions...")
+        self.if_verbose_print("Adjusting outcome using Q-model's predictions...")
         self.outcome_adjust, self.expand_outcome_adjust = self._outcome_adjustment()
 
         # Calculating corrected pseudo-outcome values
-        if_verbose_print("Calculating corrected pseudo-outcome values...")
-        self.pseudo_out = (self.y_data - self.outcome_adjust) / (n_interpd_values / var_n_interpd_values) + expand_outcome_adjust
+        self.if_verbose_print("Calculating corrected pseudo-outcome values...")
+        self.pseudo_out = (self.y_data - self.outcome_adjust) / (self.n_interpd_values / self.var_n_interpd_values) + self.expand_outcome_adjust
 
         # Training final GAM model using pseudo-outcome values
-        if_verbose_print("Training final GAM model using pseudo-outcome values...")
-        self._fit_final_gam()
+        self.if_verbose_print("Training final GAM model using pseudo-outcome values...")
+        self.final_gam = self._fit_final_gam()
 
 
+    def calculate_CDRC(self, ci=0.95):
+        """Using the results of the fitted model, this generates a dataframe of CDRC point estimates
+        at each of the values of the treatment grid. Connecting these estimates will produce
+        the overall estimated CDRC. Confidence interval is returned as well.
 
+        Parameters
+        ----------
+        ci: float (default = 0.95)
+            The desired confidence interval to produce. Default value is 0.95, corresponding
+            to 95% confidence intervals. bounded (0, 1.0).
 
+        Returns
+        ----------
+        dataframe: Pandas dataframe
+            Contains treatment grid values, the CDRC point estimate at that value,
+            and the associated lower and upper confidence interval bounds at that point.
+
+        self: object
+
+        """
+        self._validate_calculate_CDRC_params(ci)
+
+        self.if_verbose_print("""
+            Generating predictions for each value of treatment grid,
+            and averaging to get the CDRC..."""
+        )
+
+        # Create CDRC predictions from the trained, final GAM
+
+        self._cdrc_preds = self._cdrc_predictions_continuous(ci)
+
+        return pd.DataFrame(
+            self._cdrc_preds, columns=["Treatment", "Causal_Dose_Response", "Lower_CI", "Upper_CI"]
+        ).round(3)
 
 
     def _transform_inputs(self):
@@ -396,8 +424,8 @@ class TMLE_core(Core):
 
         # Create treatment grid
         grid_values = np.linspace(
-            start=df['treatment'].min(),
-            stop=df['treatment'].max(),
+            start=self.t_data.min(),
+            stop=self.t_data.max(),
             num=self.treatment_grid_num
         )
 
@@ -409,14 +437,16 @@ class TMLE_core(Core):
         # Create expanded treatment array with covariates
         expanded_t_and_x = pd.concat(
             [
-		        pd.concat(
+                pd.DataFrame(expanded_t),
+                pd.concat(
                     [self.x_data] * self.treatment_grid_num
                 ).reset_index(drop = True, inplace = False),
-		        pd.DataFrame(expanded_t)
             ],
 	        axis = 1,
             ignore_index = True
         )
+
+        expanded_t_and_x.columns = [self.treatment_col_name] + self.covariate_col_names
 
         fully_expanded_t_and_x = pd.concat(
         	[
@@ -483,8 +513,8 @@ class TMLE_core(Core):
         )
 
         interpd_values = interp1d(
-            one_dim_estimate_density(t_standard.values)[0],
-            one_dim_estimate_density(t_standard.values[0:self.num_rows])[1],
+            self.one_dim_estimate_density(t_standard.values)[0],
+            self.one_dim_estimate_density(t_standard.values[0:self.num_rows])[1],
             kind='linear'
         )(t_standard) / np.sqrt(self.g_model_2_preds)
 
@@ -499,10 +529,10 @@ class TMLE_core(Core):
         	upper = i * self.num_rows + self.num_rows
         	zeros_mat[:,i] = temp_interpd[lower:upper]
 
-        var_n_interpd_values = pred_from_loess(
+        var_n_interpd_values = self.pred_from_loess(
             train_x = self.grid_values,
             train_y = zeros_mat.mean(axis = 0),
-            new_x = self.t_data
+            x_to_pred = self.t_data
         )
 
         return n_interpd_values, var_n_interpd_values
@@ -516,16 +546,16 @@ class TMLE_core(Core):
 
         temp_outcome_adjust = self.q_model_preds[self.num_rows:]
 
-        zero_mat = np.zeros((self.num_rows, self.grid_values))
-        for i in range(0, self.grid_values):
+        zero_mat = np.zeros((self.num_rows, self.treatment_grid_num))
+        for i in range(0, self.treatment_grid_num):
         	lower = i * self.num_rows
         	upper = i * self.num_rows + self.num_rows
         	zero_mat[:,i] = temp_outcome_adjust[lower:upper]
 
-        expand_outcome_adjust = pred_from_loess(
+        expand_outcome_adjust = self.pred_from_loess(
             train_x = self.grid_values,
             train_y = zero_mat.mean(axis = 0),
-            new_x = self.t_data
+            x_to_pred = self.t_data
         )
 
         return outcome_adjust, expand_outcome_adjust
@@ -534,7 +564,7 @@ class TMLE_core(Core):
         """We now regress the original treatment values against the pseudo-outcome values
         """
 
-        final_gam_model = LinearGAM(
+        return LinearGAM(
         	s(0, n_splines=30, spline_order=3),
             max_iter=500,
             lam=self.bandwidth

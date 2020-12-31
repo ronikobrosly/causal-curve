@@ -16,18 +16,41 @@ import statsmodels.api as sm
 from statsmodels.genmod.families.links import inverse_power as Inverse_Power
 from statsmodels.tools.tools import add_constant
 
-from causal_curve import GPS_core
-from causal_curve.utils import calculate_z_score, rand_seed_wrapper
+from causal_curve.gps_core import GPS_Core
 
 
-class GPS_regressor(GPS_core):
+class GPS_Regressor(GPS_Core):
     """
     A GPS tool that handles continuous outcomes. Inherits the GPS_core
     base class. See that base class code its docstring for more details.
     """
 
-    def __init__():
-        pass
+    def __init__(
+        self,
+        gps_family=None,
+        treatment_grid_num=100,
+        lower_grid_constraint=0.01,
+        upper_grid_constraint=0.99,
+        spline_order=3,
+        n_splines=30,
+        lambda_=0.5,
+        max_iter=100,
+        random_seed=None,
+        verbose=False,
+    ):
+        GPS_Core.__init__(
+            self,
+            gps_family=None,
+            treatment_grid_num=100,
+            lower_grid_constraint=0.01,
+            upper_grid_constraint=0.99,
+            spline_order=3,
+            n_splines=30,
+            lambda_=0.5,
+            max_iter=100,
+            random_seed=None,
+            verbose=False,
+        )
 
     def _cdrc_predictions_continuous(self, ci):
         """Returns the predictions of CDRC for each value of the treatment grid. Essentially,
@@ -59,7 +82,7 @@ class GPS_regressor(GPS_core):
 
         return np.round(cdrc_preds, 3)
 
-    def predict(self, T):
+    def point_estimate(self, T):
         """Calculates point estimate within the CDRC given treatment values.
         Can only be used when outcome is continuous. Can be estimate for a single
         data point or can be run in batch for many observations. Extrapolation will produce
@@ -80,9 +103,9 @@ class GPS_regressor(GPS_core):
         if self.outcome_type != "continuous":
             raise TypeError("Your outcome must be continuous to use this function!")
 
-        return np.apply_along_axis(self._create_predict, 0, T.reshape(1, -1))
+        return np.apply_along_axis(self._create_point_estimate, 0, T.reshape(1, -1))
 
-    def _create_predict(self, T):
+    def _create_point_estimate(self, T):
         """Takes a single treatment value and produces a single point estimate
         in the case of a continuous outcome.
         """
@@ -90,7 +113,7 @@ class GPS_regressor(GPS_core):
             np.array([T, self.gps_function(T).mean()]).reshape(1, -1)
         )
 
-    def predict_interval(self, T, ci=0.95):
+    def point_estimate_interval(self, T, ci=0.95):
         """Calculates the prediction confidence interval associated with a point estimate
         within the CDRC given treatment values. Can only be used
         when outcome is continuous. Can be estimate for a single data point
@@ -116,10 +139,10 @@ class GPS_regressor(GPS_core):
             raise TypeError("Your outcome must be continuous to use this function!")
 
         return np.apply_along_axis(
-            self._create_predict_interval, 0, T.reshape(1, -1), width=ci
+            self._create_point_estimate_interval, 0, T.reshape(1, -1), width=ci
         ).T.reshape(-1, 2)
 
-    def _create_predict_interval(self, T, width):
+    def _create_point_estimate_interval(self, T, width):
         """Takes a single treatment value and produces confidence interval
         associated with a point estimate in the case of a continuous outcome.
         """

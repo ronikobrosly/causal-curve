@@ -10,7 +10,6 @@ from pandas.api.types import is_float_dtype
 from pygam import LinearGAM, s
 
 from causal_curve.core import Core
-from causal_curve.utils import clip_negatives, rand_seed_wrapper
 
 
 class Mediation(Core):

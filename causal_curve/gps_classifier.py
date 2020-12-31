@@ -16,18 +16,41 @@ import statsmodels.api as sm
 from statsmodels.genmod.families.links import inverse_power as Inverse_Power
 from statsmodels.tools.tools import add_constant
 
-from causal_curve import GPS_core
-from causal_curve.utils import calculate_z_score, rand_seed_wrapper
+from causal_curve.gps_core import GPS_Core
 
 
-class GPS_classifier(GPS_core):
+class GPS_Classifier(GPS_Core):
     """
     A GPS tool that handles binary outcomes. Inherits the GPS_core
     base class. See that base class code its docstring for more details.
     """
 
-    def __init__():
-        pass
+    def __init__(
+        self,
+        gps_family=None,
+        treatment_grid_num=100,
+        lower_grid_constraint=0.01,
+        upper_grid_constraint=0.99,
+        spline_order=3,
+        n_splines=30,
+        lambda_=0.5,
+        max_iter=100,
+        random_seed=None,
+        verbose=False,
+    ):
+        GPS_Core.__init__(
+            self,
+            gps_family=None,
+            treatment_grid_num=100,
+            lower_grid_constraint=0.01,
+            upper_grid_constraint=0.99,
+            spline_order=3,
+            n_splines=30,
+            lambda_=0.5,
+            max_iter=100,
+            random_seed=None,
+            verbose=False,
+        )
 
     def _cdrc_predictions_binary(self, ci):
         """Returns the predictions of CDRC for each value of the treatment grid. Essentially,
@@ -58,7 +81,7 @@ class GPS_classifier(GPS_core):
 
             standard_error = (
                 temp_cdrc_interval[:, 1] - temp_cdrc_preds
-            ) / calculate_z_score(ci)
+            ) / self.calculate_z_score(ci)
 
             cdrc_preds[:, i, 0] = temp_cdrc_preds
             cdrc_preds[:, i, 1] = standard_error
