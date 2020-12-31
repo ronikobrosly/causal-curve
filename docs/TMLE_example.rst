@@ -15,7 +15,8 @@ accounting for some mild confounding effects.
 Compared with the package's GPS method, this TMLE method is double robust against model
 misspecification, incorporates more powerful machine learning techniques internally (gradient boosting),
 produces significantly smaller confidence intervals, however it is not computationally efficient
-and will take longer to run.
+and will take longer to run. In addition, the treatment values provided should
+be roughly normally-distributed, otherwise you may encounter internal math errors. 
 
 The quality of the estimate it produces is highly dependent on the user's choice
 of the `treatment_grid_bins` parameter. If the bins are too small, you might violate the

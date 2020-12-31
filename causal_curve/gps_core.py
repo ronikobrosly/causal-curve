@@ -193,8 +193,8 @@ class GPS_core(Core):
         self._validate_init_params()
         rand_seed_wrapper()
 
+        if_verbose_print("Using the following params for GPS model:")
         if self.verbose:
-            print("Using the following params for GPS model:")
             pprint(self.get_params(), indent=4)
 
     def _validate_init_params(self):
@@ -405,7 +405,8 @@ class GPS_core(Core):
     def fit(self, T, X, y):
         """Fits the GPS causal dose-response model. For now, this only accepts pandas columns.
         While the treatment variable must be continuous (or ordinal with many levels), the
-        outcome variable may be continuous or binary.
+        outcome variable may be continuous or binary. You *must* provide
+        at least one covariate column.
 
         Parameters
         ----------
@@ -434,8 +435,7 @@ class GPS_core(Core):
         elif is_integer_dtype(self.y):
             self.outcome_type = "binary"
 
-        if self.verbose:
-            print(f"Determined the outcome variable is of type {self.outcome_type}...")
+        if_verbose_print(f"Determined the outcome variable is of type {self.outcome_type}...")
 
         # Validate this input data
         self._validate_fit_data()
@@ -447,14 +447,12 @@ class GPS_core(Core):
         self._determine_gps_function()
 
         # Estimate the GPS
-        if self.verbose:
-            print("Saving GPS values...")
+        if_verbose_print("Saving GPS values...")
 
         self.gps = self.gps_function(self.T)
 
         # Create GAM that predicts outcome from the treatment and GPS
-        if self.verbose:
-            print("Fitting GAM using treatment and GPS...")
+        if_verbose_print("Fitting GAM using treatment and GPS...")
 
         # Save model results
         self.gam_results = self._fit_gam()
@@ -465,8 +463,7 @@ class GPS_core(Core):
 
         self._gam_summary_str = f.getvalue()
 
-        if self.verbose:
-            print("Calculating many CDRC estimates for each treatment grid value...")
+        if_verbose_print("Calculating many CDRC estimates for each treatment grid value...")
 
         # Loop over all grid values (`treatment_grid_num` in total)
         # and give GPS loading for each observation in the dataset
@@ -494,11 +491,10 @@ class GPS_core(Core):
         """
         self._validate_calculate_CDRC_params(ci)
 
-        if self.verbose:
-            print(
-                """Generating predictions for each value of treatment grid,
-                and averaging to get the CDRC..."""
-            )
+        if_verbose_print("""
+            Generating predictions for each value of treatment grid,
+            and averaging to get the CDRC..."""
+        )
 
         # Create CDRC predictions from trained GAM
         # If working with a continuous outcome variable, use this path
@@ -630,16 +626,14 @@ class GPS_core(Core):
         if any(self.T <= 0):
             self.best_gps_family = "normal"
             self.gps_function, self.gps_deviance = self._create_normal_gps_function()
-            if self.verbose:
-                print(
-                    "Must fit `normal` GLM family to model treatment since"
-                    " treatment takes on zero or negative values..."
-                )
+            if_verbose_print(
+                """Must fit `normal` GLM family to model treatment since
+                treatment takes on zero or negative values..."""
+            )
 
         # If treatment has no negative values and user provides in put, use that.
         elif (all(self.T > 0)) & (not isinstance(self.gps_family, type(None))):
-            if self.verbose:
-                print(f"Fitting GPS model of family '{self.gps_family}'...")
+            if_verbose_print(f"Fitting GPS model of family '{self.gps_family}'...")
 
             if self.gps_family == "normal":
                 self.best_gps_family = "normal"
@@ -660,10 +654,7 @@ class GPS_core(Core):
         # If no zero or negative treatment values and user didn't provide
         # input, figure out best-fitting family
         elif (all(self.T > 0)) & (isinstance(self.gps_family, type(None))):
-            if self.verbose:
-                print(
-                    "Fitting several GPS models and" " picking the best fitting one..."
-                )
+            if_verbose_print("Fitting several GPS models and" " picking the best fitting one...")
 
             (
                 self.best_gps_family,
@@ -671,11 +662,10 @@ class GPS_core(Core):
                 self.gps_deviance,
             ) = self._find_best_gps_model()
 
-            if self.verbose:
-                print(
-                    f"Best fitting model was {self.best_gps_family}, which "
-                    f"produced a deviance of {self.gps_deviance}"
-                )
+            if_verbose_print(
+                f"""Best fitting model was {self.best_gps_family}, which
+                    produced a deviance of {self.gps_deviance}"""
+            )
 
     def _create_normal_gps_function(self):
         """Models the GPS using a GLM of the Gaussian family"""

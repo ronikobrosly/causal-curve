@@ -6,16 +6,17 @@ from pprint import pprint
 import numpy as np
 import pandas as pd
 from pandas.api.types import is_float_dtype, is_numeric_dtype
+from pygam import LinearGAM, s
 from scipy.interpolate import interp1d
-from scipy.stats import norm
-from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
-from statsmodels.genmod.generalized_linear_model import GLM
+from sklearn.neighbors import KernelDensity
+from sklearn.ensemble import GradientBoostingRegressor
+from statsmodels.nonparametric.kernel_regression import KernelReg
 
 from causal_curve.core import Core
 from causal_curve.utils import rand_seed_wrapper
 
 
-class TMLE(Core):
+class TMLE_core(Core):
     """
     Constructs a causal dose response curve via a modified version of Targetted
     Maximum Likelihood Estimation (TMLE) across a grid of the treatment values.
@@ -25,6 +26,9 @@ class TMLE(Core):
     Assumes continuous treatment and outcome variable.
 
     WARNING:
+
+    -The treatment values should be roughly normally-distributed for this tool
+    to work. Otherwise you may encounter internal math errors.
 
     -This algorithm assumes you've already performed the necessary transformations to
     categorical covariates (i.e. these variables are already one-hot encoded and
@@ -37,6 +41,27 @@ class TMLE(Core):
     Parameters
     ----------
 
+    treatment_grid_num: int, optional (default = 100)
+        Takes the treatment, and creates a quantile-based grid across its values.
+        For instance, if the number 6 is selected, this means the algorithm will only take
+        the 6 treatment variable values at approximately the 0, 20, 40, 60, 80, and 100th
+        percentiles to estimate the causal dose response curve.
+        Higher value here means the final curve will be more finely estimated,
+        but also increases computation time. Default is usually a reasonable number.
+
+    lower_grid_constraint:  float, optional(default = 0.01)
+        This adds an optional constraint of the lower side of the treatment grid.
+        Sometimes data near the minimum values of the treatment are few in number
+        and thus generate unstable estimates. By default, this clips the bottom 1 percentile
+        or lower of treatment values. This can be as low as 0, indicating there is no
+        lower limit to how much treatment data is considered.
+
+    upper_grid_constraint: float, optional (default = 0.99)
+        See above parameter. Just like above, but this is an upper constraint.
+        By default, this clips the top 99th percentile or higher of treatment values.
+        This can be as high as 1.0, indicating there is no upper limit to how much
+        treatment data is considered.
+
     n_estimators: int, optional (default = 200)
         Optional argument to set the number of learners to use when sklearn
         creates TMLE's Q and G models.
@@ -48,7 +73,8 @@ class TMLE(Core):
         Optional argument to set sklearn's maximum depth when creating TMLE's Q and G models.
 
     bandwidth: float, optional (default = 0.5)
-        Optional argument to set the bandwidth parameter of the kernel regression.
+        Optional argument to set the bandwidth parameter of the internal
+        kernel density estimation and kernel regression methods.
 
     random_seed: int, optional (default = None)
         Sets the random seed.
@@ -92,6 +118,9 @@ class TMLE(Core):
 
     def __init__(
         self,
+        treatment_grid_num=100,
+        lower_grid_constraint=0.01,
+        upper_grid_constraint=0.99,
         n_estimators=200,
         learning_rate=0.01,
         max_depth=3,
@@ -100,6 +129,9 @@ class TMLE(Core):
         verbose=False,
     ):
 
+        self.treatment_grid_num = treatment_grid_num
+        self.lower_grid_constraint = lower_grid_constraint
+        self.upper_grid_constraint = upper_grid_constraint
         self.n_estimators = n_estimators
         self.learning_rate = learning_rate
         self.max_depth = max_depth
@@ -111,14 +143,84 @@ class TMLE(Core):
         self._validate_init_params()
         rand_seed_wrapper()
 
+        if_verbose_print("Using the following params for TMLE model:")
         if self.verbose:
-            print("Using the following params for TMLE model:")
             pprint(self.get_params(), indent=4)
 
     def _validate_init_params(self):
         """
         Checks that the params used when instantiating TMLE model are formatted correctly
         """
+
+        # Checks for treatment_grid_num
+        if not isinstance(self.treatment_grid_num, int):
+            raise TypeError(
+                f"treatment_grid_num parameter must be an integer, "
+                f"but found type {type(self.treatment_grid_num)}"
+            )
+
+        if (isinstance(self.treatment_grid_num, int)) and self.treatment_grid_num < 10:
+            raise ValueError(
+                f"treatment_grid_num parameter should be >= 10 so your final curve "
+                f"has enough resolution, but found value {self.treatment_grid_num}"
+            )
+
+        if (
+            isinstance(self.treatment_grid_num, int)
+        ) and self.treatment_grid_num >= 1000:
+            raise ValueError("treatment_grid_num parameter is too high!")
+
+        # Checks for lower_grid_constraint
+        if not isinstance(self.lower_grid_constraint, float):
+            raise TypeError(
+                f"lower_grid_constraint parameter must be a float, "
+                f"but found type {type(self.lower_grid_constraint)}"
+            )
+
+        if (
+            isinstance(self.lower_grid_constraint, float)
+        ) and self.lower_grid_constraint < 0:
+            raise ValueError(
+                f"lower_grid_constraint parameter cannot be < 0, "
+                f"but found value {self.lower_grid_constraint}"
+            )
+
+        if (
+            isinstance(self.lower_grid_constraint, float)
+        ) and self.lower_grid_constraint >= 1.0:
+            raise ValueError(
+                f"lower_grid_constraint parameter cannot >= 1.0, "
+                f"but found value {self.lower_grid_constraint}"
+            )
+
+        # Checks for upper_grid_constraint
+        if not isinstance(self.upper_grid_constraint, float):
+            raise TypeError(
+                f"upper_grid_constraint parameter must be a float, "
+                f"but found type {type(self.upper_grid_constraint)}"
+            )
+
+        if (
+            isinstance(self.upper_grid_constraint, float)
+        ) and self.upper_grid_constraint <= 0:
+            raise ValueError(
+                f"upper_grid_constraint parameter cannot be <= 0, "
+                f"but found value {self.upper_grid_constraint}"
+            )
+
+        if (
+            isinstance(self.upper_grid_constraint, float)
+        ) and self.upper_grid_constraint > 1.0:
+            raise ValueError(
+                f"upper_grid_constraint parameter cannot > 1.0, "
+                f"but found value {self.upper_grid_constraint}"
+            )
+
+        # Checks for lower_grid_constraint isn't higher than upper_grid_constraint
+        if self.lower_grid_constraint >= self.upper_grid_constraint:
+            raise ValueError(
+                "lower_grid_constraint should be lower than upper_grid_constraint!"
+            )
 
         # Checks for n_estimators
         if not isinstance(self.n_estimators, int):
@@ -215,67 +317,16 @@ class TMLE(Core):
         if isinstance(ci, float) and ((ci <= 0) or (ci >= 1.0)):
             raise ValueError("`ci` parameter should be between (0, 1)")
 
-    def _initial_bucket_mean_prediction(self):
-        """Creates a model to predict the outcome variable given the provided inputs within
-        the first bucket of treatment_grid_bins. This returns the mean predicted outcome.
-        """
 
-        y = self.y_data[self.t_data < self.treatment_grid_bins[1]]
-        X = pd.concat([self.t_data, self.x_data], axis=1)[
-            self.t_data < self.treatment_grid_bins[1]
-        ]
 
-        init_model = GradientBoostingRegressor(
-            n_estimators=self.n_estimators,
-            max_depth=self.max_depth,
-            learning_rate=self.learning_rate,
-            random_state=self.random_seed,
-        ).fit(X, y)
 
-        return init_model.predict(X).mean()
 
-    def _create_treatment_comparison_df(
-        self, low_boundary, med_boundary, high_boundary
-    ):
-        """Given the current boundaries chosen from treatment_grid_bins, this filters
-        the input data appropriately.
-        """
-        temp_y = self.y_data[
-            ((self.t_data >= low_boundary) & (self.t_data <= high_boundary))
-        ]
-        temp_x = self.x_data[
-            ((self.t_data >= low_boundary) & (self.t_data <= high_boundary))
-        ]
-        temp_t = self.t_data.copy()
-        temp_t = temp_t[((temp_t >= low_boundary) & (temp_t <= high_boundary))]
-        temp_t[((temp_t >= low_boundary) & (temp_t < med_boundary))] = 0
-        temp_t[((temp_t >= med_boundary) & (temp_t <= high_boundary))] = 1
 
-        return temp_y, temp_x, temp_t
 
-    def _collect_mean_t_levels(self):
-        """Collects the mean treatment value within each treatment bucket in treatment_grid_bins"""
-
-        t_bin_means = []
-
-        for index, _ in enumerate(self.treatment_grid_bins):
-            if index == (len(self.treatment_grid_bins) - 1):
-                continue
-
-            t_bin_means.append(
-                self.t_data[
-                    (
-                        (self.t_data >= self.treatment_grid_bins[index])
-                        & (self.t_data <= self.treatment_grid_bins[index + 1])
-                    )
-                ].mean()
-            )
-
-        return t_bin_means
 
     def fit(self, T, X, y):
-        """Fits the TMLE causal dose-response model. For now, this only accepts pandas columns
-        with the same index.
+        """Fits the TMLE causal dose-response model. For now, this only
+        accepts pandas columns. You *must* provide at least one covariate column.
 
         Parameters
         ----------
@@ -299,254 +350,222 @@ class TMLE(Core):
         # Validate this input data
         self._validate_fit_data()
 
-        # Get the mean, predicted outcome value within the first bucket
-        if self.verbose:
-            print(
-                "Calculating the mean, predicted outcome value within the first bucket..."
-            )
-        self.outcome_start_val = self._initial_bucket_mean_prediction()
+        # Capture covariate and treatment column names
+        self.covariate_col_names = self.x.columns
+        self.treatment_col_name = self.t.columns
 
-        # Loop through the comparisons in the treatment_grid_bins
-        if self.verbose:
-            print("Beginning main loop through treatment bins...")
+        # Note the size of the data
+        self.num_rows = len(self.t_data)
 
-        # Collect loop results in these lists
-        self.t_bin_means = self._collect_mean_t_levels()
-        self.psi_list = []
-        self.std_error_ic_list = []
+        # Produce expanded versions of the inputs
+        if_verbose_print("Transforming data for the Q-model and G-model")
+        self.grid_values, self.fully_expanded_x , self.fully_expanded_t_and_x = self._transform_inputs()
 
-        for index, _ in enumerate(self.treatment_grid_bins):
-            if (index == 0) or (index == len(self.treatment_grid_bins) - 1):
-                continue
-            if self.verbose:
-                print(
-                    f"***** Starting iteration {index} of {len(self.treatment_grid_bins) - 2} *****"
-                )
-            low_boundary = self.treatment_grid_bins[index - 1]
-            med_boundary = self.treatment_grid_bins[index]
-            high_boundary = self.treatment_grid_bins[index + 1]
+        # Fit G-model and get relevent predictions
+        if_verbose_print("Fitting G-model and making treatment assignment predictions...")
+        self.g_model_preds, self.g_model_2_preds = self._g_model()
 
-            # Create comparison dataset
-            temp_y, temp_x, temp_t = self._create_treatment_comparison_df(
-                low_boundary, med_boundary, high_boundary
-            )
+        # Fit Q-model and get relevent predictions
+        if_verbose_print("Fitting Q-model and making outcome predictions...")
+        self.q_model_preds = self._q_model()
 
-            self.n_obs = len(temp_y)
+        # Calculating treatment assignment adjustment using G-model's predictions
+        if_verbose_print("Calculating treatment assignment adjustment using G-model's predictions...")
+        self.n_interpd_values, self.var_n_interpd_values = self._treatment_assignment_correction()
 
-            # Fit Q-model and get relevent predictions
-            if self.verbose:
-                print("Fitting Q-model and making predictions...")
-            self.y_hat_a, self.y_hat_1, self.y_hat_0 = self._q_model(
-                temp_y, temp_x, temp_t
-            )
+        # Adjusting outcome using Q-model's predictions
+        if_verbose_print("Adjusting outcome using Q-model's predictions...")
+        self.outcome_adjust, self.expand_outcome_adjust = self._outcome_adjustment()
 
-            # Fit G-model and get relevent predictions
-            if self.verbose:
-                print("Fitting G-model and making predictions...")
-            self.pi_hat1, self.pi_hat0 = self._g_model(temp_x, temp_t)
+        # Calculating corrected pseudo-outcome values
+        if_verbose_print("Calculating corrected pseudo-outcome values...")
+        self.pseudo_out = (self.y_data - self.outcome_adjust) / (n_interpd_values / var_n_interpd_values) + expand_outcome_adjust
 
-            # Estimate delta_hat
-            if self.verbose:
-                print("Estimating delta hat...")
-            self.delta_hat = self._delta_hat_estimation(temp_y, temp_t)
+        # Training final GAM model using pseudo-outcome values
+        if_verbose_print("Training final GAM model using pseudo-outcome values...")
+        self._fit_final_gam()
 
-            # Estimate targeted and corrected Psi
-            if self.verbose:
-                print("Estimating Psi...")
-            psi, std_error_IC = self._psi_estimation(temp_y, temp_t)
 
-            self.psi_list.append(psi)
-            self.std_error_ic_list.append(std_error_IC)
 
-            if self.verbose:
-                print("Finished this loop!")
 
-    def calculate_CDRC(self, ci=0.95, CDRC_grid_num=100):
-        """Using the results of the fitted model, this generates the CDRC by interpolation
-        of the binned treatment comparisons. This returns a confidence interval as well, which
-        is also generated by interpolation.
 
-        Parameters
-        ----------
-        ci: float (default = 0.95)
-            The desired confidence interval to produce. Default value is 0.95, corresponding
-            to 95% confidence intervals. bounded (0, 1.0).
 
-        CDRC_grid_num: int, optional (default = 100)
-            Linear interpolation over a quantile-based grid of treatment values is used
-            to produce the final CDRC. This parameter determines how many points
-            to include on that grid. Higher values will produce a finer estimate of the CDRC,
-            but this increases computation time. Default is usually a reasonable number.
+    def _transform_inputs(self):
+        """Takes the treatment and covariates and transforms so they can
+        be used by the algo"""
 
-        Returns
-        ----------
-        dataframe: Pandas dataframe
-            Contains treatment grid values, the CDRC point estimate at that value,
-            and the associated lower and upper confidence interval bounds at that point.
-
-        self: object
-        """
-
-        self._validate_calculate_CDRC_params(ci)
-        z_star = norm.ppf((1 + ci) / 2)
-
-        if self.verbose:
-            print(
-                "Estimating the CDRC and confidence intervals via cubic interpolation..."
-            )
-
-        # Collect discrete t_values
-        t_values = self.t_bin_means
-
-        # Collect discrete y_values
-        y_values = [self.outcome_start_val]
-
-        for index, _ in enumerate(self.psi_list):
-            y_values.append(self.outcome_start_val + sum(self.psi_list[: (index + 1)]))
-
-        # Collect discrete lower confidence bounds
-        lower_values = [self.outcome_start_val - (z_star * self.std_error_ic_list[0])]
-        for index, y_value in enumerate(y_values[1:]):
-            lower_values.append(y_value - (z_star * self.std_error_ic_list[index]))
-
-        # Collect discrete upper confidence bounds
-        upper_values = [self.outcome_start_val + (z_star * self.std_error_ic_list[0])]
-        for index, y_value in enumerate(y_values[1:]):
-            upper_values.append(y_value + (z_star * self.std_error_ic_list[index]))
-
-        # Perform cubic interpolation
-        CDRC_interp = interp1d(t_values, y_values, kind="cubic")
-        lower_interp = interp1d(t_values, lower_values, kind="cubic")
-        upper_interp = interp1d(t_values, upper_values, kind="cubic")
-
-        CDRC_t_grid = self._grid_values(CDRC_grid_num, t_values)
-
-        Treatment = CDRC_t_grid
-        CDRC = CDRC_interp(CDRC_t_grid)
-        Lower_CI = lower_interp(CDRC_t_grid)
-        Upper_CI = upper_interp(CDRC_t_grid)
-
-        if self.verbose:
-            print("Done!")
-
-        return pd.DataFrame(
-            {
-                "Treatment": Treatment,
-                "Causal_Dose_Response": CDRC,
-                "Lower_CI": Lower_CI,
-                "Upper_CI": Upper_CI,
-            }
-        ).round(3)
-
-    def _grid_values(self, CDRC_grid_num, t_values):
-        """Produces grid values for use in estimating the final CDRC and confidence intervals."""
-
-        return np.quantile(
-            self.t_data[((self.t_data > t_values[0]) & (self.t_data < t_values[-1]))],
-            q=np.linspace(
-                start=0,
-                stop=1,
-                num=CDRC_grid_num,
-            ),
+        # Create treatment grid
+        grid_values = np.linspace(
+            start=df['treatment'].min(),
+            stop=df['treatment'].max(),
+            num=self.treatment_grid_num
         )
 
-    def _q_model(self, temp_y, temp_x, temp_t):
+        # Create expanded treatment array
+        expanded_t = np.array([])
+        for treat_value in grid_values:
+        	expanded_t = np.append(expanded_t, ([treat_value] * self.num_rows))
+
+        # Create expanded treatment array with covariates
+        expanded_t_and_x = pd.concat(
+            [
+		        pd.concat(
+                    [self.x_data] * self.treatment_grid_num
+                ).reset_index(drop = True, inplace = False),
+		        pd.DataFrame(expanded_t)
+            ],
+	        axis = 1,
+            ignore_index = True
+        )
+
+        fully_expanded_t_and_x = pd.concat(
+        	[
+        		pd.concat([self.x_data, self.t_data], axis=1),
+        		expanded_t_and_x
+        	],
+        	axis = 0,
+        	ignore_index = True
+        )
+
+        fully_expanded_x = fully_expanded_t_and_x[self.covariate_col_names]
+
+        return grid_values, fully_expanded_x, fully_expanded_t_and_x
+
+    def _g_model(self):
+        """Produces the G-model and gets treatment assignment predictions"""
+
+        t = self.t_data.to_numpy()
+        X = self.x_data.to_numpy()
+
+        g_model = GradientBoostingRegressor(
+            n_estimators=self.n_estimators,
+            max_depth=self.max_depth,
+            learning_rate=self.learning_rate,
+            random_state=self.random_seed
+        ).fit(X = X, y = t)
+        g_model_preds = g_model.predict(self.fully_expanded_x)
+
+        g_model2 = GradientBoostingRegressor(
+            n_estimators=self.n_estimators,
+            max_depth=self.max_depth,
+            learning_rate=self.learning_rate,
+            random_state=self.random_seed
+        ).fit(X = X, y = ((t - g_model_preds[0:self.num_rows])**2))
+        g_model_2_preds = g_model2.predict(self.fully_expanded_x)
+
+        return g_model_preds, g_model_2_preds
+
+    def _q_model(self):
         """Produces the Q-model and gets outcome predictions using the provided treatment
         values, when the treatment is completely present and not present.
         """
 
-        X = pd.concat([temp_t, temp_x], axis=1).to_numpy()
-        y = temp_y.to_numpy()
+        X = pd.concat([self.t_data, self.x_data], axis=1).to_numpy()
+        y = self.y_data.to_numpy()
 
-        Q_model = GradientBoostingRegressor(
+        q_model = GradientBoostingRegressor(
             n_estimators=self.n_estimators,
             max_depth=self.max_depth,
             learning_rate=self.learning_rate,
-            random_state=self.random_seed,
-        ).fit(X, y)
+            random_state=self.random_seed
+        ).fit(X = X, y = y)
+        q_model_preds = q_model.predict(self.fully_expanded_t_and_x)
 
-        # Make predictions with provided treatment values
-        y_hat_a = Q_model.predict(X)
+        return q_model_preds
 
-        temp = np.column_stack((np.repeat(1, self.n_obs), np.asarray(temp_x)))
 
-        # Make predictions when treatment is completely present
-        y_hat_1 = Q_model.predict(temp)
-
-        # Make predictions when treatment is completely not present
-        temp = np.column_stack((np.repeat(0, self.n_obs), np.asarray(temp_x)))
-
-        y_hat_0 = Q_model.predict(temp)
-
-        return y_hat_a, y_hat_1, y_hat_0
-
-    def _g_model(self, temp_x, temp_t):
-        """Produces the G-model and gets treatment assignment predictions"""
-
-        X = temp_x.to_numpy()
-        t = temp_t.to_numpy()
-
-        G_model = GradientBoostingClassifier(
-            n_estimators=self.n_estimators,
-            max_depth=self.max_depth,
-            learning_rate=self.learning_rate,
-            random_state=self.random_seed,
-        ).fit(X, t)
-
-        # Make predictions of receiving treatment
-        pi_hat1 = G_model.predict_proba(X)[:, 1]
-
-        # Predictions of not receiving treatment
-        pi_hat0 = 1 - pi_hat1
-
-        return pi_hat1, pi_hat0
-
-    def _delta_hat_estimation(self, temp_y, temp_t):
-        """Estimates delta to correct treatment estimation"""
-        H_a = []
-
-        for idx, treatment in enumerate(np.asarray(temp_t)):
-            if treatment == 1:
-                H_a.append(1 / self.pi_hat1[idx])
-            elif treatment == 0:
-                H_a.append(-1 / self.pi_hat0[idx])
-
-        H_a = np.array(H_a)
-
-        # Create GLM using H_a as a forced offset
-        targetting_model = GLM(
-            endog=np.asarray(temp_y), exog=H_a, offset=np.asarray(self.y_hat_a)
-        ).fit()
-
-        return targetting_model.params[0]
-
-    def _psi_estimation(self, temp_y, temp_t):
-        """Estimates final Psi for the treatment comparison, also estimates the
-        standard error via the influence curve
+    def _treatment_assignment_correction(self):
+        """Uses the G-model and its predictions to adjust treatment assignment
         """
 
-        # Estimate Psi
-        H_1 = 1 / self.pi_hat1
-        H_0 = -1 / self.pi_hat0
-
-        Y_star_1 = self.y_hat_1 + (self.delta_hat * H_1)
-        Y_star_0 = self.y_hat_0 + (self.delta_hat * H_0)
-
-        Psi = round((Y_star_1 - Y_star_0).mean(), 3)
-
-        # Use Psi and other various variables to estimate the standard error
-        D1 = (
-            ((temp_t / self.pi_hat1) * (temp_y - self.y_hat_1))
-            + self.y_hat_1
-            - Y_star_1
+        t_standard = (
+            (self.fully_expanded_t_and_x[self.treatment_col_name] - self.g_model_preds) / np.sqrt(self.g_model_2_preds)
         )
-        D0 = (
-            (((1 - temp_t) / (1 - self.pi_hat1)) * (temp_y - self.y_hat_0))
-            + self.y_hat_0
-            - Y_star_0
+
+        interpd_values = interp1d(
+            one_dim_estimate_density(t_standard.values)[0],
+            one_dim_estimate_density(t_standard.values[0:self.num_rows])[1],
+            kind='linear'
+        )(t_standard) / np.sqrt(self.g_model_2_preds)
+
+        n_interpd_values = interpd_values[0:self.num_rows]
+
+        temp_interpd = interpd_values[self.num_rows:]
+
+        zeros_mat = np.zeros((self.num_rows, self.treatment_grid_num))
+
+        for i in range(0, self.treatment_grid_num):
+        	lower = i * self.num_rows
+        	upper = i * self.num_rows + self.num_rows
+        	zeros_mat[:,i] = temp_interpd[lower:upper]
+
+        var_n_interpd_values = pred_from_loess(
+            train_x = self.grid_values,
+            train_y = zeros_mat.mean(axis = 0),
+            new_x = self.t_data
         )
-        EIC = D1 - D0
 
-        std_error_IC = np.sqrt(EIC.var() / self.n_obs)
+        return n_interpd_values, var_n_interpd_values
 
-        return Psi, std_error_IC
+
+    def _outcome_adjustment(self):
+        """Uses the Q-model and its predictions to adjust the outcome
+        """
+
+        outcome_adjust = self.q_model_preds[0:self.num_rows]
+
+        temp_outcome_adjust = self.q_model_preds[self.num_rows:]
+
+        zero_mat = np.zeros((self.num_rows, self.grid_values))
+        for i in range(0, self.grid_values):
+        	lower = i * self.num_rows
+        	upper = i * self.num_rows + self.num_rows
+        	zero_mat[:,i] = temp_outcome_adjust[lower:upper]
+
+        expand_outcome_adjust = pred_from_loess(
+            train_x = self.grid_values,
+            train_y = zero_mat.mean(axis = 0),
+            new_x = self.t_data
+        )
+
+        return outcome_adjust, expand_outcome_adjust
+
+    def _fit_final_gam(self):
+        """We now regress the original treatment values against the pseudo-outcome values
+        """
+
+        final_gam_model = LinearGAM(
+        	s(0, n_splines=30, spline_order=3),
+            max_iter=500,
+            lam=self.bandwidth
+        ).fit(self.t_data, y = self.pseudo_out)
+
+    def one_dim_estimate_density(self, series):
+    	"""
+    	Takes in a numpy array, returns grid values for KDE and predicted probabilities
+    	"""
+    	series_grid = np.linspace(
+            start=series.min(),
+            stop=series.max(),
+            num=self.num_rows
+        )
+
+    	kde = KernelDensity(
+            kernel='gaussian',
+            bandwidth=self.bandwidth
+        ).fit(series.reshape(-1, 1))
+
+    	return series_grid, np.exp(kde.score_samples(series_grid.reshape(-1, 1)))
+
+    def pred_from_loess(self, train_x, train_y, x_to_pred):
+    	"""
+    	Trains simple loess regression and returns predictions
+    	"""
+    	kr_model = KernelReg(
+            endog = train_y,
+            exog = train_x,
+            var_type = 'c',
+            bw = [self.bandwidth]
+        )
+
+    	return kr_model.fit(x_to_pred)[0]

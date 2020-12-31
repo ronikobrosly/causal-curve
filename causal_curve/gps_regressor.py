@@ -22,8 +22,8 @@ from causal_curve.utils import calculate_z_score, rand_seed_wrapper
 
 class GPS_regressor(GPS_core):
     """
-    The GPS tool that handles continuous outcomes. Inherits the GPS_core
-    base class. See that base class code and docstring for more details.
+    A GPS tool that handles continuous outcomes. Inherits the GPS_core
+    base class. See that base class code its docstring for more details.
     """
 
     def __init__():
