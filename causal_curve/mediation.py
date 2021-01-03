@@ -133,7 +133,7 @@ class Mediation(Core):
 
         # Validate the params
         self._validate_init_params()
-        rand_seed_wrapper()
+        self.rand_seed_wrapper()
 
         if self.verbose:
             print("Using the following params for the mediation analysis:")
@@ -519,10 +519,10 @@ class Mediation(Core):
 
         # Calculate overall, mean, indirect effect
         total_prop_mean = round(np.array(self.prop_indirect_list).mean(), 4)
-        total_prop_lower = clip_negatives(
+        total_prop_lower = self.clip_negatives(
             round(np.percentile(bootstrap_overall_means, q=lower * 100), 4)
         )
-        total_prop_upper = clip_negatives(
+        total_prop_upper = self.clip_negatives(
             round(np.percentile(bootstrap_overall_means, q=upper * 100), 4)
         )
 

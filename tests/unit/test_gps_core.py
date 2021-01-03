@@ -1,10 +1,10 @@
-""" Unit tests of the gps.py module """
+""" Unit tests for the GPS_Core class """
 
 import numpy as np
 from pygam import LinearGAM
 import pytest
 
-from causal_curve import GPS
+from causal_curve.gps_core import GPS_Core
 from tests.conftest import full_continuous_example_dataset
 
 
@@ -19,10 +19,10 @@ from tests.conftest import full_continuous_example_dataset
 )
 def test_gps_fit(df_fixture, family):
     """
-    Tests the fit method of the GPS tool
+    Tests the fit method of the GPS_Core tool
     """
 
-    gps = GPS(
+    gps = GPS_Core(
         gps_family=family,
         treatment_grid_num=10,
         lower_grid_constraint=0.0,
@@ -132,88 +132,77 @@ def test_bad_gps_instantiation(
             verbose=verbose,
         )
 
-
-def test_calculate_z_score():
-    """
-    Tests that that `_calculate_z_score` methods returns expected z-scores
-    """
-    gps = GPS()
-    assert round(gps._calculate_z_score(0.99), 2) == 2.58
-    assert round(gps._calculate_z_score(0.95), 2) == 1.96
-    assert round(gps._calculate_z_score(0.90), 2) == 1.64
-    assert round(gps._calculate_z_score(0.80), 2) == 1.28
-
-
-def test_predict_method_good(GPS_fitted_model_continuous_fixture):
-    """
-    Tests the GPS `predict` method using appropriate data (with a continuous outcome)
-    """
-    observed_result = GPS_fitted_model_continuous_fixture.predict(np.array([50]))
-    assert isinstance(observed_result[0][0], float)
-    assert len(observed_result[0]) == 1
-
-    observed_result = GPS_fitted_model_continuous_fixture.predict(
-        np.array([40, 50, 60])
-    )
-    assert isinstance(observed_result[0][0], float)
-    assert len(observed_result[0]) == 3
-
-
-def test_predict_method_bad(GPS_fitted_model_binary_fixture):
-    """
-    Tests the GPS `predict` method using inappropriate data (with a binary outcome)
-    """
-    with pytest.raises(Exception) as bad:
-        observed_result = GPS_fitted_model_binary_fixture.predict(np.array([50]))
-
-
-def test_predict_interval_method_good(GPS_fitted_model_continuous_fixture):
-    """
-    Tests the GPS `predict_interval` method using appropriate data (with a continuous outcome)
-    """
-    observed_result = GPS_fitted_model_continuous_fixture.predict_interval(
-        np.array([50])
-    )
-    assert isinstance(observed_result[0][0], float)
-    assert observed_result.shape == (1, 2)
-
-    observed_result = GPS_fitted_model_continuous_fixture.predict_interval(
-        np.array([40, 50, 60])
-    )
-    assert isinstance(observed_result[0][0], float)
-    assert observed_result.shape == (3, 2)
-
-
-def test_predict_interval_method_bad(GPS_fitted_model_binary_fixture):
-    """
-    Tests the GPS `predict_interval` method using appropriate data (with a continuous outcome)
-    """
-    with pytest.raises(Exception) as bad:
-        observed_result = GPS_fitted_model_binary_fixture.predict_interval(
-            np.array([50])
-        )
-
-
-def test_predict_log_odds_method_good(GPS_fitted_model_binary_fixture):
-    """
-    Tests the GPS `predict_log_odds` method using appropriate data (with a binary outcome)
-    """
-    observed_result = GPS_fitted_model_binary_fixture.predict_log_odds(np.array([0.5]))
-    assert isinstance(observed_result[0][0], float)
-    assert len(observed_result[0]) == 1
-
-    observed_result = GPS_fitted_model_binary_fixture.predict_log_odds(
-        np.array([0.5, 0.6, 0.7])
-    )
-    assert isinstance(observed_result[0][0], float)
-    assert len(observed_result[0]) == 3
-
-
-def test_predict_log_odds_method_bad(GPS_fitted_model_continuous_fixture):
-    """
-    Tests the GPS `predict_log_odds` method using appropriate data (with a continuous outcome)
-    """
-    with pytest.raises(Exception) as bad:
-        observed_result = GPS_fitted_model_continuous_fixture.predict_log_odds(
-            np.array([50])
-        )
+#
+# def test_predict_method_good(GPS_fitted_model_continuous_fixture):
+#     """
+#     Tests the GPS `predict` method using appropriate data (with a continuous outcome)
+#     """
+#     observed_result = GPS_fitted_model_continuous_fixture.predict(np.array([50]))
+#     assert isinstance(observed_result[0][0], float)
+#     assert len(observed_result[0]) == 1
+#
+#     observed_result = GPS_fitted_model_continuous_fixture.predict(
+#         np.array([40, 50, 60])
+#     )
+#     assert isinstance(observed_result[0][0], float)
+#     assert len(observed_result[0]) == 3
+#
+#
+# def test_predict_method_bad(GPS_fitted_model_binary_fixture):
+#     """
+#     Tests the GPS `predict` method using inappropriate data (with a binary outcome)
+#     """
+#     with pytest.raises(Exception) as bad:
+#         observed_result = GPS_fitted_model_binary_fixture.predict(np.array([50]))
+#
+#
+# def test_predict_interval_method_good(GPS_fitted_model_continuous_fixture):
+#     """
+#     Tests the GPS `predict_interval` method using appropriate data (with a continuous outcome)
+#     """
+#     observed_result = GPS_fitted_model_continuous_fixture.predict_interval(
+#         np.array([50])
+#     )
+#     assert isinstance(observed_result[0][0], float)
+#     assert observed_result.shape == (1, 2)
+#
+#     observed_result = GPS_fitted_model_continuous_fixture.predict_interval(
+#         np.array([40, 50, 60])
+#     )
+#     assert isinstance(observed_result[0][0], float)
+#     assert observed_result.shape == (3, 2)
+#
+#
+# def test_predict_interval_method_bad(GPS_fitted_model_binary_fixture):
+#     """
+#     Tests the GPS `predict_interval` method using appropriate data (with a continuous outcome)
+#     """
+#     with pytest.raises(Exception) as bad:
+#         observed_result = GPS_fitted_model_binary_fixture.predict_interval(
+#             np.array([50])
+#         )
+#
+#
+# def test_predict_log_odds_method_good(GPS_fitted_model_binary_fixture):
+#     """
+#     Tests the GPS `predict_log_odds` method using appropriate data (with a binary outcome)
+#     """
+#     observed_result = GPS_fitted_model_binary_fixture.predict_log_odds(np.array([0.5]))
+#     assert isinstance(observed_result[0][0], float)
+#     assert len(observed_result[0]) == 1
+#
+#     observed_result = GPS_fitted_model_binary_fixture.predict_log_odds(
+#         np.array([0.5, 0.6, 0.7])
+#     )
+#     assert isinstance(observed_result[0][0], float)
+#     assert len(observed_result[0]) == 3
+#
+#
+# def test_predict_log_odds_method_bad(GPS_fitted_model_continuous_fixture):
+#     """
+#     Tests the GPS `predict_log_odds` method using appropriate data (with a continuous outcome)
+#     """
+#     with pytest.raises(Exception) as bad:
+#         observed_result = GPS_fitted_model_continuous_fixture.predict_log_odds(
+#             np.array([50])
+#         )

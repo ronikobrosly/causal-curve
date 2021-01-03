@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from causal_curve import TMLE
+from causal_curve import TMLE_Regressor
 
 
 def test_full_tmle_flow(continuous_dataset_fixture):
@@ -10,8 +10,7 @@ def test_full_tmle_flow(continuous_dataset_fixture):
     Tests the full flow of the TMLE tool
     """
 
-    tmle = TMLE(
-        treatment_grid_bins=[22.1, 30, 40, 50, 60, 70, 80.1],
+    tmle = TMLE_Regressor(
         random_seed=100,
         verbose=True,
     )

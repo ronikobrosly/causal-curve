@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from causal_curve import GPS
+from causal_curve import GPS_Regressor, GPS_Classifier
 
 
 def test_full_continuous_gps_flow(continuous_dataset_fixture):
@@ -10,7 +10,7 @@ def test_full_continuous_gps_flow(continuous_dataset_fixture):
     Tests the full flow of the GPS tool when used with a continuous outcome
     """
 
-    gps = GPS(
+    gps = GPS_Regressor(
         treatment_grid_num=10,
         lower_grid_constraint=0.0,
         upper_grid_constraint=1.0,
@@ -37,12 +37,12 @@ def test_full_continuous_gps_flow(continuous_dataset_fixture):
     assert check.all()
 
 
-def test_binary_continuous_gps_flow(binary_dataset_fixture):
+def test_binary_gps_flow(binary_dataset_fixture):
     """
     Tests the full flow of the GPS tool when used with a binary outcome
     """
 
-    gps = GPS(
+    gps = GPS_Classifier(
         gps_family="normal",
         treatment_grid_num=10,
         lower_grid_constraint=0.0,
