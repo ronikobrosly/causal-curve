@@ -5,6 +5,16 @@ Change Log
 ==========
 
 
+Version 1.0.0: **Major Update**
+-------------
+- Overhaul of the TMLE tool to make it dramatically more accurate and user-friendly.
+- Improved TMLE example documentation
+- Much like with `scikit-learn`, there are now separate model classes used for predicting binary or continuous outcomes
+- Updating documentation to reflect API changes
+- Added more tests
+- Linted with `pylint` (added `.pylintrc` file)
+
+
 Version 0.5.2
 -------------
 - Fixed bug that prevented `causal-curve` modules from being shown in Sphinx documentation

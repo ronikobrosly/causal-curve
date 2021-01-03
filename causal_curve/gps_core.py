@@ -1,6 +1,5 @@
-# pylint: disable=bad-continuation
 """
-Defines the Generalized Prospensity Score (GPS) model class
+Defines the Generalized Prospensity Score (GPS) Core model class
 """
 
 import contextlib
@@ -18,10 +17,9 @@ from statsmodels.genmod.families.links import inverse_power as Inverse_Power
 from statsmodels.tools.tools import add_constant
 
 from causal_curve.core import Core
-from causal_curve.utils import rand_seed_wrapper
 
 
-class GPS(Core):
+class GPS_Core(Core):
     """
     In a multi-stage approach, this computes the generalized propensity score (GPS) function,
     and uses this in a generalized additive model (GAM) to correct treatment prediction of
@@ -192,10 +190,10 @@ class GPS(Core):
 
         # Validate the params
         self._validate_init_params()
-        rand_seed_wrapper()
+        self.rand_seed_wrapper()
 
+        self.if_verbose_print("Using the following params for GPS model:")
         if self.verbose:
-            print("Using the following params for GPS model:")
             pprint(self.get_params(), indent=4)
 
     def _validate_init_params(self):
@@ -233,7 +231,7 @@ class GPS(Core):
         if (
             isinstance(self.treatment_grid_num, int)
         ) and self.treatment_grid_num >= 1000:
-            raise ValueError(f"treatment_grid_num parameter is too high!")
+            raise ValueError("treatment_grid_num parameter is too high!")
 
         # Checks for lower_grid_constraint
         if not isinstance(self.lower_grid_constraint, float):
@@ -300,7 +298,7 @@ class GPS(Core):
             )
 
         if (isinstance(self.spline_order, int)) and self.spline_order >= 30:
-            raise ValueError(f"spline_order parameter is too high!")
+            raise ValueError("spline_order parameter is too high!")
 
         # Checks for n_splines
         if not isinstance(self.n_splines, int):
@@ -314,7 +312,7 @@ class GPS(Core):
             )
 
         if (isinstance(self.n_splines, int)) and self.n_splines >= 100:
-            raise ValueError(f"n_splines parameter is too high!")
+            raise ValueError("n_splines parameter is too high!")
 
         # Checks for lambda_
         if not isinstance(self.lambda_, (int, float)):
@@ -328,7 +326,7 @@ class GPS(Core):
             )
 
         if (isinstance(self.lambda_, (int, float))) and self.lambda_ >= 1000:
-            raise ValueError(f"lambda_ parameter is too high!")
+            raise ValueError("lambda_ parameter is too high!")
 
         # Checks for max_iter
         if not isinstance(self.max_iter, int):
@@ -338,11 +336,11 @@ class GPS(Core):
 
         if (isinstance(self.max_iter, int)) and self.max_iter <= 10:
             raise ValueError(
-                f"max_iter parameter is too low! Results won't be reliable!"
+                "max_iter parameter is too low! Results won't be reliable!"
             )
 
         if (isinstance(self.max_iter, int)) and self.max_iter >= 1e6:
-            raise ValueError(f"max_iter parameter is unnecessarily high!")
+            raise ValueError("max_iter parameter is unnecessarily high!")
 
         # Checks for random_seed
         if not isinstance(self.random_seed, (int, type(None))):
@@ -351,7 +349,7 @@ class GPS(Core):
             )
 
         if (isinstance(self.random_seed, int)) and self.random_seed < 0:
-            raise ValueError(f"random_seed parameter must be > 0")
+            raise ValueError("random_seed parameter must be > 0")
 
         # Checks for verbose
         if not isinstance(self.verbose, bool):
@@ -363,33 +361,33 @@ class GPS(Core):
         """Verifies that T, X, and y are formatted the right way"""
         # Checks for T column
         if not is_float_dtype(self.T):
-            raise TypeError(f"Treatment data must be of type float")
+            raise TypeError("Treatment data must be of type float")
 
         # Make sure all X columns are float or int
         if isinstance(self.X, pd.Series):
             if not is_numeric_dtype(self.X):
                 raise TypeError(
-                    f"All covariate (X) columns must be int or float type (i.e. must be numeric)"
+                    "All covariate (X) columns must be int or float type (i.e. must be numeric)"
                 )
 
         elif isinstance(self.X, pd.DataFrame):
             for column in self.X:
                 if not is_numeric_dtype(self.X[column]):
                     raise TypeError(
-                        f"All covariate (X) columns must be int or float type "
-                        f"(i.e. must be numeric)"
+                        "All covariate (X) columns must be int or float type "
+                        "(i.e. must be numeric)"
                     )
 
         # Checks for Y column
         if not (is_float_dtype(self.y) or is_integer_dtype(self.y)):
-            raise TypeError(f"Outcome data must be of type float or integer")
+            raise TypeError("Outcome data must be of type float or integer")
 
         if is_integer_dtype(self.y) and (
             not np.array_equal(np.sort(self.y.unique()), np.array([0, 1]))
         ):
             raise TypeError(
-                f"If your outcome data is of type integer (binary outcome),"
-                f"it should only contain 1's and 0's."
+                "If your outcome data is of type integer (binary outcome),"
+                "it should only contain 1's and 0's."
             )
 
     def _grid_values(self):
@@ -406,7 +404,8 @@ class GPS(Core):
     def fit(self, T, X, y):
         """Fits the GPS causal dose-response model. For now, this only accepts pandas columns.
         While the treatment variable must be continuous (or ordinal with many levels), the
-        outcome variable may be continuous or binary.
+        outcome variable may be continuous or binary. You *must* provide
+        at least one covariate column.
 
         Parameters
         ----------
@@ -435,8 +434,9 @@ class GPS(Core):
         elif is_integer_dtype(self.y):
             self.outcome_type = "binary"
 
-        if self.verbose:
-            print(f"Determined the outcome variable is of type {self.outcome_type}...")
+        self.if_verbose_print(
+            f"Determined the outcome variable is of type {self.outcome_type}..."
+        )
 
         # Validate this input data
         self._validate_fit_data()
@@ -448,14 +448,12 @@ class GPS(Core):
         self._determine_gps_function()
 
         # Estimate the GPS
-        if self.verbose:
-            print(f"Saving GPS values...")
+        self.if_verbose_print("Saving GPS values...")
 
         self.gps = self.gps_function(self.T)
 
         # Create GAM that predicts outcome from the treatment and GPS
-        if self.verbose:
-            print(f"Fitting GAM using treatment and GPS...")
+        self.if_verbose_print("Fitting GAM using treatment and GPS...")
 
         # Save model results
         self.gam_results = self._fit_gam()
@@ -466,17 +464,19 @@ class GPS(Core):
 
         self._gam_summary_str = f.getvalue()
 
-        if self.verbose:
-            print(f"Calculating many CDRC estimates for each treatment grid value...")
+        self.if_verbose_print(
+            "Calculating many CDRC estimates for each treatment grid value..."
+        )
 
         # Loop over all grid values (`treatment_grid_num` in total)
         # and give GPS loading for each observation in the dataset
         self.gps_at_grid = self._gps_values_at_grid()
 
     def calculate_CDRC(self, ci=0.95):
-        """Using the results of the fitted model, this generates point estimates for the CDRC
-        at each of the values of the treatment grid. Connecting these estimates will produce
-        the overall estimated CDRC. Confidence interval is returned as well.
+        """Using the results of the fitted model, this generates a dataframe of
+        point estimates for the CDRC at each of the values of the
+        treatment grid. Connecting these estimates will produce the overall
+        estimated CDRC. Confidence interval is returned as well.
 
         Parameters
         ----------
@@ -495,11 +495,11 @@ class GPS(Core):
         """
         self._validate_calculate_CDRC_params(ci)
 
-        if self.verbose:
-            print(
-                """Generating predictions for each value of treatment grid,
-                and averaging to get the CDRC..."""
-            )
+        self.if_verbose_print(
+            """
+            Generating predictions for each value of treatment grid,
+            and averaging to get the CDRC..."""
+        )
 
         # Create CDRC predictions from trained GAM
         # If working with a continuous outcome variable, use this path
@@ -547,11 +547,11 @@ class GPS(Core):
 
                 temp_lower_bound = np.exp(
                     temp_log_odds_estimate
-                    - (self._calculate_z_score(ci) * self._cdrc_preds[:, i, 1].mean())
+                    - (self.calculate_z_score(ci) * self._cdrc_preds[:, i, 1].mean())
                 )
                 temp_upper_bound = np.exp(
                     temp_log_odds_estimate
-                    + (self._calculate_z_score(ci) * self._cdrc_preds[:, i, 1].mean())
+                    + (self.calculate_z_score(ci) * self._cdrc_preds[:, i, 1].mean())
                 )
                 results.append(
                     [
@@ -568,7 +568,8 @@ class GPS(Core):
             results, columns=["Treatment", outcome_name, "Lower_CI", "Upper_CI"]
         ).round(3)
 
-    def _validate_calculate_CDRC_params(self, ci):
+    @staticmethod
+    def _validate_calculate_CDRC_params(ci):
         """Validates the parameters given to `calculate_CDRC`"""
 
         if not isinstance(ci, float):
@@ -578,76 +579,6 @@ class GPS(Core):
 
         if isinstance(ci, float) and ((ci <= 0) or (ci >= 1.0)):
             raise ValueError("`ci` parameter should be between (0, 1)")
-
-    def _calculate_z_score(self, ci):
-        """Calculates the critical z-score for a desired two-sided, confidence interval width."""
-        return norm.ppf((1 + ci) / 2)
-
-    def _cdrc_predictions_continuous(self, ci):
-        """Returns the predictions of CDRC for each value of the treatment grid. Essentially,
-        we're making predictions using the original treatment and gps_at_grid.
-        To be used when the outcome of interest is continuous.
-        """
-
-        # To keep track of cdrc predictions, we create an empty 3d array of shape
-        # (n_samples, treatment_grid_num, 3). The last dimension is of length 3 because
-        # we are going to keep track of the point estimate of the prediction, as well as
-        # the lower and upper bounds of the prediction interval
-        cdrc_preds = np.zeros((len(self.T), self.treatment_grid_num, 3), dtype=float)
-
-        # Loop through each of the grid values, predict point estimate and get prediction interval
-        for i in range(0, self.treatment_grid_num):
-            temp_T = np.repeat(self.grid_values[i], repeats=len(self.T))
-            temp_gps = self.gps_at_grid[:, i]
-            temp_cdrc_preds = self.gam_results.predict(
-                np.column_stack((temp_T, temp_gps))
-            )
-            temp_cdrc_interval = self.gam_results.confidence_intervals(
-                np.column_stack((temp_T, temp_gps)), width=ci
-            )
-            temp_cdrc_lower_bound = temp_cdrc_interval[:, 0]
-            temp_cdrc_upper_bound = temp_cdrc_interval[:, 1]
-            cdrc_preds[:, i, 0] = temp_cdrc_preds
-            cdrc_preds[:, i, 1] = temp_cdrc_lower_bound
-            cdrc_preds[:, i, 2] = temp_cdrc_upper_bound
-
-        return np.round(cdrc_preds, 3)
-
-    def _cdrc_predictions_binary(self, ci):
-        """Returns the predictions of CDRC for each value of the treatment grid. Essentially,
-        we're making predictions using the original treatment and gps_at_grid.
-        To be used when the outcome of interest is binary.
-        """
-        # To keep track of cdrc predictions, we create an empty 2d array of shape
-        # (n_samples, treatment_grid_num, 2). The last dimension is of length 2 because
-        # we are going to keep track of the point estimate (log-odds) of the prediction, as well as
-        # the standard error of the prediction interval (again, this is for the log odds)
-        cdrc_preds = np.zeros((len(self.T), self.treatment_grid_num, 2), dtype=float)
-
-        # Loop through each of the grid values, predict point estimate and get prediction interval
-        for i in range(0, self.treatment_grid_num):
-
-            temp_T = np.repeat(self.grid_values[i], repeats=len(self.T))
-            temp_gps = self.gps_at_grid[:, i]
-
-            temp_cdrc_preds = logit(
-                self.gam_results.predict_proba(np.column_stack((temp_T, temp_gps)))
-            )
-
-            temp_cdrc_interval = logit(
-                self.gam_results.confidence_intervals(
-                    np.column_stack((temp_T, temp_gps)), width=ci
-                )
-            )
-
-            standard_error = (
-                temp_cdrc_interval[:, 1] - temp_cdrc_preds
-            ) / self._calculate_z_score(ci)
-
-            cdrc_preds[:, i, 0] = temp_cdrc_preds
-            cdrc_preds[:, i, 1] = standard_error
-
-        return np.round(cdrc_preds, 3)
 
     def _gps_values_at_grid(self):
         """Returns an array where we get the GPS-derived values for each element
@@ -699,15 +630,14 @@ class GPS(Core):
         if any(self.T <= 0):
             self.best_gps_family = "normal"
             self.gps_function, self.gps_deviance = self._create_normal_gps_function()
-            if self.verbose:
-                print(
-                    f"Must fit `normal` GLM family to model treatment since treatment takes on zero or negative values..."
-                )
+            self.if_verbose_print(
+                """Must fit `normal` GLM family to model treatment since
+                treatment takes on zero or negative values..."""
+            )
 
         # If treatment has no negative values and user provides in put, use that.
         elif (all(self.T > 0)) & (not isinstance(self.gps_family, type(None))):
-            if self.verbose:
-                print(f"Fitting GPS model of family '{self.gps_family}'...")
+            self.if_verbose_print(f"Fitting GPS model of family '{self.gps_family}'...")
 
             if self.gps_family == "normal":
                 self.best_gps_family = "normal"
@@ -725,10 +655,12 @@ class GPS(Core):
                 self.best_gps_family = "gamma"
                 self.gps_function, self.gps_deviance = self._create_gamma_gps_function()
 
-        # If no zero or negative treatment values and user didn't provide input, figure out best-fitting family
+        # If no zero or negative treatment values and user didn't provide
+        # input, figure out best-fitting family
         elif (all(self.T > 0)) & (isinstance(self.gps_family, type(None))):
-            if self.verbose:
-                print(f"Fitting several GPS models and picking the best fitting one...")
+            self.if_verbose_print(
+                "Fitting several GPS models and" " picking the best fitting one..."
+            )
 
             (
                 self.best_gps_family,
@@ -736,11 +668,10 @@ class GPS(Core):
                 self.gps_deviance,
             ) = self._find_best_gps_model()
 
-            if self.verbose:
-                print(
-                    f"Best fitting model was {self.best_gps_family}, which "
-                    f"produced a deviance of {self.gps_deviance}"
-                )
+            self.if_verbose_print(
+                f"""Best fitting model was {self.best_gps_family}, which
+                    produced a deviance of {self.gps_deviance}"""
+            )
 
     def _create_normal_gps_function(self):
         """Models the GPS using a GLM of the Gaussian family"""
@@ -807,104 +738,4 @@ class GPS(Core):
             best_model,
             models_to_try_dict[best_model][0],
             models_to_try_dict[best_model][1],
-        )
-
-    def predict(self, T):
-        """Calculates point estimate within the CDRC given treatment values.
-        Can only be used when outcome is continuous. Can be estimate for a single
-        data point or can be run in batch for many observations. Extrapolation will produce
-        untrustworthy results; the provided treatment should be within
-        the range of the training data.
-
-        Parameters
-        ----------
-        T: Numpy array, shape (n_samples,)
-            A continuous treatment variable.
-
-        Returns
-        ----------
-        array: Numpy array
-            Contains a set of CDRC point estimates
-
-        """
-        if self.outcome_type != "continuous":
-            raise TypeError("Your outcome must be continuous to use this function!")
-
-        return np.apply_along_axis(self._create_predict, 0, T.reshape(1, -1))
-
-    def _create_predict(self, T):
-        """Takes a single treatment value and produces a single point estimate
-        in the case of a continuous outcome.
-        """
-        return self.gam_results.predict(
-            np.array([T, self.gps_function(T).mean()]).reshape(1, -1)
-        )
-
-    def predict_interval(self, T, ci=0.95):
-        """Calculates the prediction confidence interval associated with a point estimate
-        within the CDRC given treatment values. Can only be used
-        when outcome is continuous. Can be estimate for a single data point
-        or can be run in batch for many observations. Extrapolation will produce
-        untrustworthy results; the provided treatment should be within
-        the range of the training data.
-
-        Parameters
-        ----------
-        T: Numpy array, shape (n_samples,)
-            A continuous treatment variable.
-        ci: float (default = 0.95)
-            The desired confidence interval to produce. Default value is 0.95, corresponding
-            to 95% confidence intervals. bounded (0, 1.0).
-
-        Returns
-        ----------
-        array: Numpy array
-            Contains a set of CDRC prediction intervals ([lower bound, higher bound])
-
-        """
-        if self.outcome_type != "continuous":
-            raise TypeError("Your outcome must be continuous to use this function!")
-
-        return np.apply_along_axis(
-            self._create_predict_interval, 0, T.reshape(1, -1)
-        ).T.reshape(-1, 2)
-
-    def _create_predict_interval(self, T):
-        """Takes a single treatment value and produces confidence interval
-        associated with a point estimate in the case of a continuous outcome.
-        """
-        return self.gam_results.prediction_intervals(
-            np.array([T, self.gps_function(T).mean()]).reshape(1, -1)
-        )
-
-    def predict_log_odds(self, T):
-        """Calculates the predicted log odds of the highest integer class. Can
-        only be used when the outcome is binary. Can be estimate for a single
-        data point or can be run in batch for many observations. Extrapolation will produce
-        untrustworthy results; the provided treatment should be within
-        the range of the training data.
-
-        Parameters
-        ----------
-        T: Numpy array, shape (n_samples,)
-            A continuous treatment variable.
-
-        Returns
-        ----------
-        array: Numpy array
-            Contains a set of log odds
-        """
-        if self.outcome_type != "binary":
-            raise TypeError("Your outcome must be binary to use this function!")
-
-        return np.apply_along_axis(self._create_log_odds, 0, T.reshape(1, -1))
-
-    def _create_log_odds(self, T):
-        """Take a single treatment value and produces the log odds of the higher
-        integer class, in the case of a binary outcome.
-        """
-        return logit(
-            self.gam_results.predict_proba(
-                np.array([T, self.gps_function(T).mean()]).reshape(1, -1)
-            )
         )

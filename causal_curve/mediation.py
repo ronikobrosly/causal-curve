@@ -1,4 +1,3 @@
-# pylint: disable=bad-continuation
 """
 Defines the Mediation test class
 """
@@ -11,7 +10,6 @@ from pandas.api.types import is_float_dtype
 from pygam import LinearGAM, s
 
 from causal_curve.core import Core
-from causal_curve.utils import rand_seed_wrapper
 
 
 class Mediation(Core):
@@ -135,7 +133,7 @@ class Mediation(Core):
 
         # Validate the params
         self._validate_init_params()
-        rand_seed_wrapper()
+        self.rand_seed_wrapper()
 
         if self.verbose:
             print("Using the following params for the mediation analysis:")
@@ -160,7 +158,7 @@ class Mediation(Core):
             )
 
         if (isinstance(self.treatment_grid_num, int)) and self.treatment_grid_num > 100:
-            raise ValueError(f"treatment_grid_num parameter is too high!")
+            raise ValueError("treatment_grid_num parameter is too high!")
 
         # Checks for lower_grid_constraint
         if not isinstance(self.lower_grid_constraint, float):
@@ -269,7 +267,7 @@ class Mediation(Core):
             )
 
         if (isinstance(self.spline_order, int)) and self.spline_order >= 30:
-            raise ValueError(f"spline_order parameter is too high!")
+            raise ValueError("spline_order parameter is too high!")
 
         # Checks for n_splines
         if not isinstance(self.n_splines, int):
@@ -283,7 +281,7 @@ class Mediation(Core):
             )
 
         if (isinstance(self.n_splines, int)) and self.n_splines >= 100:
-            raise ValueError(f"n_splines parameter is too high!")
+            raise ValueError("n_splines parameter is too high!")
 
         # Checks for lambda_
         if not isinstance(self.lambda_, (int, float)):
@@ -297,7 +295,7 @@ class Mediation(Core):
             )
 
         if (isinstance(self.lambda_, (int, float))) and self.lambda_ >= 1000:
-            raise ValueError(f"lambda_ parameter is too high!")
+            raise ValueError("lambda_ parameter is too high!")
 
         # Checks for max_iter
         if not isinstance(self.max_iter, int):
@@ -307,11 +305,11 @@ class Mediation(Core):
 
         if (isinstance(self.max_iter, int)) and self.max_iter <= 10:
             raise ValueError(
-                f"max_iter parameter is too low! Results won't be reliable!"
+                "max_iter parameter is too low! Results won't be reliable!"
             )
 
         if (isinstance(self.max_iter, int)) and self.max_iter >= 1e6:
-            raise ValueError(f"max_iter parameter is unnecessarily high!")
+            raise ValueError("max_iter parameter is unnecessarily high!")
 
         # Checks for random_seed
         if not isinstance(self.random_seed, (int, type(None))):
@@ -320,7 +318,7 @@ class Mediation(Core):
             )
 
         if (isinstance(self.random_seed, int)) and self.random_seed < 0:
-            raise ValueError(f"random_seed parameter must be > 0")
+            raise ValueError("random_seed parameter must be > 0")
 
         # Checks for verbose
         if not isinstance(self.verbose, bool):
@@ -332,15 +330,15 @@ class Mediation(Core):
         """Verifies that T, M, and y are formatted the right way"""
         # Checks for T column
         if not is_float_dtype(self.T):
-            raise TypeError(f"Treatment data must be of type float")
+            raise TypeError("Treatment data must be of type float")
 
         # Checks for M column
         if not is_float_dtype(self.M):
-            raise TypeError(f"Mediation data must be of type float")
+            raise TypeError("Mediation data must be of type float")
 
         # Checks for Y column
         if not is_float_dtype(self.y):
-            raise TypeError(f"Outcome data must be of type float")
+            raise TypeError("Outcome data must be of type float")
 
     def _grid_values(self):
         """Produces initial grid values for the treatment variable"""
@@ -498,7 +496,7 @@ class Mediation(Core):
 
         # Bootstrap these general_indirect values
         bootstrap_overall_means = []
-        for i in range(0, 1000):
+        for _ in range(0, 1000):
             bootstrap_overall_means.append(
                 general_indirect.sample(frac=0.25, replace=True).mean()
             )
@@ -521,10 +519,10 @@ class Mediation(Core):
 
         # Calculate overall, mean, indirect effect
         total_prop_mean = round(np.array(self.prop_indirect_list).mean(), 4)
-        total_prop_lower = self._clip_negatives(
+        total_prop_lower = self.clip_negatives(
             round(np.percentile(bootstrap_overall_means, q=lower * 100), 4)
         )
-        total_prop_upper = self._clip_negatives(
+        total_prop_upper = self.clip_negatives(
             round(np.percentile(bootstrap_overall_means, q=upper * 100), 4)
         )
 
@@ -535,18 +533,12 @@ class Mediation(Core):
         )
         return final_results
 
-    def _clip_negatives(self, number):
-        """Helper function to clip negative numbers to zero"""
-        if number < 0:
-            return 0
-        return number
-
     def _bootstrap_analysis(self, temp_low_treatment, temp_high_treatment):
         """The top-level function used in the fitting method"""
 
         bootstrap_collection = []
 
-        for i in range(0, self.bootstrap_replicates):
+        for _ in range(0, self.bootstrap_replicates):
             # Create single bootstrap replicate
             temp_t, temp_m, temp_y = self._create_bootstrap_replicate()
             # Create the models from this
@@ -558,7 +550,6 @@ class Mediation(Core):
                 temp_mediator_model,
                 temp_t,
                 temp_m,
-                temp_y,
                 temp_low_treatment,
                 temp_high_treatment,
             )
@@ -612,7 +603,6 @@ class Mediation(Core):
         temp_mediator_model,
         temp_t,
         temp_m,
-        temp_y,
         temp_low_treatment,
         temp_high_treatment,
     ):
@@ -651,15 +641,15 @@ class Mediation(Core):
             ["z0", temp_high_treatment, temp_low_treatment, predict_m0, predict_m0],
         ]
 
-        for input in inputs:
+        for element in inputs:
 
             # Set treatment values
-            t_1 = input[1]
-            t_0 = input[2]
+            t_1 = element[1]
+            t_0 = element[2]
 
             # Set mediator values
-            m_1 = input[3]
-            m_0 = input[4]
+            m_1 = element[3]
+            m_0 = element[4]
 
             pr_1 = temp_outcome_model.predict(
                 np.column_stack((np.repeat(t_1, self.n), m_1))
@@ -669,6 +659,6 @@ class Mediation(Core):
                 np.column_stack((np.repeat(t_0, self.n), m_0))
             )
 
-            outcome_preds[input[0]] = (pr_1 - pr_0).mean()
+            outcome_preds[element[0]] = (pr_1 - pr_0).mean()
 
         return outcome_preds

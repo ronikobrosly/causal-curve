@@ -63,7 +63,7 @@ features as potentially confounding "nuisance" variables:
 - Whether the child spent time in a neonatal intensive care unit as a baby
 - Whether the child is experiencing food insecurity (is food sometimes not available due to lack of resources?).
 
-In our simulated "experiment", these above confounders will be controlled for.
+In our "experiment", these above confounders will be controlled for.
 
 By using either the GPS or TMLE tools included in `causal-curve` one can generate the causal
 dose-response curves for BLLs in relation to the four outcomes:
