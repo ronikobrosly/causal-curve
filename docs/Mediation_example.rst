@@ -1,8 +1,8 @@
 .. _Mediation_example:
 
-==========================================================
-Test for Mediation for continuous treatments and mediators
-==========================================================
+============================================================
+Mediation Tool (continuous treatment, mediator, and outcome)
+============================================================
 
 Mediation test
 --------------

@@ -24,6 +24,8 @@ Python tools to perform causal inference when the treatment of interest is conti
 
 ## Overview
 
+(**Version 1.0.0 released in January 2021!**)
+
 There are many implemented methods to perform causal inference when your intervention of interest is binary,
 but few methods exist to handle continuous treatments.
 

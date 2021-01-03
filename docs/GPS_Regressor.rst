@@ -1,8 +1,8 @@
-.. _GPS_example:
+.. _GPS_Regressor:
 
-====================================================
-GPS Method for Causal Dose Response Curve Estimation
-====================================================
+================================================================
+GPS_Classifier Tool (continuous treatments, continuous outcomes)
+================================================================
 
 Generalized propensity score method
 -----------------------------------
@@ -91,7 +91,7 @@ The GPS tool also allows you to estimate a specific set of points along the caus
 In the case of a continuous outcome, use the `predict` and `predict_interval` methods
 to produce a point estimate and prediction interval, respectively. In the case of a
 binary outcome, use the `predict_log_odds` methods to calculate the log odds of the
-highest outcome class. 
+highest outcome class.
 
 References
 ----------

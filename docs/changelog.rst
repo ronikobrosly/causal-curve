@@ -11,9 +11,9 @@ Version 1.0.0: **Major Update**
 - Improved TMLE example documentation
 - Much like with `scikit-learn`, there are now separate model classes used for predicting binary or continuous outcomes
 - Updating documentation to reflect API changes
-- Added more tests to bring code coverage up to 100%
+- Added more tests
 - Linted with `pylint` (added `.pylintrc` file)
-- 
+-
 
 
 Version 0.5.2

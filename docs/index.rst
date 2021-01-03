@@ -23,10 +23,11 @@ Welcome to causal-curve's documentation!
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Tutorials of Individual Tools
+   :caption: Package Tools
 
-   GPS_example
-   TMLE_example
+   GPS_Regressor
+   GPS_Classifier
+   TMLE_Regressor
    Mediation_example
 
 .. toctree::
@@ -52,13 +53,15 @@ Welcome to causal-curve's documentation!
 
 
 **causal-curve** is a Python package with tools to perform causal inference
-using observational data when the treatment of interest is continuous.
+when the treatment of interest is continuous.
 
 .. image:: ../imgs/welcome_plot.png
 
 
 Summary
 -------
+
+(**Version 1.0.0 released in Jan 2021!**)
 
 There are many available methods to perform causal inference when your intervention of interest is binary,
 but few methods exist to handle continuous treatments. This is unfortunate because there are many
@@ -67,16 +70,19 @@ address this gap, providing tools to estimate causal curves (AKA causal dose-res
 Both continuous and binary outcomes can be modeled with this package.
 
 
-Quick example (of the ``GPS`` tool)
+Quick example (of the ``GPS_Regressor`` tool)
 -----------------------------------
 
 **causal-curve** uses a sklearn-like API that should feel familiar to python machine learning users.
+This includes `_Regressor` and `_Classifier` models, and `fit()` methods.
+
 The following example estimates the causal dose-response curve (CDRC) by calculating
 generalized propensity scores.
 
->>> from causal_curve import GPS
+>>> from causal_curve import GPS_Regressor
+>>> import numpy as np
 
->>> gps = GPS(treatment_grid_num = 200, random_seed = 512)
+>>> gps = GPS_Regressor(treatment_grid_num = 200, random_seed = 512)
 
 >>> df # a pandas dataframe with your data
            X_1       X_2  Treatment    Outcome
@@ -88,10 +94,10 @@ generalized propensity scores.
 
 >>> gps.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
 >>> gps_results = gps.calculate_CDRC(ci = 0.95)
->>> gps_pred = gps.predict(0.0003)
->>> gps_pred_interval = gps.predict_interval(0.0003, ci = 0.95)
+>>> gps_point = gps.point_estimate(np.array([0.0003]))
+>>> gps_point_interval = gps.point_estimate_interval(np.array([0.0003]), ci = 0.95)
 
-1. First we import our GPS class.
+1. First we import the `GPS_Regressor` class.
 
 2. Then we instantiate the class, providing any of the optional parameters.
 
@@ -101,6 +107,6 @@ generalized propensity scores.
 
 5. Estimate the points of the causal curve (along with 95% confidence interval bounds) with the ``.calculate_CDRC()`` method.
 
-6. Estimate user-provided points along the causal curve with the ``.predict()``, ``.predict_interval()``, and ``.predict_log_odds()`` methods.
+6. Generate point estimates along the causal curve with the ``.point_estimate()``, ``.point_estimate_interval()``, and ``.estimate_log_odds()`` methods.
 
 7. Explore or plot your results!

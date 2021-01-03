@@ -20,7 +20,7 @@ to analyzing observational data (e.g. confounding and selection bias) [@Hernán:
 
 As long as you have varying observational data on some treatment, your outcome of interest,
 and potentially confounding variables across your units of analysis (in addition to meeting the assumptions described below),
-then you can essentially simulate a proper experiment and make causal claims.
+then you can essentially estimate the results of a proper experiment and make causal claims.
 
 
 Interpreting the causal curve
@@ -28,7 +28,7 @@ Interpreting the causal curve
 
 Two of the methods contained within this package produce causal curves for continuous treatments
 (see the GPS and TMLE methods). Both continuous and binary treatments can be modeled
-(only the GPS tool can handle binary outcomes).
+(only the `GPS_Classifier` tool can handle binary outcomes).
 
 **Continuous outcome:**
 
@@ -51,7 +51,7 @@ generated through standard multivariable regression modeling in a few important 
 
 .. image:: ../imgs/binary_OR_fig.png
 
-In the case of binary outcome, the GPS tool can be used to estimate a curve of odds ratio. Every
+In the case of binary outcome, the `GPS_Classifier` tool can be used to estimate a curve of odds ratio. Every
 point on the curve is relative to the lowest treatment value. The highest effect (relative to the lowest treatment value)
 is around a treatment value of -1.2. At this point in the treatment, the odds of a positive class
 occurring is 5.6 times higher compared with the lowest treatment value. This curve is always on
@@ -78,16 +78,6 @@ be **confounding** variables.
 
 None of the methods provided in causal-curve rely on inference via instrumental variables, they only
 rely on the data from the observed treatment, confounders, and the outcome of interest (like the above GPS example).
-
-
-Additional resources
---------------------------------------------
-
-There are a number of excellent blogs and books covering the math behind causal inference in more depth.
-In addition to these, the following resources are recommended:
-
-- Miguel Hernan and Jamie Robin's book `"Causal Inference: What if" <https://cdn1.sph.harvard.edu/wp-content/uploads/sites/1268/2020/07/ci_hernanrobins_31july20.pdf>`_.
-- Cloudera Fast Forward Labs Research's `book on causal inference <https://ff13.fastforwardlabs.com/>`_.
 
 
 References

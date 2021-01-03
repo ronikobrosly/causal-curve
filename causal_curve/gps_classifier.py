@@ -88,8 +88,8 @@ class GPS_Classifier(GPS_Core):
 
         return np.round(cdrc_preds, 3)
 
-    def predict_log_odds(self, T):
-        """Calculates the predicted log odds of the highest integer class. Can
+    def estimate_log_odds(self, T):
+        """Calculates the estimated log odds of the highest integer class. Can
         only be used when the outcome is binary. Can be estimate for a single
         data point or can be run in batch for many observations. Extrapolation will produce
         untrustworthy results; the provided treatment should be within
