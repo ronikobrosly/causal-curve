@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 from scipy.stats import norm
 
-from causal_curve import GPS_Regressor, GPS_Classifier
+from causal_curve import GPS_Regressor, GPS_Classifier, TMLE_Regressor
 
 
 @pytest.fixture(scope="module")
@@ -241,6 +241,31 @@ def GPS_fitted_model_binary():
     fixture.fit(
         T=df["treatment"],
         X=df["x1"],
+        y=df["outcome"],
+    )
+
+    return fixture
+
+
+
+@pytest.fixture(scope="module")
+def TMLE_fitted_model_continuous_fixture():
+    """Returns a TMLE model that is already fit with data with a continuous outcome"""
+    return TMLE_fitted_model_continuous()
+
+
+def TMLE_fitted_model_continuous():
+    """Example GPS model that is fit with data including a continuous outcome"""
+
+    df = full_continuous_example_dataset()
+
+    fixture = TMLE_Regressor(
+        random_seed=100,
+        verbose=True,
+    )
+    fixture.fit(
+        T=df["treatment"],
+        X=df[["x1", "x2"]],
         y=df["outcome"],
     )
 

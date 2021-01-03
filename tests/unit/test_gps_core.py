@@ -119,7 +119,7 @@ def test_bad_gps_instantiation(
     Tests for exceptions when the GPS class if call with bad inputs.
     """
     with pytest.raises(Exception) as bad:
-        GPS(
+        GPS_Core(
             gps_family=gps_family,
             treatment_grid_num=treatment_grid_num,
             lower_grid_constraint=lower_grid_constraint,
@@ -132,77 +132,15 @@ def test_bad_gps_instantiation(
             verbose=verbose,
         )
 
-#
-# def test_predict_method_good(GPS_fitted_model_continuous_fixture):
-#     """
-#     Tests the GPS `predict` method using appropriate data (with a continuous outcome)
-#     """
-#     observed_result = GPS_fitted_model_continuous_fixture.predict(np.array([50]))
-#     assert isinstance(observed_result[0][0], float)
-#     assert len(observed_result[0]) == 1
-#
-#     observed_result = GPS_fitted_model_continuous_fixture.predict(
-#         np.array([40, 50, 60])
-#     )
-#     assert isinstance(observed_result[0][0], float)
-#     assert len(observed_result[0]) == 3
-#
-#
-# def test_predict_method_bad(GPS_fitted_model_binary_fixture):
-#     """
-#     Tests the GPS `predict` method using inappropriate data (with a binary outcome)
-#     """
-#     with pytest.raises(Exception) as bad:
-#         observed_result = GPS_fitted_model_binary_fixture.predict(np.array([50]))
-#
-#
-# def test_predict_interval_method_good(GPS_fitted_model_continuous_fixture):
-#     """
-#     Tests the GPS `predict_interval` method using appropriate data (with a continuous outcome)
-#     """
-#     observed_result = GPS_fitted_model_continuous_fixture.predict_interval(
-#         np.array([50])
-#     )
-#     assert isinstance(observed_result[0][0], float)
-#     assert observed_result.shape == (1, 2)
-#
-#     observed_result = GPS_fitted_model_continuous_fixture.predict_interval(
-#         np.array([40, 50, 60])
-#     )
-#     assert isinstance(observed_result[0][0], float)
-#     assert observed_result.shape == (3, 2)
-#
-#
-# def test_predict_interval_method_bad(GPS_fitted_model_binary_fixture):
-#     """
-#     Tests the GPS `predict_interval` method using appropriate data (with a continuous outcome)
-#     """
-#     with pytest.raises(Exception) as bad:
-#         observed_result = GPS_fitted_model_binary_fixture.predict_interval(
-#             np.array([50])
-#         )
-#
-#
-# def test_predict_log_odds_method_good(GPS_fitted_model_binary_fixture):
-#     """
-#     Tests the GPS `predict_log_odds` method using appropriate data (with a binary outcome)
-#     """
-#     observed_result = GPS_fitted_model_binary_fixture.predict_log_odds(np.array([0.5]))
-#     assert isinstance(observed_result[0][0], float)
-#     assert len(observed_result[0]) == 1
-#
-#     observed_result = GPS_fitted_model_binary_fixture.predict_log_odds(
-#         np.array([0.5, 0.6, 0.7])
-#     )
-#     assert isinstance(observed_result[0][0], float)
-#     assert len(observed_result[0]) == 3
-#
-#
-# def test_predict_log_odds_method_bad(GPS_fitted_model_continuous_fixture):
-#     """
-#     Tests the GPS `predict_log_odds` method using appropriate data (with a continuous outcome)
-#     """
-#     with pytest.raises(Exception) as bad:
-#         observed_result = GPS_fitted_model_continuous_fixture.predict_log_odds(
-#             np.array([50])
-#         )
+
+def test_bad_param_calculate_CDRC(GPS_fitted_model_continuous_fixture):
+    """
+    Tests the GPS `calculate_CDRC` when the `ci` param is bad
+    """
+
+    with pytest.raises(Exception) as bad:
+        observed_result = GPS_fitted_model_continuous_fixture.calculate_CDRC(np.array([50]), ci = {'param': 0.95})
+
+
+    with pytest.raises(Exception) as bad:
+        observed_result = GPS_fitted_model_continuous_fixture.calculate_CDRC(np.array([50]), ci = 1.05)

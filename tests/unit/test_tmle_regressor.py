@@ -1,84 +1,39 @@
-# """ Unit tests of the tmle.py module """
-#
-# import pytest
-#
-# from causal_curve import TMLE
-#
-#
-# def test_tmle_fit(continuous_dataset_fixture):
-#     """
-#     Tests the fit method GPS tool
-#     """
-#
-#     tmle = TMLE(
-#         treatment_grid_bins=[22.1, 30, 40, 50, 60, 70, 80.1],
-#         random_seed=100,
-#         verbose=True,
-#     )
-#     tmle.fit(
-#         T=continuous_dataset_fixture["treatment"],
-#         X=continuous_dataset_fixture[["x1", "x2"]],
-#         y=continuous_dataset_fixture["outcome"],
-#     )
-#
-#     assert tmle.n_obs == 72
-#     assert len(tmle.psi_list) == 5
-#     assert len(tmle.std_error_ic_list) == 5
-#
-#
-# @pytest.mark.parametrize(
-#     (
-#         "treatment_grid_bins",
-#         "n_estimators",
-#         "learning_rate",
-#         "max_depth",
-#         "random_seed",
-#         "verbose",
-#     ),
-#     [
-#         ([0, 1, "2", 3, 4], 100, 0.1, 5, None, False),
-#         (5, 100, 0.1, 5, None, False),
-#         ("5", 100, 0.1, 5, None, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], "100", 0.1, 5, None, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 1, 0.1, 5, None, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, "0.1", 5, None, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 1000000, 5, None, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, "5", None, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, -5, None, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, 5, "None", False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, 5, -10, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, 5, None, "False"),
-#         ({"a": 5, "b": 6}, 100, 0.1, 5, None, False),
-#         (["a", "b", "c"], 100, 0.1, 5, None, False),
-#         ([1.0], 100, 0.1, 5, None, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 100.0, 0.1, 5, None, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 1.0, 0.1, 5, None, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 10000000, 0.1, 5, None, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, "hehe", 5, None, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, -0.1, 5, None, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 10000000, 5, None, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, "hehe", None, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, 5.0, None, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, -5, None, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, 5, "hehe", False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, 5, -10, False),
-#         ([22.1, 30, 40, 50, 60, 70, 80.1], 100, 0.1, 5, None, "thirty two"),
-#     ],
-# )
-# def test_bad_tmle_instantiation(
-#     treatment_grid_bins,
-#     n_estimators,
-#     learning_rate,
-#     max_depth,
-#     random_seed,
-#     verbose,
-# ):
-#     with pytest.raises(Exception) as bad:
-#         TMLE(
-#             treatment_grid_bins=treatment_grid_bins,
-#             n_estimators=n_estimators,
-#             learning_rate=learning_rate,
-#             max_depth=max_depth,
-#             random_seed=random_seed,
-#             verbose=verbose,
-#         )
+""" Unit tests of the tmle.py module """
+
+import numpy as np
+import pytest
+
+from causal_curve import TMLE_Regressor
+
+
+
+def test_point_estimate_method_good(TMLE_fitted_model_continuous_fixture):
+    """
+    Tests the GPS `point_estimate` method using appropriate data (with a continuous outcome)
+    """
+
+    observed_result = TMLE_fitted_model_continuous_fixture.point_estimate(np.array([50]))
+    assert isinstance(observed_result[0][0], float)
+    assert len(observed_result[0]) == 1
+
+    observed_result = TMLE_fitted_model_continuous_fixture.point_estimate(
+        np.array([40, 50, 60])
+    )
+    assert isinstance(observed_result[0][0], float)
+    assert len(observed_result[0]) == 3
+
+def test_point_estimate_interval_method_good(TMLE_fitted_model_continuous_fixture):
+    """
+    Tests the GPS `point_estimate_interval` method using appropriate data (with a continuous outcome)
+    """
+    observed_result = TMLE_fitted_model_continuous_fixture.point_estimate_interval(
+        np.array([50])
+    )
+    assert isinstance(observed_result[0][0], float)
+    assert observed_result.shape == (1, 2)
+
+    observed_result = TMLE_fitted_model_continuous_fixture.point_estimate_interval(
+        np.array([40, 50, 60])
+    )
+    assert isinstance(observed_result[0][0], float)
+    assert observed_result.shape == (3, 2)

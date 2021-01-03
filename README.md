@@ -8,7 +8,7 @@ Python tools to perform causal inference when the treatment of interest is conti
 
 
 <p align="center">
-<img src="/imgs/curves.png" align="middle" width="1000" height="345" />
+<img src="/imgs/curves.png" align="middle"/>
 </p>
 
 

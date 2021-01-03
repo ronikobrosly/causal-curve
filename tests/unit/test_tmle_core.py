@@ -102,3 +102,16 @@ def test_bad_tmle_instantiation(
             random_seed=random_seed,
             verbose=verbose,
         )
+
+
+def test_bad_param_calculate_CDRC_TMLE(TMLE_fitted_model_continuous_fixture):
+    """
+    Tests the TMLE `calculate_CDRC` when the `ci` param is bad
+    """
+
+    with pytest.raises(Exception) as bad:
+        observed_result = TMLE_fitted_model_continuous_fixture.calculate_CDRC(np.array([50]), ci = {'param': 0.95})
+
+
+    with pytest.raises(Exception) as bad:
+        observed_result = TMLE_fitted_model_continuous_fixture.calculate_CDRC(np.array([50]), ci = 1.05)
