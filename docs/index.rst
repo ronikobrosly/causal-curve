@@ -71,7 +71,7 @@ Both continuous and binary outcomes can be modeled with this package.
 
 
 Quick example (of the ``GPS_Regressor`` tool)
------------------------------------
+---------------------------------------------
 
 **causal-curve** uses a sklearn-like API that should feel familiar to python machine learning users.
 This includes ``_Regressor`` and ``_Classifier`` models, and ``fit()`` methods.

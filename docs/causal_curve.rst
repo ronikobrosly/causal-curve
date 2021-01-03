@@ -2,18 +2,52 @@ causal\_curve package
 =====================
 
 
-causal\_curve.gps module
-------------------------
+causal\_curve.core module
+-------------------------
 
-.. automodule:: causal_curve.gps
+.. automodule:: causal_curve.core
    :members:
    :undoc-members:
    :show-inheritance:
 
-causal\_curve.tmle module
--------------------------
+causal\_curve.gps_core module
+-----------------------------
 
-.. automodule:: causal_curve.tmle
+.. automodule:: causal_curve.gps_core
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+causal\_curve.gps_regressor module
+----------------------------------
+
+.. automodule:: causal_curve.gps_regressor
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+causal\_curve.gps_classifier module
+-----------------------------------
+
+.. automodule:: causal_curve.gps_classifier
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+causal\_curve.tmle_core module
+------------------------------
+
+.. automodule:: causal_curve.tmle_core
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+causal\_curve.tmle_regressor module
+-----------------------------------
+
+.. automodule:: causal_curve.tmle_regressor
   :members:
   :undoc-members:
   :show-inheritance:
@@ -26,21 +60,8 @@ causal\_curve.mediation module
   :undoc-members:
   :show-inheritance:
 
-causal\_curve.core module
--------------------------
 
-.. automodule:: causal_curve.core
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
-causal\_curve.utils module
---------------------------
-
-.. automodule:: causal_curve.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 
 Module contents
