@@ -1,21 +1,18 @@
 .. _GPS_Regressor:
 
 ================================================================
-GPS_Classifier Tool (continuous treatments, continuous outcomes)
+GPS_Regressor Tool (continuous treatments, continuous outcomes)
 ================================================================
 
-Generalized propensity score method
------------------------------------
 
-
-In this example, we use this package's GPS tool to estimate the marginal causal curve of some
+In this example, we use this package's GPS_Regressor tool to estimate the marginal causal curve of some
 continuous treatment on a continuous outcome, accounting for some mild confounding effects.
 To put this differently, the result of this will be an estimate of the average
-of each individual's dose-response to the treatment. To do this we employ the
-generalized propensity score (GPS) to correct the treatment prediction of the outcome.
+of each individual's dose-response to the treatment. To do this we calculate
+generalized propensity scores (GPS) to correct the treatment prediction of the outcome.
 
-Compared with the package's TMLE method, this GPS method is more computationally efficient,
-better suited for large datasets, but produces significantly wider confidence intervals.
+Compared with the package's TMLE method, the GPS methods are more computationally efficient,
+better suited for large datasets, but produces wider confidence intervals.
 
 In this example we use simulated data originally developed by Hirano and Imbens but adapted by others
 (see references). The advantage of this simulated data is it allows us
@@ -71,10 +68,10 @@ The following code completes the data generation:
 >>> ).sort_values('Treatment', ascending = True)
 
 With this dataframe, we can now calculate the GPS to estimate the causal relationship between
-treatment and outcome. Let's use the default settings of the GPS tool:
+treatment and outcome. Let's use the default settings of the GPS_Regressor tool:
 
->>> from causal_curve import GPS
->>> gps = GPS()
+>>> from causal_curve import GPS_Regressor
+>>> gps = GPS_Regressor()
 >>> gps.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
 >>> gps_results = gps.calculate_CDRC(0.95)
 
@@ -84,14 +81,9 @@ half the error of a simple LOESS estimate using only the treatment and the outco
 
 .. image:: ../imgs/cdrc/CDRC.png
 
-A binary outcome can also be handled with the GPS tool. As long as the outcome series contains
-binary integer values (e.g. 0's and 1's) the GPS `fit` method will work as it's supposed to.
-
-The GPS tool also allows you to estimate a specific set of points along the causal curve.
-In the case of a continuous outcome, use the `predict` and `predict_interval` methods
-to produce a point estimate and prediction interval, respectively. In the case of a
-binary outcome, use the `predict_log_odds` methods to calculate the log odds of the
-highest outcome class.
+The GPS_Regressor tool also allows you to estimate a specific set of points along the causal curve.
+Use the `predict` and `predict_interval` methods to produce a point estimate
+and prediction interval, respectively. 
 
 References
 ----------

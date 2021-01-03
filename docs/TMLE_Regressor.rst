@@ -4,30 +4,32 @@
 TMLE_Regressor Tool (continuous treatments, continuous outcomes)
 ================================================================
 
-Targeted Maximum Likelihood Estimation method
----------------------------------------------
-
 
 In this example, we use this package's Targeted Maximum Likelihood Estimation (TMLE)
 tool to estimate the marginal causal curve of some continuous treatment on a continuous outcome,
 accounting for some mild confounding effects.
 
-Compared with the package's GPS method, this TMLE method is double robust against model
-misspecification, incorporates more powerful machine learning techniques internally (gradient boosting),
-produces significantly smaller confidence intervals, however it is not computationally efficient
-and will take longer to run. In addition, the treatment values provided should
-be roughly normally-distributed, otherwise you may encounter internal math errors.
+The TMLE algorithm is doubly robust, meaning that as long as one of the two models contained
+with the tool (the ``g`` or ``q`` models) performs well, then the overall tool will correctly
+estimate the causal curve.
 
-The quality of the estimate it produces is highly dependent on the user's choice
-of the `treatment_grid_bins` parameter. If the bins are too small, you might violate the
-'positivity' assumption, but if the buckets are too large, your final estimate of the CDRC will
-not be smooth. We recommend ensure there are at least 100 treatment observations within
-each of your buckets. Exploring the treatment distribution and quantiles is recommended.
+Compared with the package's GPS methods incorporates more powerful machine learning techniques internally (gradient boosting)
+and produces significantly smaller confidence intervals. However it is less computationally efficient
+and will take longer to run. In addition, **the treatment values provided should
+be roughly normally-distributed**, otherwise you may encounter internal math errors.
 
 
->>> from causal_curve import TMLE
->>> tmle = TMLE(
-    treatment_grid_bins = [1.0, 1.5, 2.0, ...],
+>>> df.head(5) # a pandas dataframe with your data
+           X_1       X_2  Treatment    Outcome
+0     0.596685  0.162688   0.000039     12.3
+1     1.014187  0.916101   0.000197     14.9
+2     0.932859  1.328576   0.000223     19.01
+3     1.140052  0.555203   0.000339     22.3
+4     1.613471  0.340886   0.000438     24.98
+
+
+>>> from causal_curve import TMLE_Regressor
+>>> tmle = TMLE_Regressor(
     random_seed=111,
     verbose=True,
 )

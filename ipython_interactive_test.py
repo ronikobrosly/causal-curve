@@ -68,6 +68,14 @@ plt.show()
 
 ########### CREATE NON-LINEAR CUSTOM SIM DATA ###########
 
+
+import numpy as np
+import pandas as pd
+
+pd.set_option('display.max_rows', 1000)
+
+
+
 np.random.seed(200)
 
 def generate_data(t, A, sigma, omega, noise=0, n_outliers=0, random_state=0):

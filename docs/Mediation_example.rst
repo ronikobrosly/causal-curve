@@ -4,11 +4,8 @@
 Mediation Tool (continuous treatment, mediator, and outcome)
 ============================================================
 
-Mediation test
---------------
 
-
-It trying to explore the causal relationships between various elements, oftentimes you'll use
+In trying to explore the causal relationships between various elements, oftentimes you'll use
 your domain knowledge to sketch out your initial ideas about the causal connections.
 See the following causal DAG of the expected relationships between smoking, diabetes, obesity, age,
 and mortality (Havumaki et al.):

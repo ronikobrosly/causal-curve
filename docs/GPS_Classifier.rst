@@ -4,94 +4,41 @@
 GPS_Classifier Tool (continuous treatments, binary outcomes)
 ============================================================
 
-Generalized propensity score method
------------------------------------
+As with the other GPS tool, we calculate generalized propensity scores (GPS) but
+with the classifier we can estimate the point-by-point causal contribution of
+a continuous treatment to a binary outcome. The GPS_Classifier does this by
+estimating the log odds of a positive outcome and odds ratio (odds of positive outcome / odds of negative outcome) along
+the entire range of treatment values:
+
+.. image:: ../imgs/binary_OR_fig.png
 
 
-In this example, we use this package's GPS tool to estimate the marginal causal curve of some
-continuous treatment on a continuous outcome, accounting for some mild confounding effects.
-To put this differently, the result of this will be an estimate of the average
-of each individual's dose-response to the treatment. To do this we employ the
-generalized propensity score (GPS) to correct the treatment prediction of the outcome.
+Currently, the causal-curve package does not contain a TMLE implementation that is appropriate for a binary outcome,
+so the GPS_Classifier tool will have to suffice for this sort of outcome.
 
-Compared with the package's TMLE method, this GPS method is more computationally efficient,
-better suited for large datasets, but produces significantly wider confidence intervals.
+This tool works much like the _GPS_Regressor tool; as long as the outcome series in your dataframe contains
+binary integer values (e.g. 0's and 1's) the ``fit()`` method will work as it's supposed to:
 
-In this example we use simulated data originally developed by Hirano and Imbens but adapted by others
-(see references). The advantage of this simulated data is it allows us
-to compare the estimate we produce against the true, analytically-derived causal curve.
-
-Let :math:`t_i` be the treatment for the i-th unit, let :math:`x_1` and :math:`x_2` be the
-confounding covariates, and let :math:`y_i` be the outcome measure. We assume that the covariates
-and treatment are exponentially-distributed, and the treatment variable is associated with the
-covariates in the following way:
-
->>> import numpy as np
->>> import pandas as pd
->>> from scipy.stats import expon
-
->>> np.random.seed(333)
->>> n = 5000
->>> x_1 = expon.rvs(size=n, scale = 1)
->>> x_2 = expon.rvs(size=n, scale = 1)
->>> treatment = expon.rvs(size=n, scale = (1/(x_1 + x_2)))
-
-The GPS is given by
-
-.. math::
-
-   f(t, x_1, x_2) = (x_1 + x_2) * e^{-(x_1 + x_2) * t}
-
-If we generate the outcome variable by summing the treatment and GPS, the true causal
-curve is derived analytically to be:
-
-.. math::
-
-   f(t) = t + \frac{2}{(1 + t)^3}
-
-
-The following code completes the data generation:
-
->>> gps = ((x_1 + x_2) * np.exp(-(x_1 + x_2) * treatment))
->>> outcome = treatment + gps + np.random.normal(size = n, scale = 1)
-
->>> truth_func = lambda treatment: (treatment + (2/(1 + treatment)**3))
->>> vfunc = np.vectorize(truth_func)
->>> true_outcome = vfunc(treatment)
-
->>> df = pd.DataFrame(
->>>     {
->>>         'X_1': x_1,
->>>         'X_2': x_2,
->>>         'Treatment': treatment,
->>>         'GPS': gps,
->>>         'Outcome': outcome,
->>>         'True_outcome': true_outcome
->>>     }
->>> ).sort_values('Treatment', ascending = True)
+>>> df.head(5) # a pandas dataframe with your data
+           X_1       X_2  Treatment    Outcome
+0     0.596685  0.162688   0.000039     1
+1     1.014187  0.916101   0.000197     0
+2     0.932859  1.328576   0.000223     0
+3     1.140052  0.555203   0.000339     0
+4     1.613471  0.340886   0.000438     1
 
 With this dataframe, we can now calculate the GPS to estimate the causal relationship between
 treatment and outcome. Let's use the default settings of the GPS tool:
 
->>> from causal_curve import GPS
+>>> from causal_curve import GPS_Classifier
 >>> gps = GPS()
 >>> gps.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
 >>> gps_results = gps.calculate_CDRC(0.95)
 
-You now have everything to produce the following plot with matplotlib. In this example with only mild confounding,
-the GPS-calculated estimate of the true causal curve produces has approximately
-half the error of a simple LOESS estimate using only the treatment and the outcome.
+The ``gps_results`` object (a dataframe) now contains all of the data to produce the above plot.
 
-.. image:: ../imgs/cdrc/CDRC.png
-
-A binary outcome can also be handled with the GPS tool. As long as the outcome series contains
-binary integer values (e.g. 0's and 1's) the GPS `fit` method will work as it's supposed to.
-
-The GPS tool also allows you to estimate a specific set of points along the causal curve.
-In the case of a continuous outcome, use the `predict` and `predict_interval` methods
-to produce a point estimate and prediction interval, respectively. In the case of a
-binary outcome, use the `predict_log_odds` methods to calculate the log odds of the
-highest outcome class.
+If you'd like to estimate the log odds at a specific point on the curve, use the
+``predict_log_odds`` to do so.
 
 References
 ----------

@@ -51,7 +51,7 @@ generated through standard multivariable regression modeling in a few important 
 
 .. image:: ../imgs/binary_OR_fig.png
 
-In the case of binary outcome, the `GPS_Classifier` tool can be used to estimate a curve of odds ratio. Every
+In the case of binary outcome, the `GPS_Classifier` tool can be used to estimate a curve of odds ratios. Every
 point on the curve is relative to the lowest treatment value. The highest effect (relative to the lowest treatment value)
 is around a treatment value of -1.2. At this point in the treatment, the odds of a positive class
 occurring is 5.6 times higher compared with the lowest treatment value. This curve is always on

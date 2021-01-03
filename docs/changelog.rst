@@ -13,7 +13,6 @@ Version 1.0.0: **Major Update**
 - Updating documentation to reflect API changes
 - Added more tests
 - Linted with `pylint` (added `.pylintrc` file)
--
 
 
 Version 0.5.2
