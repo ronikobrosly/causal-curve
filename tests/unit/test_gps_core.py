@@ -139,8 +139,11 @@ def test_bad_param_calculate_CDRC(GPS_fitted_model_continuous_fixture):
     """
 
     with pytest.raises(Exception) as bad:
-        observed_result = GPS_fitted_model_continuous_fixture.calculate_CDRC(np.array([50]), ci = {'param': 0.95})
-
+        observed_result = GPS_fitted_model_continuous_fixture.calculate_CDRC(
+            np.array([50]), ci={"param": 0.95}
+        )
 
     with pytest.raises(Exception) as bad:
-        observed_result = GPS_fitted_model_continuous_fixture.calculate_CDRC(np.array([50]), ci = 1.05)
+        observed_result = GPS_fitted_model_continuous_fixture.calculate_CDRC(
+            np.array([50]), ci=1.05
+        )

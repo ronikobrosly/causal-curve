@@ -2,19 +2,7 @@
 Defines the Generalized Prospensity Score (GPS) regressor model class
 """
 
-import contextlib
-import io
-from pprint import pprint
-
 import numpy as np
-import pandas as pd
-from pandas.api.types import is_float_dtype, is_integer_dtype, is_numeric_dtype
-from pygam import LinearGAM, LogisticGAM, s
-from scipy.special import logit
-from scipy.stats import gamma, norm
-import statsmodels.api as sm
-from statsmodels.genmod.families.links import inverse_power as Inverse_Power
-from statsmodels.tools.tools import add_constant
 
 from causal_curve.gps_core import GPS_Core
 

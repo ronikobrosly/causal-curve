@@ -42,41 +42,33 @@ def test_tmle_fit(continuous_dataset_fixture):
         ("100.0", 0.01, 0.99, 200, 0.01, 3, 0.5, None, False),
         (2, 0.01, 0.99, 200, 0.01, 3, 0.5, None, False),
         (500000, 0.01, 0.99, 200, 0.01, 3, 0.5, None, False),
-
         # lower_grid_constraint
-        (100, {0.01: 'a'}, 0.99, 200, 0.01, 3, 0.5, None, False),
+        (100, {0.01: "a"}, 0.99, 200, 0.01, 3, 0.5, None, False),
         (100, -0.01, 0.99, 200, 0.01, 3, 0.5, None, False),
         (100, 6.05, 0.99, 200, 0.01, 3, 0.5, None, False),
-
         # upper_grid_constraint
-        (100, 0.01, [1,2,3], 200, 0.01, 3, 0.5, None, False),
+        (100, 0.01, [1, 2, 3], 200, 0.01, 3, 0.5, None, False),
         (100, 0.01, -0.05, 200, 0.01, 3, 0.5, None, False),
         (100, 0.01, 5.99, 200, 0.01, 3, 0.5, None, False),
         (100, 0.9, 0.2, 200, 0.01, 3, 0.5, None, False),
-
         # n_estimators
         (100, 0.01, 0.99, "3.0", 0.01, 3, 0.5, None, False),
         (100, 0.01, 0.99, -5, 0.01, 3, 0.5, None, False),
         (100, 0.01, 0.99, 10000000, 0.01, 3, 0.5, None, False),
-
         # learning_rate
-        (100, 0.01, 0.99, 200, ['a', 'b'], 3, 0.5, None, False),
+        (100, 0.01, 0.99, 200, ["a", "b"], 3, 0.5, None, False),
         (100, 0.01, 0.99, 200, 5000000, 3, 0.5, None, False),
-
         # max_depth
         (100, 0.01, 0.99, 200, 0.01, "a", 0.5, None, False),
         (100, 0.01, 0.99, 200, 0.01, -6, 0.5, None, False),
-
         # bandwidth
         (100, 0.01, 0.99, 200, 0.01, 3, "b", None, False),
         (100, 0.01, 0.99, 200, 0.01, 3, -10, None, False),
-
         # random seed
         (100, 0.01, 0.99, 200, 0.01, 3, 0.5, "b", False),
         (100, 0.01, 0.99, 200, 0.01, 3, 0.5, -10, False),
-
         # verbose
-        (100, 0.01, 0.99, 200, 0.01, 3, 0.5, None, "Verbose")
+        (100, 0.01, 0.99, 200, 0.01, 3, 0.5, None, "Verbose"),
     ],
 )
 def test_bad_tmle_instantiation(
@@ -110,8 +102,11 @@ def test_bad_param_calculate_CDRC_TMLE(TMLE_fitted_model_continuous_fixture):
     """
 
     with pytest.raises(Exception) as bad:
-        observed_result = TMLE_fitted_model_continuous_fixture.calculate_CDRC(np.array([50]), ci = {'param': 0.95})
-
+        observed_result = TMLE_fitted_model_continuous_fixture.calculate_CDRC(
+            np.array([50]), ci={"param": 0.95}
+        )
 
     with pytest.raises(Exception) as bad:
-        observed_result = TMLE_fitted_model_continuous_fixture.calculate_CDRC(np.array([50]), ci = 1.05)
+        observed_result = TMLE_fitted_model_continuous_fixture.calculate_CDRC(
+            np.array([50]), ci=1.05
+        )

@@ -6,13 +6,14 @@ import pytest
 from causal_curve import TMLE_Regressor
 
 
-
 def test_point_estimate_method_good(TMLE_fitted_model_continuous_fixture):
     """
     Tests the GPS `point_estimate` method using appropriate data (with a continuous outcome)
     """
 
-    observed_result = TMLE_fitted_model_continuous_fixture.point_estimate(np.array([50]))
+    observed_result = TMLE_fitted_model_continuous_fixture.point_estimate(
+        np.array([50])
+    )
     assert isinstance(observed_result[0][0], float)
     assert len(observed_result[0]) == 1
 
@@ -21,6 +22,7 @@ def test_point_estimate_method_good(TMLE_fitted_model_continuous_fixture):
     )
     assert isinstance(observed_result[0][0], float)
     assert len(observed_result[0]) == 3
+
 
 def test_point_estimate_interval_method_good(TMLE_fitted_model_continuous_fixture):
     """

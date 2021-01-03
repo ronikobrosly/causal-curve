@@ -473,9 +473,10 @@ class GPS_Core(Core):
         self.gps_at_grid = self._gps_values_at_grid()
 
     def calculate_CDRC(self, ci=0.95):
-        """Using the results of the fitted model, this generates a dataframe of point estimates for the CDRC
-        at each of the values of the treatment grid. Connecting these estimates will produce
-        the overall estimated CDRC. Confidence interval is returned as well.
+        """Using the results of the fitted model, this generates a dataframe of
+        point estimates for the CDRC at each of the values of the
+        treatment grid. Connecting these estimates will produce the overall
+        estimated CDRC. Confidence interval is returned as well.
 
         Parameters
         ----------

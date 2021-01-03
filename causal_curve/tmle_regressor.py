@@ -1,15 +1,8 @@
 """
 Defines the Targetted Maximum likelihood Estimation (TMLE) regressor model class
 """
-from pprint import pprint
 
 import numpy as np
-import pandas as pd
-from pandas.api.types import is_float_dtype, is_numeric_dtype
-from scipy.interpolate import interp1d
-from scipy.stats import norm
-from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
-from statsmodels.genmod.generalized_linear_model import GLM
 
 from causal_curve.tmle_core import TMLE_Core
 

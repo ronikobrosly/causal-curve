@@ -22,6 +22,7 @@ def test_point_estimate_method_good(GPS_fitted_model_continuous_fixture):
     assert isinstance(observed_result[0][0], float)
     assert len(observed_result[0]) == 3
 
+
 def test_point_estimate_interval_method_good(GPS_fitted_model_continuous_fixture):
     """
     Tests the GPS `point_estimate_interval` method using appropriate data (with a continuous outcome)
@@ -38,6 +39,7 @@ def test_point_estimate_interval_method_good(GPS_fitted_model_continuous_fixture
     assert isinstance(observed_result[0][0], float)
     assert observed_result.shape == (3, 2)
 
+
 def test_point_estimate_method_bad(GPS_fitted_model_continuous_fixture):
     """
     Tests the GPS `point_estimate` method using appropriate data (with a continuous outcome)
@@ -49,6 +51,7 @@ def test_point_estimate_method_bad(GPS_fitted_model_continuous_fixture):
         observed_result = GPS_fitted_model_continuous_fixture.point_estimate(
             np.array([50])
         )
+
 
 def test_point_estimate_interval_method_bad(GPS_fitted_model_continuous_fixture):
     """

@@ -247,7 +247,6 @@ def GPS_fitted_model_binary():
     return fixture
 
 
-
 @pytest.fixture(scope="module")
 def TMLE_fitted_model_continuous_fixture():
     """Returns a TMLE model that is already fit with data with a continuous outcome"""
