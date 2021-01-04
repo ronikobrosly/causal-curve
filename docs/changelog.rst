@@ -5,8 +5,13 @@ Change Log
 ==========
 
 
-Version 1.0.0: **Major Update**
+Version 1.0.1
 -------------
+- Added to TMLE overview in the docs (including plot)
+
+
+Version 1.0.0: **Major Update**
+-------------------------------
 - Overhaul of the TMLE tool to make it dramatically more accurate and user-friendly.
 - Improved TMLE example documentation
 - Much like with `scikit-learn`, there are now separate model classes used for predicting binary or continuous outcomes

@@ -18,24 +18,64 @@ and produces significantly smaller confidence intervals. However it is less comp
 and will take longer to run. In addition, **the treatment values provided should
 be roughly normally-distributed**, otherwise you may encounter internal math errors.
 
+Let's first generate some simple toy data:
 
->>> df.head(5) # a pandas dataframe with your data
-           X_1       X_2  Treatment    Outcome
-0     0.596685  0.162688   0.000039     12.3
-1     1.014187  0.916101   0.000197     14.9
-2     0.932859  1.328576   0.000223     19.01
-3     1.140052  0.555203   0.000339     22.3
-4     1.613471  0.340886   0.000438     24.98
+
+>>> import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from causal_curve import TMLE_Regressor
+np.random.seed(200)
+
+>>> def generate_data(t, A, sigma, omega, noise=0, n_outliers=0, random_state=0):
+	y = A * np.exp(-sigma * t) * np.sin(omega * t)
+	rnd = np.random.RandomState(random_state)
+	error = noise * rnd.randn(t.size)
+	outliers = rnd.randint(0, t.size, n_outliers)
+	error[outliers] *= 35
+	return y + error
+
+>>> treatment = np.linspace(0, 10, 1000)
+outcome = generate_data(
+	t = treatment,
+	A = 2,
+	sigma = 0.1,
+	omega = (0.1 * 2 * np.pi),
+	noise = 0.1,
+	n_outliers = 5
+)
+x1 = np.random.uniform(0,10,1000)
+x2 = (np.random.uniform(0,10,1000) * 3)
+
+>>> df = pd.DataFrame(
+	{
+		'x1': x1,
+		'x2': x2,
+		'treatment': treatment,
+		'outcome': outcome
+	}
+)
+
+
+All we do now is employ the TMLE_Regressor class, with mostly default settings:
 
 
 >>> from causal_curve import TMLE_Regressor
->>> tmle = TMLE_Regressor(
-    random_seed=111,
-    verbose=True,
+tmle = TMLE_Regressor(
+    random_seed=111
 )
 
 >>> tmle.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
->>> gps_results = tmle.calculate_CDRC(0.99)
+gps_results = tmle.calculate_CDRC(0.99)
+
+The resulting dataframe contains all of the data you need to generate the following plot:
+
+.. image:: ../imgs/tmle_plot.png
+
+To generate user-specified points along the curve, use the ``point_estimate`` and ``point_estimate_interval`` methods:
+
+>>> tmle.point_estimate(np.array([5.5]))
+tmle.point_estimate_interval(np.array([5.5]))
 
 
 References
