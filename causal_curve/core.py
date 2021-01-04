@@ -10,7 +10,7 @@ class Core:
     """Base class for causal_curve module"""
 
     def __init__(self):
-        __version__ = "1.0.0"
+        __version__ = "1.0.1"
 
     def get_params(self):
         """Returns a dict of all of the object's user-facing parameters
