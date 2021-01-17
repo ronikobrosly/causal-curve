@@ -340,6 +340,8 @@ class TMLE_Core(Core):
         self : object
 
         """
+        self.rand_seed_wrapper(self.random_seed)
+
         self.t_data = T.reset_index(drop=True, inplace=False)
         self.x_data = X.reset_index(drop=True, inplace=False)
         self.y_data = y.reset_index(drop=True, inplace=False)
@@ -407,6 +409,8 @@ class TMLE_Core(Core):
         self: object
 
         """
+        self.rand_seed_wrapper(self.random_seed)
+
         self._validate_calculate_CDRC_params(ci)
 
         self.if_verbose_print("""
