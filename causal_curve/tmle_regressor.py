@@ -11,6 +11,15 @@ class TMLE_Regressor(TMLE_Core):
     """
     A TMLE tool that handles continuous outcomes. Inherits the TMLE_core
     base class. See that base class code its docstring for more details.
+
+    Methods
+    ----------
+
+    point_estimate: (self, T)
+        Calculates point estimate within the CDRC given treatment values.
+        Can only be used when outcome is continuous.
+
+
     """
 
     def _cdrc_predictions_continuous(self, ci):

@@ -11,6 +11,18 @@ class GPS_Regressor(GPS_Core):
     """
     A GPS tool that handles continuous outcomes. Inherits the GPS_core
     base class. See that base class code its docstring for more details.
+
+    Methods
+    ----------
+
+    point_estimate: (self, T)
+        Calculates point estimate within the CDRC given treatment values.
+        Can only be used when outcome is continuous.
+
+    point_estimate_interval: (self, T, ci)
+        Calculates the prediction confidence interval associated with a point estimate
+        within the CDRC given treatment values. Can only be used when outcome is continuous.
+
     """
 
     def __init__(

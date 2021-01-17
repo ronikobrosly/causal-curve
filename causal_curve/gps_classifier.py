@@ -12,6 +12,15 @@ class GPS_Classifier(GPS_Core):
     """
     A GPS tool that handles binary outcomes. Inherits the GPS_core
     base class. See that base class code its docstring for more details.
+
+
+    Methods
+    ----------
+
+    estimate_log_odds: (self, T)
+        Calculates the predicted log odds of the highest integer class. Can
+        only be used when the outcome is binary.
+        
     """
 
     def __init__(
