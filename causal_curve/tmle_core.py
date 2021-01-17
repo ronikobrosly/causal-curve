@@ -1,8 +1,6 @@
 """
 Defines the Targetted Maximum likelihood Estimation (TMLE) model class
 """
-from pprint import pprint
-
 import numpy as np
 import pandas as pd
 from pandas.api.types import is_float_dtype, is_numeric_dtype
@@ -85,6 +83,14 @@ class TMLE_Core(Core):
     Attributes
     ----------
 
+    grid_values: array of shape (treatment_grid_num, )
+        The gridded values of the treatment variable. Equally spaced.
+
+    final_gam: `pygam.LinearGAM` class
+        trained final model of `LinearGAM` class, from pyGAM library
+
+    pseudo_out: array of shape (observations, )
+        Adjusted, pseudo-outcome observations
 
 
     Methods
@@ -99,6 +105,13 @@ class TMLE_Core(Core):
     Examples
     --------
 
+    >>> # With continuous outcome
+    >>> from causal_curve import TMLE_Regressor
+    >>> tmle = TMLE_Regressor()
+    >>> tmle.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
+    >>> tmle_results = tmle.calculate_CDRC(0.95)
+    >>> point_estimate = tmle.point_estimate(np.array([5.0]))
+    >>> point_estimate_interval = tmle.point_estimate_interval(np.array([5.0]), 0.95)
 
 
     References
@@ -137,14 +150,6 @@ class TMLE_Core(Core):
         self.bandwidth = bandwidth
         self.random_seed = random_seed
         self.verbose = verbose
-
-        # Validate the params
-        self._validate_init_params()
-        self.rand_seed_wrapper()
-
-        self.if_verbose_print("Using the following params for TMLE model:")
-        if self.verbose:
-            pprint(self.get_params(), indent=4)
 
     def _validate_init_params(self):
         """

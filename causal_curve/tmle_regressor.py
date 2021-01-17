@@ -1,6 +1,7 @@
 """
 Defines the Targetted Maximum likelihood Estimation (TMLE) regressor model class
 """
+from pprint import pprint
 
 import numpy as np
 
@@ -11,7 +12,45 @@ class TMLE_Regressor(TMLE_Core):
     """
     A TMLE tool that handles continuous outcomes. Inherits the TMLE_core
     base class. See that base class code its docstring for more details.
+
+    Methods
+    ----------
+
+    point_estimate: (self, T)
+        Calculates point estimate within the CDRC given treatment values.
+        Can only be used when outcome is continuous.
     """
+
+    def __init__(
+        self,
+        treatment_grid_num=100,
+        lower_grid_constraint=0.01,
+        upper_grid_constraint=0.99,
+        n_estimators=200,
+        learning_rate=0.01,
+        max_depth=3,
+        bandwidth=0.5,
+        random_seed=None,
+        verbose=False,
+    ):
+
+        self.treatment_grid_num = treatment_grid_num
+        self.lower_grid_constraint = lower_grid_constraint
+        self.upper_grid_constraint = upper_grid_constraint
+        self.n_estimators = n_estimators
+        self.learning_rate = learning_rate
+        self.max_depth = max_depth
+        self.bandwidth = bandwidth
+        self.random_seed = random_seed
+        self.verbose = verbose
+
+        # Validate the params
+        self._validate_init_params()
+        self.rand_seed_wrapper()
+
+        self.if_verbose_print("Using the following params for TMLE model:")
+        if self.verbose:
+            pprint(self.get_params(), indent=4)
 
     def _cdrc_predictions_continuous(self, ci):
         """Returns the predictions of CDRC for each value of the treatment grid. Essentially,

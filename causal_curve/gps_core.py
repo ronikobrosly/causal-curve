@@ -4,7 +4,6 @@ Defines the Generalized Prospensity Score (GPS) Core model class
 
 import contextlib
 import io
-from pprint import pprint
 
 import numpy as np
 import pandas as pd
@@ -121,31 +120,28 @@ class GPS_Core(Core):
     calculate_CDRC: (self, ci)
         Calculates the CDRC (and confidence interval) from trained model.
 
-    predict: (self, T)
-        Calculates point estimate within the CDRC given treatment values.
-        Can only be used when outcome is continuous.
-
-    predict_interval: (self, T, ci)
-        Calculates the prediction confidence interval associated with a point estimate
-        within the CDRC given treatment values. Can only be used when outcome is continuous.
-
-    predict_log_odds: (self, T)
-        Calculates the predicted log odds of the highest integer class. Can
-        only be used when the outcome is binary.
-
     print_gam_summary: (self)
         Prints pyGAM text summary of GAM predicting outcome from the treatment and the GPS.
 
 
     Examples
     --------
-    >>> from causal_curve import GPS
-    >>> gps = GPS(treatment_grid_num = 200, random_seed = 512)
+
+    >>> # With continuous outcome
+    >>> from causal_curve import GPS_Regressor
+    >>> gps = GPS_Regressor(treatment_grid_num = 200, random_seed = 512)
     >>> gps.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
     >>> gps_results = gps.calculate_CDRC(0.95)
-    >>> treatment_points = np.array([10,15,20,25])
-    >>> preds = gps.predict(treatment_points)
-    >>> conf_ints = gps.predict_interval(treatment_points, 0.95)
+    >>> point_estimate = gps.point_estimate(np.array([5.0]))
+    >>> point_estimate_interval = gps.point_estimate_interval(np.array([5.0]), 0.95)
+
+
+    >>> # With binary outcome
+    >>> from causal_curve import GPS_Classifier
+    >>> gps = GPS_Classifier()
+    >>> gps.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Binary_Outcome'])
+    >>> gps_results = gps.calculate_CDRC(0.95)
+    >>> log_odds = gps.estimate_log_odds(np.array([5.0]))
 
 
     References
@@ -187,14 +183,6 @@ class GPS_Core(Core):
         self.max_iter = max_iter
         self.random_seed = random_seed
         self.verbose = verbose
-
-        # Validate the params
-        self._validate_init_params()
-        self.rand_seed_wrapper()
-
-        self.if_verbose_print("Using the following params for GPS model:")
-        if self.verbose:
-            pprint(self.get_params(), indent=4)
 
     def _validate_init_params(self):
         """
