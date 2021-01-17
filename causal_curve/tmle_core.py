@@ -1,8 +1,6 @@
 """
 Defines the Targetted Maximum likelihood Estimation (TMLE) model class
 """
-from pprint import pprint
-
 import numpy as np
 import pandas as pd
 from pandas.api.types import is_float_dtype, is_numeric_dtype
@@ -152,14 +150,6 @@ class TMLE_Core(Core):
         self.bandwidth = bandwidth
         self.random_seed = random_seed
         self.verbose = verbose
-
-        # Validate the params
-        self._validate_init_params()
-        self.rand_seed_wrapper()
-
-        self.if_verbose_print("Using the following params for TMLE model:")
-        if self.verbose:
-            pprint(self.get_params(), indent=4)
 
     def _validate_init_params(self):
         """

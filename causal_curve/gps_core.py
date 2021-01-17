@@ -4,7 +4,6 @@ Defines the Generalized Prospensity Score (GPS) Core model class
 
 import contextlib
 import io
-from pprint import pprint
 
 import numpy as np
 import pandas as pd
@@ -184,14 +183,6 @@ class GPS_Core(Core):
         self.max_iter = max_iter
         self.random_seed = random_seed
         self.verbose = verbose
-
-        # Validate the params
-        self._validate_init_params()
-        self.rand_seed_wrapper()
-
-        self.if_verbose_print("Using the following params for GPS model:")
-        if self.verbose:
-            pprint(self.get_params(), indent=4)
 
     def _validate_init_params(self):
         """

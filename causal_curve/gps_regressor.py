@@ -1,6 +1,7 @@
 """
 Defines the Generalized Prospensity Score (GPS) regressor model class
 """
+from pprint import pprint
 
 import numpy as np
 
@@ -38,19 +39,25 @@ class GPS_Regressor(GPS_Core):
         random_seed=None,
         verbose=False,
     ):
-        GPS_Core.__init__(
-            self,
-            gps_family=None,
-            treatment_grid_num=100,
-            lower_grid_constraint=0.01,
-            upper_grid_constraint=0.99,
-            spline_order=3,
-            n_splines=30,
-            lambda_=0.5,
-            max_iter=100,
-            random_seed=None,
-            verbose=False,
-        )
+
+        self.gps_family = gps_family
+        self.treatment_grid_num = treatment_grid_num
+        self.lower_grid_constraint = lower_grid_constraint
+        self.upper_grid_constraint = upper_grid_constraint
+        self.spline_order = spline_order
+        self.n_splines = n_splines
+        self.lambda_ = lambda_
+        self.max_iter = max_iter
+        self.random_seed = random_seed
+        self.verbose = verbose
+
+        # Validate the params
+        self._validate_init_params()
+        self.rand_seed_wrapper()
+
+        self.if_verbose_print("Using the following params for GPS model:")
+        if self.verbose:
+            pprint(self.get_params(), indent=4)
 
     def _cdrc_predictions_continuous(self, ci):
         """Returns the predictions of CDRC for each value of the treatment grid. Essentially,

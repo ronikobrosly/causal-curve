@@ -9,6 +9,7 @@ Version 1.0.2
 -------------
 - Updated end-to-end example notebook in `/examples` folder
 - Fixed various class docstrings if they still reference old v0.5.2 API
+- Fixed bug where custom class input parameters weren't being used
 
 
 Version 1.0.1
