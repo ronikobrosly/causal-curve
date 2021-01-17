@@ -5,6 +5,10 @@ Change Log
 ==========
 
 
+Version 1.0.3
+-------------
+- Fixed bug with `random_seed` functionality in all tools
+
 Version 1.0.2
 -------------
 - Updated end-to-end example notebook in `/examples` folder

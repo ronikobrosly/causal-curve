@@ -389,6 +389,8 @@ class Mediation(Core):
         self : object
 
         """
+        self.rand_seed_wrapper(self.random_seed)
+
         self.T = T.reset_index(drop=True, inplace=False)
         self.M = M.reset_index(drop=True, inplace=False)
         self.y = y.reset_index(drop=True, inplace=False)
@@ -445,6 +447,7 @@ class Mediation(Core):
         self : object
 
         """
+        self.rand_seed_wrapper(self.random_seed)
 
         # Collect effect results in these lists
         self.t_bin_means = self._collect_mean_t_levels()

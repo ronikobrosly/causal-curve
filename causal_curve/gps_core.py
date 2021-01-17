@@ -412,6 +412,8 @@ class GPS_Core(Core):
         self : object
 
         """
+        self.rand_seed_wrapper(self.random_seed)
+
         self.T = T.reset_index(drop=True, inplace=False)
         self.X = X.reset_index(drop=True, inplace=False)
         self.y = y.reset_index(drop=True, inplace=False)
@@ -481,6 +483,7 @@ class GPS_Core(Core):
         self: object
 
         """
+        self.rand_seed_wrapper(self.random_seed)
         self._validate_calculate_CDRC_params(ci)
 
         self.if_verbose_print(
