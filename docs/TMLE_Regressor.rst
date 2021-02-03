@@ -62,11 +62,12 @@ All we do now is employ the TMLE_Regressor class, with mostly default settings:
 
 >>> from causal_curve import TMLE_Regressor
 tmle = TMLE_Regressor(
-    random_seed=111
+    random_seed=111,
+		bandwidth=10
 )
 
->>> tmle.fit(T = df['Treatment'], X = df[['X_1', 'X_2']], y = df['Outcome'])
-gps_results = tmle.calculate_CDRC(0.99)
+>>> tmle.fit(T = df['treatment'], X = df[['x1', 'x2']], y = df['outcome'])
+gps_results = tmle.calculate_CDRC(0.95)
 
 The resulting dataframe contains all of the data you need to generate the following plot:
 
