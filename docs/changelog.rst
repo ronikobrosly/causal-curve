@@ -4,6 +4,9 @@
 Change Log
 ==========
 
+Version 1.0.4
+-------------
+- Fixed TMLE plot and code errors in documentation
 
 Version 1.0.3
 -------------
