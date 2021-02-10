@@ -90,7 +90,7 @@ pull request:
    your changes and switch to it::
 
       git fetch upstream
-      git checkout -b my-feature upstream/master
+      git checkout -b my-feature upstream/main
 
    where ``my-feature`` is the name of your new branch (it's good practice to have
    an explicit name). You can now start making changes.
@@ -108,7 +108,7 @@ pull request:
 
 8. Create a pull request from your work. The base fork is the fork you
    would like to merge changes into, that is ``ronikobrosly/causal-curve`` on the
-   ``master`` branch. The head fork is the repository where you made your
+   ``main`` branch. The head fork is the repository where you made your
    changes, that is ``yourusername/causal-curve`` on the ``my-feature`` branch.
    Add a title and a description of your pull request, then click on
    **Create Pull Request**.

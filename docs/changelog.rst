@@ -4,6 +4,11 @@
 Change Log
 ==========
 
+Version 1.0.5
+-------------
+- Removed `master` branch, replaced with `main`
+- Removed all mention of `master` branch from documentation
+
 Version 1.0.4
 -------------
 - Fixed TMLE plot and code errors in documentation

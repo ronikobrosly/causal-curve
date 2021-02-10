@@ -6,7 +6,7 @@ Health data: generating causal curves and examining mediation
 
 To provide an end-to-end example of the sorts of analyses `cause-curve` can be used for, we'll
 begin with a health topic. A notebook containing the pipeline to produce the following
-output `is available here <https://github.com/ronikobrosly/causal-curve/blob/master/examples/NHANES_BLL_example.ipynb>`_.
+output `is available here <https://github.com/ronikobrosly/causal-curve/blob/main/examples/NHANES_BLL_example.ipynb>`_.
 Note: Specific examples of the individual `causal-curve` tools with
 code are available elsewhere in this documentation.
 
