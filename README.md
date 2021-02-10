@@ -1,7 +1,7 @@
 # causal-curve
 
-[![build status](http://img.shields.io/travis/ronikobrosly/causal-curve/master.svg?style=flat)](https://travis-ci.org/ronikobrosly/causal-curve)
-[![codecov](https://codecov.io/gh/ronikobrosly/causal-curve/branch/master/graph/badge.svg)](https://codecov.io/gh/ronikobrosly/causal-curve)
+[![build status](http://img.shields.io/travis/ronikobrosly/causal-curve/main.svg?style=flat)](https://travis-ci.org/ronikobrosly/causal-curve)
+[![codecov](https://codecov.io/gh/ronikobrosly/causal-curve/branch/main/graph/badge.svg)](https://codecov.io/gh/ronikobrosly/causal-curve)
 [![DOI](https://zenodo.org/badge/256017107.svg)](https://zenodo.org/badge/latestdoi/256017107)
 
 Python tools to perform causal inference when the treatment of interest is continuous.
@@ -49,7 +49,7 @@ Available via PyPI:
 You can also get the latest version of causal-curve by cloning the repository::
 
 ```
-git clone -b master https://github.com/ronikobrosly/causal-curve.git
+git clone -b main https://github.com/ronikobrosly/causal-curve.git
 cd causal-curve
 pip install .
 ```
