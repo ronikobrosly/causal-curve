@@ -118,7 +118,8 @@ class TMLE_Core(Core):
     ----------
 
     Kennedy EH, Ma Z, McHugh MD, Small DS. Nonparametric methods for doubly robust estimation
-    of continuous treatment effects. Journal of the Royal Statistical Society, Series B. 79(4), 2017, pp.1229-1245.
+    of continuous treatment effects. Journal of the Royal Statistical Society,
+    Series B. 79(4), 2017, pp.1229-1245.
 
     van der Laan MJ and Rubin D. Targeted maximum likelihood learning. In: The International
     Journal of Biostatistics, 2(1), 2006.
@@ -362,10 +363,16 @@ class TMLE_Core(Core):
 
         # Produce expanded versions of the inputs
         self.if_verbose_print("Transforming data for the Q-model and G-model")
-        self.grid_values, self.fully_expanded_x , self.fully_expanded_t_and_x = self._transform_inputs()
+        (
+            self.grid_values,
+            self.fully_expanded_x,
+            self.fully_expanded_t_and_x,
+        ) = self._transform_inputs()
 
         # Fit G-model and get relevent predictions
-        self.if_verbose_print("Fitting G-model and making treatment assignment predictions...")
+        self.if_verbose_print(
+            "Fitting G-model and making treatment assignment predictions..."
+        )
         self.g_model_preds, self.g_model_2_preds = self._g_model()
 
         # Fit Q-model and get relevent predictions
@@ -373,8 +380,13 @@ class TMLE_Core(Core):
         self.q_model_preds = self._q_model()
 
         # Calculating treatment assignment adjustment using G-model's predictions
-        self.if_verbose_print("Calculating treatment assignment adjustment using G-model's predictions...")
-        self.n_interpd_values, self.var_n_interpd_values = self._treatment_assignment_correction()
+        self.if_verbose_print(
+            "Calculating treatment assignment adjustment using G-model's predictions..."
+        )
+        (
+            self.n_interpd_values,
+            self.var_n_interpd_values,
+        ) = self._treatment_assignment_correction()
 
         # Adjusting outcome using Q-model's predictions
         self.if_verbose_print("Adjusting outcome using Q-model's predictions...")
@@ -382,12 +394,13 @@ class TMLE_Core(Core):
 
         # Calculating corrected pseudo-outcome values
         self.if_verbose_print("Calculating corrected pseudo-outcome values...")
-        self.pseudo_out = (self.y_data - self.outcome_adjust) / (self.n_interpd_values / self.var_n_interpd_values) + self.expand_outcome_adjust
+        self.pseudo_out = (self.y_data - self.outcome_adjust) / (
+            self.n_interpd_values / self.var_n_interpd_values
+        ) + self.expand_outcome_adjust
 
         # Training final GAM model using pseudo-outcome values
         self.if_verbose_print("Training final GAM model using pseudo-outcome values...")
         self.final_gam = self._fit_final_gam()
-
 
     def calculate_CDRC(self, ci=0.95):
         """Using the results of the fitted model, this generates a dataframe of CDRC point estimates
@@ -413,7 +426,8 @@ class TMLE_Core(Core):
 
         self._validate_calculate_CDRC_params(ci)
 
-        self.if_verbose_print("""
+        self.if_verbose_print(
+            """
             Generating predictions for each value of treatment grid,
             and averaging to get the CDRC..."""
         )
@@ -423,9 +437,9 @@ class TMLE_Core(Core):
         self._cdrc_preds = self._cdrc_predictions_continuous(ci)
 
         return pd.DataFrame(
-            self._cdrc_preds, columns=["Treatment", "Causal_Dose_Response", "Lower_CI", "Upper_CI"]
+            self._cdrc_preds,
+            columns=["Treatment", "Causal_Dose_Response", "Lower_CI", "Upper_CI"],
         ).round(3)
-
 
     def _transform_inputs(self):
         """Takes the treatment and covariates and transforms so they can
@@ -433,37 +447,32 @@ class TMLE_Core(Core):
 
         # Create treatment grid
         grid_values = np.linspace(
-            start=self.t_data.min(),
-            stop=self.t_data.max(),
-            num=self.treatment_grid_num
+            start=self.t_data.min(), stop=self.t_data.max(), num=self.treatment_grid_num
         )
 
         # Create expanded treatment array
         expanded_t = np.array([])
         for treat_value in grid_values:
-        	expanded_t = np.append(expanded_t, ([treat_value] * self.num_rows))
+            expanded_t = np.append(expanded_t, ([treat_value] * self.num_rows))
 
         # Create expanded treatment array with covariates
         expanded_t_and_x = pd.concat(
             [
                 pd.DataFrame(expanded_t),
-                pd.concat(
-                    [self.x_data] * self.treatment_grid_num
-                ).reset_index(drop = True, inplace = False),
+                pd.concat([self.x_data] * self.treatment_grid_num).reset_index(
+                    drop=True, inplace=False
+                ),
             ],
-	        axis = 1,
-            ignore_index = True
+            axis=1,
+            ignore_index=True,
         )
 
         expanded_t_and_x.columns = [self.treatment_col_name] + self.covariate_col_names
 
         fully_expanded_t_and_x = pd.concat(
-        	[
-        		pd.concat([self.x_data, self.t_data], axis=1),
-        		expanded_t_and_x
-        	],
-        	axis = 0,
-        	ignore_index = True
+            [pd.concat([self.x_data, self.t_data], axis=1), expanded_t_and_x],
+            axis=0,
+            ignore_index=True,
         )
 
         fully_expanded_x = fully_expanded_t_and_x[self.covariate_col_names]
@@ -480,16 +489,16 @@ class TMLE_Core(Core):
             n_estimators=self.n_estimators,
             max_depth=self.max_depth,
             learning_rate=self.learning_rate,
-            random_state=self.random_seed
-        ).fit(X = X, y = t)
+            random_state=self.random_seed,
+        ).fit(X=X, y=t)
         g_model_preds = g_model.predict(self.fully_expanded_x)
 
         g_model2 = GradientBoostingRegressor(
             n_estimators=self.n_estimators,
             max_depth=self.max_depth,
             learning_rate=self.learning_rate,
-            random_state=self.random_seed
-        ).fit(X = X, y = ((t - g_model_preds[0:self.num_rows])**2))
+            random_state=self.random_seed,
+        ).fit(X=X, y=((t - g_model_preds[0 : self.num_rows]) ** 2))
         g_model_2_preds = g_model2.predict(self.fully_expanded_x)
 
         return g_model_preds, g_model_2_preds
@@ -506,105 +515,95 @@ class TMLE_Core(Core):
             n_estimators=self.n_estimators,
             max_depth=self.max_depth,
             learning_rate=self.learning_rate,
-            random_state=self.random_seed
-        ).fit(X = X, y = y)
+            random_state=self.random_seed,
+        ).fit(X=X, y=y)
         q_model_preds = q_model.predict(self.fully_expanded_t_and_x)
 
         return q_model_preds
 
-
     def _treatment_assignment_correction(self):
-        """Uses the G-model and its predictions to adjust treatment assignment
-        """
+        """Uses the G-model and its predictions to adjust treatment assignment"""
 
         t_standard = (
-            (self.fully_expanded_t_and_x[self.treatment_col_name] - self.g_model_preds) / np.sqrt(self.g_model_2_preds)
+            self.fully_expanded_t_and_x[self.treatment_col_name] - self.g_model_preds
+        ) / np.sqrt(self.g_model_2_preds)
+
+        interpd_values = (
+            interp1d(
+                self.one_dim_estimate_density(t_standard.values)[0],
+                self.one_dim_estimate_density(t_standard.values[0 : self.num_rows])[1],
+                kind="linear",
+            )(t_standard)
+            / np.sqrt(self.g_model_2_preds)
         )
 
-        interpd_values = interp1d(
-            self.one_dim_estimate_density(t_standard.values)[0],
-            self.one_dim_estimate_density(t_standard.values[0:self.num_rows])[1],
-            kind='linear'
-        )(t_standard) / np.sqrt(self.g_model_2_preds)
+        n_interpd_values = interpd_values[0 : self.num_rows]
 
-        n_interpd_values = interpd_values[0:self.num_rows]
-
-        temp_interpd = interpd_values[self.num_rows:]
+        temp_interpd = interpd_values[self.num_rows :]
 
         zeros_mat = np.zeros((self.num_rows, self.treatment_grid_num))
 
         for i in range(0, self.treatment_grid_num):
-        	lower = i * self.num_rows
-        	upper = i * self.num_rows + self.num_rows
-        	zeros_mat[:,i] = temp_interpd[lower:upper]
+            lower = i * self.num_rows
+            upper = i * self.num_rows + self.num_rows
+            zeros_mat[:, i] = temp_interpd[lower:upper]
 
         var_n_interpd_values = self.pred_from_loess(
-            train_x = self.grid_values,
-            train_y = zeros_mat.mean(axis = 0),
-            x_to_pred = self.t_data
+            train_x=self.grid_values,
+            train_y=zeros_mat.mean(axis=0),
+            x_to_pred=self.t_data,
         )
 
         return n_interpd_values, var_n_interpd_values
 
-
     def _outcome_adjustment(self):
-        """Uses the Q-model and its predictions to adjust the outcome
-        """
+        """Uses the Q-model and its predictions to adjust the outcome"""
 
-        outcome_adjust = self.q_model_preds[0:self.num_rows]
+        outcome_adjust = self.q_model_preds[0 : self.num_rows]
 
-        temp_outcome_adjust = self.q_model_preds[self.num_rows:]
+        temp_outcome_adjust = self.q_model_preds[self.num_rows :]
 
         zero_mat = np.zeros((self.num_rows, self.treatment_grid_num))
         for i in range(0, self.treatment_grid_num):
-        	lower = i * self.num_rows
-        	upper = i * self.num_rows + self.num_rows
-        	zero_mat[:,i] = temp_outcome_adjust[lower:upper]
+            lower = i * self.num_rows
+            upper = i * self.num_rows + self.num_rows
+            zero_mat[:, i] = temp_outcome_adjust[lower:upper]
 
         expand_outcome_adjust = self.pred_from_loess(
-            train_x = self.grid_values,
-            train_y = zero_mat.mean(axis = 0),
-            x_to_pred = self.t_data
+            train_x=self.grid_values,
+            train_y=zero_mat.mean(axis=0),
+            x_to_pred=self.t_data,
         )
 
         return outcome_adjust, expand_outcome_adjust
 
     def _fit_final_gam(self):
-        """We now regress the original treatment values against the pseudo-outcome values
-        """
+        """We now regress the original treatment values against the pseudo-outcome values"""
 
         return LinearGAM(
-        	s(0, n_splines=30, spline_order=3),
-            max_iter=500,
-            lam=self.bandwidth
-        ).fit(self.t_data, y = self.pseudo_out)
+            s(0, n_splines=30, spline_order=3), max_iter=500, lam=self.bandwidth
+        ).fit(self.t_data, y=self.pseudo_out)
 
     def one_dim_estimate_density(self, series):
-    	"""
-    	Takes in a numpy array, returns grid values for KDE and predicted probabilities
-    	"""
-    	series_grid = np.linspace(
-            start=series.min(),
-            stop=series.max(),
-            num=self.num_rows
+        """
+        Takes in a numpy array, returns grid values for KDE and predicted probabilities
+        """
+        series_grid = np.linspace(
+            start=series.min(), stop=series.max(), num=self.num_rows
         )
 
-    	kde = KernelDensity(
-            kernel='gaussian',
-            bandwidth=self.bandwidth
-        ).fit(series.reshape(-1, 1))
+        kde = KernelDensity(kernel="gaussian", bandwidth=self.bandwidth).fit(
+            series.reshape(-1, 1)
+        )
 
-    	return series_grid, np.exp(kde.score_samples(series_grid.reshape(-1, 1)))
+        return series_grid, np.exp(kde.score_samples(series_grid.reshape(-1, 1)))
 
     def pred_from_loess(self, train_x, train_y, x_to_pred):
-    	"""
-    	Trains simple loess regression and returns predictions
-    	"""
-    	kr_model = KernelReg(
-            endog = train_y,
-            exog = train_x,
-            var_type = 'c',
-            bw = [self.bandwidth]
+        """
+        Trains simple loess regression and returns predictions
+        """
+        kr_model = KernelReg(
+            endog=train_y, exog=train_x, var_type="c", bw=[self.bandwidth]
         )
 
-    	return kr_model.fit(x_to_pred)[0]
+        return kr_model.fit(x_to_pred)[0]
