@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 from pandas.api.types import is_float_dtype, is_integer_dtype, is_numeric_dtype
 from pygam import LinearGAM, LogisticGAM, s
-from scipy.special import logit
 from scipy.stats import gamma, norm
 import statsmodels.api as sm
 from statsmodels.genmod.families.links import inverse_power as Inverse_Power

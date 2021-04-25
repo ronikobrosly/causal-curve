@@ -4,6 +4,10 @@
 Change Log
 ==========
 
+Version 1.0.6
+-------------
+- Latest version of python black can now run. Linted tmle_core.py.
+
 Version 1.0.5
 -------------
 - Removed `master` branch, replaced with `main`
