@@ -56,7 +56,7 @@ pip install .
 
 ## Documentation
 
-[Documentation is available at readthedocs.org](https://causal-curve.readthedocs.io/en/latest/)
+[Documentation, tutorials, and examples are available at readthedocs.org](https://causal-curve.readthedocs.io/en/latest/)
 
 
 ## Contributing
