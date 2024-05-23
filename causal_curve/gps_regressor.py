@@ -117,7 +117,7 @@ class GPS_Regressor(GPS_Core):
         in the case of a continuous outcome.
         """
         return self.gam_results.predict(
-            np.array([T, self.gps_function(T).mean()]).reshape(1, -1)
+            np.array([T[0], self.gps_function(T).mean()]).reshape(1, -1)
         )
 
     def point_estimate_interval(self, T, ci=0.95):
@@ -154,5 +154,5 @@ class GPS_Regressor(GPS_Core):
         associated with a point estimate in the case of a continuous outcome.
         """
         return self.gam_results.prediction_intervals(
-            np.array([T, self.gps_function(T).mean()]).reshape(1, -1), width=width
+            np.array([T[0], self.gps_function(T).mean()]).reshape(1, -1), width=width
         )
