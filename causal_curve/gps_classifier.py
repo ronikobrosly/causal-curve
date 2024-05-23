@@ -121,6 +121,6 @@ class GPS_Classifier(GPS_Core):
         """
         return logit(
             self.gam_results.predict_proba(
-                np.array([T, self.gps_function(T).mean()]).reshape(1, -1)
+                np.array([T[0], self.gps_function(T).mean()]).reshape(1, -1)
             )
         )
